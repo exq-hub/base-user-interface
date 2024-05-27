@@ -2,13 +2,13 @@
 User Interface for Exquisitor.
 
 
-# Setup
+## Setup
 To install the application
 ```
 npm clean-install
 ```
 
-# Run
+## Run
 To run the application
 ```
 npm run dev
