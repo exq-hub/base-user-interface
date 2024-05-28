@@ -15,9 +15,9 @@ export interface ItemInfo {
 }
 
 export interface RelatedItems {
-    timelineN: number // Number of items in group
-    timelineRange: [number,number] // ExqId start to end of group
-    timelineItems: number[] // In case the related group items are not sequential
+    nGroup: number // Number of items in group
+    groupRange: [number,number] // ExqId start to end of group
+    groupItems: number[] // In case the related group items are not sequential
 }
 
 export default interface MediaItem {

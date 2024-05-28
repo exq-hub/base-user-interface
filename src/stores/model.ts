@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'
-import { ExqSuggestRequest } from '@/types/exq'
+import { ExqURFRequest } from '@/types/exq'
 import { doURF, initModel, removeModel } from '@/services/ExquisitorAPI'
 import { useAppStore } from './app'
 
@@ -127,9 +127,9 @@ export const useModelStore = defineStore('model', () => {
         models[indx].name = newName
     }
     
-    async function getSuggestions(req: ExqSuggestRequest, gridId: number, itemId?: number) {
+    async function getSuggestions(req: ExqURFRequest, gridId: number, itemId?: number) {
         let suggs = await doURF(req) // Call Exquisitor
-        let model = models.filter(e => e.id === req.model)[0] // Get model
+        let model = models.filter(e => e.id === req.modelId)[0] // Get model
         if (req.n == model.grid[gridId].itemsToShow) { // Is it a full update?
             // Returned items NOT equal to the requested amount
             if (suggs.suggestions.length != req.n) {

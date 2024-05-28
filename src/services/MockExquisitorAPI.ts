@@ -1,6 +1,6 @@
 import type { 
-    ExqSuggestResponse, 
-    ExqSuggestRequest, 
+    ExqURFRequest, 
+    ExqSearchResponse, 
     ExqInitResponse, 
     ExqInitModelRequest,
     ExqRemoveModelRequest,
@@ -29,7 +29,7 @@ const imgPaths : string[] = getTestImagePaths()
 
 // Initialize Exquisitor
 
-export const initExquisitor = (): ExqInitResponse => { 
+export const initSession = (): ExqInitResponse => { 
     return { session: 'testSession', totalItems: 100 }
 } 
 
@@ -53,7 +53,7 @@ export const removeModel = (req: ExqRemoveModelRequest) : void => {}
 //     await fetch('CALL_TO_API_HERE').then((val) => val.json())
 
 // Get suggestions from the current model
-export const doURF = async (req: ExqSuggestRequest): Promise<ExqSuggestResponse> => {
+export const doURF = async (req: ExqURFRequest): Promise<ExqSearchResponse> => {
     const resp : number[] = []
     for (var i = 0; i < req.n; i++) {
         resp.push(mockItems[i])
@@ -64,7 +64,6 @@ export const doURF = async (req: ExqSuggestRequest): Promise<ExqSuggestResponse>
 export const getItem = async (exqId: number, modelId: number): Promise<MediaItem> => {
     const ilsets = new Map<number,boolean[]>()
     ilsets.set(modelId, [false,false,false,false])
-    const rel : RelatedItems = {timelineN: 100, timelineRange: [0,99], timelineItems: []}
     return {
         id: exqId, 
         name: 'name-' + exqId,
@@ -73,7 +72,6 @@ export const getItem = async (exqId: number, modelId: number): Promise<MediaItem
         mediaType: MediaType.Image, 
         thumbPath: imgPaths[exqId], 
         srcPath: imgPaths[exqId],
-        relatedItems: rel
     }
 }
 

@@ -1,6 +1,6 @@
 import type { 
-    ExqSuggestRequest, 
-    ExqSuggestResponse,
+    ExqURFRequest, 
+    ExqSearchResponse,
     ExqGetItemResponse, 
     ExqInitResponse,
     ExqRemoveModelRequest,
@@ -21,7 +21,7 @@ import type {
 import type MediaItem from "@/types/mediaitem"
 import { type ItemInfo, type RelatedItems } from "@/types/mediaitem"
 import {
-    initExquisitor as mockInitExq, 
+    initSession as mockInitExq, 
     doURF as mockDoURF,
     getItem as mockGetItem,
     getFilters as mockGetFilters,
@@ -33,9 +33,8 @@ const exqURI = 'http://localhost:5001'
 // const exqURI = 'http://bjth.itu.dk:5001'
 const mock = true 
 
-const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
 function generateString(length: number) : string {
+    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = ' ';
     const charactersLength = characters.length;
     for ( let i = 0; i < length; i++ ) {
@@ -45,19 +44,12 @@ function generateString(length: number) : string {
     return result;
 }
 
-// Initialize Exquisitor
+// Initialize Session
 // TODO: Start Page options?
-export const initExquisitor = async () : Promise<ExqInitResponse> => {
+export const initSession = async () : Promise<ExqInitResponse> => {
     if (mock) return mockInitExq()
-    const obj = {session: generateString(10)}
-    const resp : ExqInitResponse = await fetch(exqURI+'/initExquisitor', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(obj)
-    }).then(val => val.json())
+    const session = generateString(10)
+    const resp : ExqInitResponse = await fetch(exqURI+'/exq/init/'+session).then(val => val.json())
     return resp
 }
 
@@ -65,7 +57,7 @@ export const initExquisitor = async () : Promise<ExqInitResponse> => {
 export const initModel = (req: ExqInitModelRequest): void => {
     console.log(req)
     if (mock) return
-    fetch(exqURI+'/initModel', {
+    fetch(exqURI+'/exq/log/addModel', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -77,7 +69,7 @@ export const initModel = (req: ExqInitModelRequest): void => {
 
 export const removeModel = (req: ExqRemoveModelRequest) : void => {
     if (mock) return
-    fetch(exqURI+'/deleteModel', {
+    fetch(exqURI+'/exq/log/removeModel', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -92,9 +84,9 @@ export const getCollections = async (): Promise<string[]> =>
     await fetch('CALL_TO_API_HERE').then((val) => val.json())
 
 // Get suggestions from the current model
-export const doURF = async (req: ExqSuggestRequest): Promise<ExqSuggestResponse> => {
+export const doURF = async (req: ExqURFRequest): Promise<ExqSearchResponse> => {
     if (mock) return await mockDoURF(req)
-    const resp : ExqSuggestResponse = await fetch(exqURI+'/urf', {
+    const resp : ExqSearchResponse = await fetch(exqURI+'/urf', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -127,14 +119,13 @@ export const getItem = async (exqId: number, modelId: number): Promise<MediaItem
         currentSets: sets, 
         mediaType: resp.mediaType, 
         thumbPath: resp.thumbPath, 
-        srcPath: resp.srcPath,
-        relatedItems: resp.relatedItems 
+        srcPath: resp.srcPath
     }
 }
 
-export const getFilters = async (): Promise<ExqGetFiltersResponse> => {
+export const getFilters = async (session: string): Promise<ExqGetFiltersResponse> => {
     if (mock) return await mockGetFilters()
-    return await fetch(exqURI+'/getFilters', {
+    return await fetch(exqURI+'/exq/filters/'+session, {
         method: 'GET',
         mode: 'cors',
         headers: {
@@ -312,9 +303,9 @@ export const getItemInfo = async (model: number, itemId: number): Promise<ItemIn
 export const getRelatedItems = async (itemId: number): Promise<RelatedItems> => {
     if (mock) {
         return {
-            timelineN: 10,
-            timelineRange: [10,20],
-            timelineItems: []
+            nGroup: 10,
+            groupRange: [10,20],
+            groupItems: []
         }
     }
     const resp: RelatedItems =

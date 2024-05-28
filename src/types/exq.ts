@@ -23,23 +23,23 @@ export interface ExqRemoveModelRequest {
     modelId: number
 }
 
-export interface ExqSuggestRequest {
+export interface ExqURFRequest {
     session: string
-    model: number
+    modelId: number
     n: number
     pos: number[]
     neg: number[]
     seen: number[]
-    filters?: {
+    filters: {
         names: string[]
         values: number[][]
     }
-    excluded?: {
+    excluded: {
         excludedGroup: number[]
     }
 }
 
-export interface ExqSuggestResponse {
+export interface ExqSearchResponse {
     suggestions : number[]
 }
 
@@ -50,7 +50,6 @@ export interface ExqGetItemResponse {
     mediaType: MediaType
     thumbPath: string
     srcPath: string
-    relatedItems: RelatedItems
 }
 
 export interface ExqGetFiltersResponse {
