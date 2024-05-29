@@ -12,7 +12,7 @@ ExqResetFilterRequest
 import type { Filter } from "@/types/filter"
 import { FilterProperty, FilterType } from "@/types/filter"
 import type MediaItem from "@/types/mediaitem"
-import { MediaType, type RelatedItems } from "@/types/mediaitem"
+import { MediaType } from "@/types/mediaitem"
 import type { GridGroup } from "@/types/model"
 
 const mockItems : number[] = [...Array(200).keys()]
@@ -56,7 +56,7 @@ export const removeModel = (req: ExqRemoveModelRequest) : void => {}
 export const doURF = async (req: ExqURFRequest): Promise<ExqSearchResponse> => {
     const resp : number[] = []
     for (var i = 0; i < req.n; i++) {
-        resp.push(mockItems[i])
+        resp.push(mockItems[20+i])
     }
     return { suggestions : resp }
 }

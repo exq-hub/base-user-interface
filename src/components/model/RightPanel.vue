@@ -36,9 +36,11 @@
      >
         <!-- TODO: Move this part into generic component (ItemSet) -->
         <v-list :v-model="posUpdate">
-            <v-list-item v-for="it in sets.positives">
+            <v-list-item v-for="(it,idx) in sets.positives">
                 <item 
                  :item-id="it.id"
+                 :item-index="idx"
+                 :grid-index="-1"
                  :item="it"
                  :model-id="activeModelId"
                  :btn-pos="false"
@@ -47,7 +49,6 @@
                  :btn-submit="true"
                  :provided="true"
                  :overlay="true"
-                 @urf-change="getPositives"
                 />
             </v-list-item>
         </v-list>
@@ -59,9 +60,11 @@
      color="error"
      >
         <v-list :v-model="negUpdate">
-            <v-list-item v-for="it in sets.negatives">
+            <v-list-item v-for="(it,idx) in sets.negatives">
                 <item 
                  :item-id="it.id"
+                 :item-index="idx"
+                 :grid-index="-1"
                  :item="it"
                  :model-id="activeModelId"
                  :btn-pos="true"
@@ -70,7 +73,6 @@
                  :btn-submit="true"
                  :provided="true"
                  :overlay="true"
-                 @urf-change="getNegatives"
                 />
             </v-list-item>
         </v-list>
@@ -82,9 +84,11 @@
      color="grey"
      >
         <v-list :v-model="histUpdate">
-            <v-list-item v-for="it in sets.history">
+            <v-list-item v-for="(it,idx) in sets.history">
                 <item 
                  :item-id="it.id"
+                 :item-index="idx"
+                 :grid-index="-1"
                  :item="it"
                  :model-id="activeModelId"
                  :btn-pos="true"
@@ -93,7 +97,6 @@
                  :btn-submit="true"
                  :provided="true"
                  :overlay="true"
-                 @urf-change="getHistory"
                 />
             </v-list-item>
         </v-list>

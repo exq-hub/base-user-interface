@@ -2,6 +2,7 @@ import { Filter } from "@/types/filter"
 import { useAppStore } from "@/stores/app"
 import { defineStore } from "pinia"
 import { getFilters, resetFilters } from "@/services/ExquisitorAPI"
+import { ExqApplyFiltersRequest } from "@/types/exq"
 
 export const useFilterStore = defineStore('filter', () => {
     const session = useAppStore().session
@@ -21,10 +22,10 @@ export const useFilterStore = defineStore('filter', () => {
             });
         } else {
             activeFilters.set(modelId, [])
-            await getFilters().then((resp) => { 
+            await getFilters(useAppStore().session).then((resp) => { 
                 filtersLoaded.value = true
                 filters.push(...resp.filters)
-                filters.forEach(element => {
+                filters.forEach(_ => {
                     activeFilters.get(modelId)!.push([])
                 });
             })
@@ -38,8 +39,12 @@ export const useFilterStore = defineStore('filter', () => {
         // console.log('addFilters (response):', resp)
     }
 
-    function applyRangeFilters(modelId: number, filterId: number, values: [number, number]) {
+    function applyRangeOrCountFilters(modelId: number, filterId: number, values: [number, number]) {
         activeFilters.get(modelId)![filterId] = values
+    }
+
+    function applyMultiRangeFilters(modelId: number, filterId: number, values: [number,number][]) {
+        // TODO: activeMultiRangeFilters Map<number, number[][][]>
     }
     
     function clearFilters(modelId: number) {
@@ -53,14 +58,18 @@ export const useFilterStore = defineStore('filter', () => {
         activeFilters.set(modelId, setFilters)
     }
 
-    function getModelFilters(modelId: number) : number[][] {
-        let filterVals : number[][] = []
-        if (activeFilters.has(modelId))
-            if (activeFilters.get(modelId)!.length > 0)
+    function getModelFilters(modelId: number) : { names: string[], values: number[][] } {
+        let filterObj : { names: string[], values: number[][] } = { names: [], values: []}
+        if (activeFilters.has(modelId)) {
+            const modelFilters = activeFilters.get(modelId)!
+            if (modelFilters.length > 0) {
                 filters.forEach(element => {
-                    filterVals.push(activeFilters.get(modelId)![element.id])
+                    filterObj.names.push(element.name)
+                    filterObj.values.push(modelFilters[element.id])
                 })
-        return filterVals
+            }
+        }
+        return filterObj
     }
 
     function getFilterValues(modelId: number, filterId: number) {
@@ -76,7 +85,7 @@ export const useFilterStore = defineStore('filter', () => {
         filtersLoaded,
         loadFilters,
         applyFilters,
-        applyRangeFilters,
+        applyRangeOrCountFilters,
         clearFilters,
         updateActiveFilters,
         getModelFilters,

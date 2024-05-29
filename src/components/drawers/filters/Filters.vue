@@ -136,7 +136,7 @@ function updateFilter(filterId: number, value: string | number | (string|number)
 }
 
 function updateRangeFilter(filterId: number, values: [number, number]) {
-    filterStore.applyRangeFilters(activeModelId.value, filterId, values);
+    filterStore.applyRangeOrCountFilters(activeModelId.value, filterId, values);
     emit('filterUpdate');
 }
 

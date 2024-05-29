@@ -8,9 +8,11 @@
     </v-sheet>
     <!-- Result List -->
     <v-list v-model="loaded" :key="activeModelId">
-        <v-list-item v-for="it in excludedItems.items">
+        <v-list-item v-for="(it,idx) in excludedItems.items">
             <item 
              :item-id="it"
+             :grid-index="0"
+             :item-index="idx"
              :model-id="activeModelId"
              :btn-pos="true"
              :btn-neg="true"
@@ -27,7 +29,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import Item from '@/components/items/Item.vue';
-import { clearExcludedVideos, getExcludedVideos, } from '@/services/ExquisitorAPI';
+import { clearExcludedGroups, getExcludedGroups, } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useModelStore } from '@/stores/model';
 
@@ -40,13 +42,13 @@ const loaded = ref(false)
 const session = useAppStore().session
 
 async function getExcludedVids() {
-    excludedItems.items = await getExcludedVideos({session: session, model: activeModelId.value}).then(val => val.videos)
+    excludedItems.items = await getExcludedGroups({session: session, model: activeModelId.value}).then(val => val.excGroups)
     console.log(excludedItems.items)
     loaded.value = true
 }
 
 async function clearExcluded() {
-    await clearExcludedVideos({session: session, model: activeModelId.value, items: excludedItems.items})
+    await clearExcludedGroups({session: session, model: activeModelId.value, items: excludedItems.items})
             .then(() => excludedItems.items = [])
 }
 

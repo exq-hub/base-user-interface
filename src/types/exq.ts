@@ -1,7 +1,7 @@
 // Return types for ExquisitorAPI calls
 
 import type { Filter } from "./filter"
-import type { MediaType, RelatedItems } from "./mediaitem"
+import type { MediaType } from "./mediaitem"
 import type { GridGroup } from "./model"
 
 export interface ExqInitResponse {
@@ -34,9 +34,7 @@ export interface ExqURFRequest {
         names: string[]
         values: number[][]
     }
-    excluded: {
-        excludedGroup: number[]
-    }
+    excluded: number[]
 }
 
 export interface ExqSearchResponse {
@@ -63,29 +61,29 @@ export interface ExqApplyFiltersRequest {
     values: number[][]
 }
 
-export interface ExqExcludeVideoRequest {
+export interface ExqExcludeGroupRequest {
     session: string
     model: number
     itemId: number
 }
 
-export interface ExqExcludeVideoResponse {
+export interface ExqExcludeGroupResponse {
     excludedOrNot: boolean 
 }
 
-export interface ExqClearExcludedVideoRequest {
+export interface ExqClearExcludedGroupRequest {
     session: string
     model: number
     items: number[]
 }
 
-export interface ExqGetExcludedVideosRequest {
+export interface ExqGetExcludedGroupsRequest {
     session: string
     model: number
 }
 
-export interface ExqGetExcludedVideosResponse {
-    videos: number[]
+export interface ExqGetExcludedGroupsResponse {
+    excGroups: number[]
 }
 
 export interface ExqResetFilterRequest {
@@ -94,17 +92,12 @@ export interface ExqResetFilterRequest {
 }
 
 export interface ExqSubmissionRequest {
-    session: string
-    model: number
-    id: number,
-    evalId: string,
-}
-
-export interface ExqTextSubmissionRequest {
-    session: string
-    model: number
-    text: string,
-    evalId: string,
+    sessionId: string
+    modelId: number
+    name: string
+    text: string
+    qa: boolean
+    evalId: string
 }
 
 export interface ExqSearchRequest {

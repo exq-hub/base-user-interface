@@ -20,7 +20,7 @@
         </v-img>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
-             @click="addToSet(itemId, ILSets.Positives); $emit('replace', itemId)"
+             @click="addToSet(itemId, ILSets.Positives); $emit('replace', itemIndex, gridIndex, ILSets.Positives)"
              :disabled="isPos(itemId, modelId)"
              size="small"
             >
@@ -29,7 +29,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnNeg"
-             @click="addToSet(itemId, ILSets.Negatives); $emit('replace', itemId)"
+             @click="addToSet(itemId, ILSets.Negatives); $emit('replace', itemIndex, gridIndex, ILSets.Negatives)"
              :disabled="isNeg(itemId, modelId)"
              size="small"
             >
@@ -38,7 +38,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnIgnore"
-             @click="addToSet(itemId, ILSets.History); $emit('replace', itemId)"
+             @click="addToSet(itemId, ILSets.History); $emit('replace', itemIndex, gridIndex, ILSets.History)"
              :disabled="isHistory(itemId, modelId)"
              size="small"
             >
@@ -76,13 +76,15 @@
 
 
 <script lang="ts" setup>
-import { submitItem } from '@/services/ExquisitorAPI';
+import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
 import MediaItem, { ILSets } from '@/types/mediaitem';
 
 interface Props {
     itemId: number
+    itemIndex: number
+    gridIndex: number
     modelId: number
     item?: MediaItem
     btnPos: boolean
@@ -93,6 +95,7 @@ interface Props {
     overlay: boolean
 }
 const props = defineProps<Props>()
+defineEmits<{'replace': [itemIndex: number, gridIndex: number, set: ILSets]}>()
 
 const itemStore = useItemStore()
 const item : MediaItem = reactive({id: -1, srcPath:'', thumbPath:''})
@@ -142,7 +145,14 @@ function addToSet(itemId: number, ilset: ILSets) {
     if (ilset == ILSets.Negatives) snackColor.value = 'error'
     if (ilset == ILSets.Submitted) {
         snackColor.value = 'indigo'
-        submitItem({ session: session, model: props.modelId, id: itemId, evalId: evalId })
+        submitAnswer({ 
+            sessionId: session, 
+            modelId: props.modelId,
+            name: itemStore.items.get(itemId)!.name!,
+            text: '',
+            qa: false,
+            evalId: evalId
+        })
     }
     snack(itemStore.items.get(itemId)!.name!, ILSets[ilset])
 }

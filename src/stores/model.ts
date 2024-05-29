@@ -127,31 +127,30 @@ export const useModelStore = defineStore('model', () => {
         models[indx].name = newName
     }
     
-    async function getSuggestions(req: ExqURFRequest, gridId: number, itemId?: number) {
+    async function getSuggestions(req: ExqURFRequest, gridIdx: number, itemIdx?: number) {
         let suggs = await doURF(req) // Call Exquisitor
         let model = models.filter(e => e.id === req.modelId)[0] // Get model
-        if (req.n == model.grid[gridId].itemsToShow) { // Is it a full update?
+        if (req.n == model.grid[gridIdx].itemsToShow) { // Is it a full update?
             // Returned items NOT equal to the requested amount
             if (suggs.suggestions.length != req.n) {
                 // Remove grid items
-                model.grid[gridId].items.splice(0, model.grid[0].items.length) 
+                model.grid[gridIdx].items.splice(0, model.grid[0].items.length) 
                 // Add suggestions to grid
                 for (let i = 0; i < suggs.suggestions.length; i++) {
-                    model.grid[gridId].items.push(suggs.suggestions[i]);
+                    model.grid[gridIdx].items.push(suggs.suggestions[i]);
                 }
             }
             // Returned items equal to the requested amount
             if (suggs.suggestions.length == req.n) {
                 // Replace grid items with suggestions
                 for (let i = 0; i < req.n; i++) {
-                    model.grid[gridId].items[i] = suggs.suggestions[i];
+                    model.grid[gridIdx].items[i] = suggs.suggestions[i];
                 }
             } 
-        } else if (req.n == 1 && itemId !== undefined) {
-            console.log('Replace item:', itemId!)
-            let indx = model.grid[gridId].items.indexOf(itemId!)
-            console.log('Replace', model.grid[gridId].items[indx], 'from index:', indx)
-            model.grid[gridId].items[indx] = suggs.suggestions[0]
+        } else if (req.n == 1 && itemIdx !== undefined) {
+            console.log('Replace item:', itemIdx!)
+            console.log('Replace', model.grid[gridIdx].items[itemIdx], 'from index:', itemIdx)
+            model.grid[gridIdx].items[itemIdx] = suggs.suggestions[0]
             console.log('Suggs:', suggs.suggestions)
             console.log('Suggs.suggestions[0]:', suggs.suggestions[0])
         }

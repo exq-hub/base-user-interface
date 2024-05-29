@@ -3,6 +3,7 @@ import type MediaItem from "@/types/mediaitem";
 import { defineStore } from "pinia";
 import { reactive } from "vue";
 import { getItem, getItemInfo, getRelatedItems } from "@/services/ExquisitorAPI";
+import { useAppStore } from "@/stores/app";
 // import { getItem } from "@/services/MockExquisitorAPI";
 
 export const useItemStore = defineStore('item', () => {
@@ -27,9 +28,9 @@ export const useItemStore = defineStore('item', () => {
             return items.get(exqId)! // '!' Non-null
         } else {
             // console.log('Fetching media item ' + exqId + ' from API')
-            const item = await getItem(exqId, modelId)
+            const item = await getItem(useAppStore().session, exqId, modelId)
             items.set(exqId, item)
-            // console.log('exqId', items.get(exqId))
+            console.log('exqId', items.get(exqId))
             return item
         }
     }
@@ -50,7 +51,7 @@ export const useItemStore = defineStore('item', () => {
                 }
                 mediaItems.push(items.get(v)!)
             } else {
-                const item = await getItem(v, modelId)
+                const item = await getItem(useAppStore().session, v, modelId)
                 console.log('Inserting ', item)
                 items.set(v, item)
                 mediaItems.push(item)

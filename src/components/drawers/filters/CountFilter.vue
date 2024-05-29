@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, type Ref } from 'vue';
+import { reactive } from 'vue';
 
 interface Props {
     modelId: number

@@ -70,7 +70,7 @@
 import { ref } from 'vue';
 import { useModelStore } from '@/stores/model';
 import EditTextField from '@/components/general/EditTextField.vue';
-import { submitText } from '@/services/ExquisitorAPI';
+import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 
 const modelStore = useModelStore()
@@ -89,9 +89,16 @@ function changeEvalId(newId: string) {
 }
 
 function submitTextAnswerVBS() {
-    const requestObject = {session: appStore.session, model: activeModel.value.id, text: qaAnswer.value, evalId: appStore.evalId}
+    const requestObject = {
+        sessionId: appStore.session,
+        modelId: activeModel.value.id,
+        name: '',
+        text: qaAnswer.value, 
+        qa: true,
+        evalId: appStore.evalId
+    }
     console.log(requestObject)
-    submitText(requestObject)
+    submitAnswer(requestObject)
     snack()
     qaAnswer.value = ''
 }
