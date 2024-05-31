@@ -21,7 +21,7 @@ function getTestImagePaths() : string[] {
     var imgs : string[] = []
     for (var i = 0; i < 200; i++) {
         const imgName = i.toString().padStart(5, '0')
-        imgs.push('/test-images-vbs/'+imgName+'.jpg')
+        imgs.push('/test-images-lsc/'+imgName+'.jpg')
     }
     return imgs
 }
@@ -55,8 +55,19 @@ export const removeModel = (req: ExqRemoveModelRequest) : void => {}
 // Get suggestions from the current model
 export const doURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => {
     const resp : number[] = []
-    for (var i = 0; i < req.n; i++) {
-        resp.push(mockItems[20+i])
+    for (var i = 0; i < 100; i++) {
+        let next = false
+        for (var j = 0; j < req.seen.length; j++) {
+            if (i == req.seen[j]) {
+                console.log(i, 'found in seen')
+                next = true
+                break
+            }
+        }
+        if (next) { continue }
+        resp.push(mockItems[i])
+        if (resp.length == req.n)
+            return {suggestions: resp}
     }
     return { suggestions : resp }
 }

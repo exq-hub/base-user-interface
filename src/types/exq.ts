@@ -46,7 +46,7 @@ export interface ExqTextSearchRequest {
     modelId: number
     n: number
     text: string
-    seen: []
+    seen: number[]
     filters: {
         names: string[]
         values: number[][]

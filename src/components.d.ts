@@ -7,7 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    AppFooter: typeof import('./components/AppFooter.vue')['default']
     Chat: typeof import('./components/model/Chat.vue')['default']
     CountFilter: typeof import('./components/drawers/filters/CountFilter.vue')['default']
     DeleteDialog: typeof import('./components/general/DeleteDialog.vue')['default']
@@ -15,7 +14,6 @@ declare module 'vue' {
     EditTextField: typeof import('./components/general/EditTextField.vue')['default']
     ExcludedVideos: typeof import('./components/drawers/filters/ExcludedVideos.vue')['default']
     Filters: typeof import('./components/drawers/filters/Filters.vue')['default']
-    HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     Item: typeof import('./components/items/Item.vue')['default']
     ItemOverlay: typeof import('./components/items/ItemOverlay.vue')['default']
     ItemSet: typeof import('./components/drawers/ItemSet.vue')['default']

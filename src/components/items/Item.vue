@@ -169,5 +169,6 @@ const openOverlay = ref(false)
 
 .v-card :deep(.v-card-actions) {
     justify-content: center;
+    min-height: auto;
 }
 </style>

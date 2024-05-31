@@ -16,7 +16,7 @@ export const useModelStore = defineStore('model', () => {
             groups: [{
                 id: 0, 
                 name: 'RF', 
-                itemsToShow: 16
+                itemsToShow: 20
             }], 
             resources: ResourceValues.Low 
         }
@@ -108,10 +108,11 @@ export const useModelStore = defineStore('model', () => {
     
     function resetModel(model: Model) {
         const idx : number = models.findIndex(e => e.id === model.id)
-        initModel({ modelId: model.id, session: model.session })
         models[idx].grid = []
         models[idx].activeFilters?.clear()
         models[idx].activeSearch = []
+        initModel({ modelId: model.id, session: model.session })
+        initializeModelItems(model.id)
     }
     
     function getModel (id: number) : Model {
@@ -126,7 +127,7 @@ export const useModelStore = defineStore('model', () => {
         let indx = models.findIndex(e => e.id === model.id && e.name === model.name)
         models[indx].name = newName
     }
-    
+
     async function getSuggestions(req: ExqURFRequest, gridIdx: number, itemIdx?: number) {
         let suggs = await searchURF(req) // Call Exquisitor
         let model = models.filter(e => e.id === req.modelId)[0] // Get model

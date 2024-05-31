@@ -1,10 +1,16 @@
 <template>
     <div class="w-50">
-        <v-container>
-            <v-row dense v-for="(grp, grdIdx) in grids.grids">
-                <v-col v-for="(it, itIdx) in grp.items"
+        <v-container
+         height="70vh"
+         align="center"
+        >
+            <v-row 
+             justify="center"
+             v-for="(grp, grdIdx) in grids.grids">
+                <v-col 
+                 v-for="(it, itIdx) in grp.items"
                  :key="activeModel.id+grdIdx+it"
-                 cols="3"
+                 cols="auto"
                 >
                     <item 
                      :item-id="it"
@@ -21,6 +27,29 @@
                     />
                 </v-col>
             </v-row>
+        </v-container>
+        <v-container class="ma-0 pa-0 pl-4 pr-4">
+            <v-sheet 
+             class="urf-btns mt-5 d-flex"
+             rounded
+            >
+                <v-btn class="mr-10" stacked :elevation="0"
+                 @click="updateItems"
+                >
+                    <v-icon>mdi-refresh</v-icon>
+                    Update
+                </v-btn>
+                <v-btn stacked :elevation="0"
+                 @click="clearModel"
+                >
+                    <v-icon>mdi-close</v-icon>
+                    Clear
+                </v-btn>
+            </v-sheet>
+            <v-sheet class="urf-ctrl d-flex mt-1">
+                <v-checkbox v-model="checkFilters" class="mr-10" hide-details label="Apply Filters" />
+                <v-checkbox v-model="checkAddNegs" hide-details label="Add Negatives" />
+            </v-sheet>
         </v-container>
     </div>
 </template>
@@ -40,10 +69,41 @@ const grids = reactive({grids:activeModel.value.grid})
 
 const itemStore = useItemStore()
 
+const checkFilters = ref(true)
+const checkAddNegs = ref(false)
+
 watch(activeModel, () => {
     console.log(activeModel.value.grid[0])
     grids.grids = activeModel.value.grid
 })
+
+async function updateItems() {
+    console.log('Updating Items')
+    let filters : {names: string[], values: number[][]} = {names: [], values: []}
+    if (checkFilters.value)
+        filters = useFilterStore().getModelFilters(activeModel.value.id)
+    let gridItems = grids.grids[0].items 
+    console.log('gridItems', gridItems)
+    itemStore.addItemsToSet(gridItems, activeModel.value.id, ILSets.History)
+    let n = activeModel.value.settings.groups[0].itemsToShow;
+    let pos = itemStore.getSetItems(activeModel.value.id, ILSets.Positives).map((e,_) => e.id)
+    let neg = itemStore.getSetItems(activeModel.value.id, ILSets.Negatives).map((e,_) => e.id)
+    let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
+    hist.push(...pos)
+    hist.push(...neg)
+    const reqObj : ExqURFRequest = {
+        session: useAppStore().session, 
+        modelId: activeModel.value.id,
+        n: n,
+        pos: pos,
+        neg: neg,
+        seen: hist,
+        filters: filters,
+        excluded: [] //TODO
+    }
+    await modelStore.getSuggestions(reqObj, grids.grids[0].id)
+    grids.grids = activeModel.value.grid
+}
 
 async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
     console.log('Replacing Item', itemIdx, gridIdx, set)
@@ -52,7 +112,10 @@ async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
     hist.push(...pos)
     hist.push(...neg)
-    let filters = useFilterStore().getModelFilters(activeModel.value.id)
+    hist.push(...grids.grids[gridIdx].items)
+    let filters : {names: string[], values: number[][]} = {names: [], values: []}
+    if (checkFilters.value)
+        filters = useFilterStore().getModelFilters(activeModel.value.id)
     const reqObj : ExqURFRequest = {
         session: useAppStore().session, 
         modelId: activeModel.value.id,
@@ -67,8 +130,28 @@ async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
     grids.grids = activeModel.value.grid
 }
 
+async function clearModel() {
+    itemStore.removeModelFromItems(activeModel.value.id)
+    itemStore.modelItems.get(activeModel.value.id)?.clear()
+    modelStore.resetModel(activeModel.value)
+    grids.grids = activeModel.value.grid
+}
 </script>
 
 <style scoped>
+.v-col {
+    flex: auto;
+    padding-top: 5px;
+    padding-bottom: 0;
+    padding-right: 1px;
+    padding-left: 1px;
+}
 
+.urf-btns {
+    justify-content: center;
+}
+
+.urf-ctrl {
+    justify-content: center;
+}
 </style>

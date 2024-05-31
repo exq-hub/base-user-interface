@@ -1,9 +1,9 @@
 <template>
     <div class="w-50">
-        <v-container class="d-block" align="center">
+        <v-container class="d-block sticky-container" align="center">
             <v-virtual-scroll
              :items="chatEntries"
-             height="75vh"
+             height="70vh"
             >
                 <template v-slot:default="{ item }">
                     <v-list-item>
@@ -29,11 +29,28 @@
                     </v-row>
                 </template>
             </v-virtual-scroll>
+            <v-sheet 
+             class="chat-options mt-5 d-flex"
+             rounded
+            >
+                <v-btn stacked :elevation="0">
+                    <v-icon>mdi-approximately-equal</v-icon>
+                    Summarize
+                </v-btn>
+                <v-btn stacked :elevation="0">
+                    <v-icon>mdi-text</v-icon>
+                    Rephrase
+                </v-btn>
+                <v-checkbox hide-details label="Filters" />
+                <v-checkbox hide-details label="History" />
+            </v-sheet>
             <v-text-field
              v-model="query"
-             class="mt-10"
+             class="mt-5"
+             variant="outlined"
              label="What are you looking for?"
              density="compact"
+             clearable
              hide-details
              :loading="loading"
              append-inner-icon="mdi-magnify"
@@ -51,8 +68,10 @@ import type { ChatEntryQueryText } from '@/types/chat';
 import { reactive, ref } from 'vue';
 import Item from '@/components/items/Item.vue';
 import { useModelStore } from '@/stores/model';
+import { useAppStore } from '@/stores/app';
 
 const activeModel = computed(() => useModelStore().activeModel)
+const session = computed(() => useAppStore().session)
 
 const convStore = useConversationStore()
 
@@ -65,7 +84,18 @@ convStore.createConversation(activeModel.value.id)
 const query = ref('')
 async function search() {
     loading.value = true
-    const entry = await searchVLM({query: query.value}).then((res) => {
+    const entry = await searchVLM({
+        session: session.value,
+        modelId: activeModel.value.id,
+        n: 10,
+        text: query.value,
+        seen: [],
+        filters: {
+            names: [],
+            values: []
+        },
+        excluded: []
+    }).then((res) => {
         loading.value = false
         loaded.value = true
         return res
@@ -94,5 +124,16 @@ async function search() {
     border-radius: 10px;
     border-color: cadetblue;
     border: solid 1px;
+}
+
+.chat-options {
+    justify-content: space-evenly;
+}
+
+.sticky-container {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 5vh; /* Adjust as needed */
+    z-index: 1000; /* Ensure it is above other content */
 }
 </style>
