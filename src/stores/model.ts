@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'
 import { ExqURFRequest } from '@/types/exq'
-import { doURF, initModel, removeModel } from '@/services/ExquisitorAPI'
+import { searchURF, initModel, removeModel } from '@/services/ExquisitorAPI'
 import { useAppStore } from './app'
 
 export const useModelStore = defineStore('model', () => {
@@ -128,7 +128,7 @@ export const useModelStore = defineStore('model', () => {
     }
     
     async function getSuggestions(req: ExqURFRequest, gridIdx: number, itemIdx?: number) {
-        let suggs = await doURF(req) // Call Exquisitor
+        let suggs = await searchURF(req) // Call Exquisitor
         let model = models.filter(e => e.id === req.modelId)[0] // Get model
         if (req.n == model.grid[gridIdx].itemsToShow) { // Is it a full update?
             // Returned items NOT equal to the requested amount

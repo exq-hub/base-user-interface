@@ -1,13 +1,13 @@
 import type { 
     ExqURFRequest, 
-    ExqSearchResponse, 
     ExqInitResponse, 
     ExqInitModelRequest,
     ExqRemoveModelRequest,
     ExqInitModelResponse,
-ExqGetFiltersResponse,
-ExqApplyFiltersRequest,
-ExqResetFilterRequest
+    ExqGetFiltersResponse,
+    ExqApplyFiltersRequest,
+    ExqResetFilterRequest,
+    ExqURFResponse
 } from "@/types/exq"
 import type { Filter } from "@/types/filter"
 import { FilterProperty, FilterType } from "@/types/filter"
@@ -53,7 +53,7 @@ export const removeModel = (req: ExqRemoveModelRequest) : void => {}
 //     await fetch('CALL_TO_API_HERE').then((val) => val.json())
 
 // Get suggestions from the current model
-export const doURF = async (req: ExqURFRequest): Promise<ExqSearchResponse> => {
+export const doURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => {
     const resp : number[] = []
     for (var i = 0; i < req.n; i++) {
         resp.push(mockItems[20+i])
@@ -188,4 +188,3 @@ export const applyFilters = async (req: ExqApplyFiltersRequest): Promise<void> =
 export const resetFilters = async (req: ExqResetFilterRequest): Promise<void> => {
     return;
 }
-

@@ -37,8 +37,40 @@ export interface ExqURFRequest {
     excluded: number[]
 }
 
-export interface ExqSearchResponse {
+export interface ExqURFResponse {
     suggestions : number[]
+}
+
+export interface ExqTextSearchRequest {
+    session: string
+    modelId: number
+    n: number
+    text: string
+    seen: []
+    filters: {
+        names: string[]
+        values: number[][]
+    }
+    excluded: number[]
+}
+
+export interface ExqChatFeedbackRequest {
+    session: string
+    modelId: number
+    n: number
+    text: string
+    pos: []
+    seen: []
+    filters: {
+        names: string[]
+        values: number[][]
+    }
+    excluded: number[]
+}
+
+export interface ExqQueryRewriteRequest {
+    query: string
+    positive: number
 }
 
 export interface ExqGetItemResponse {
@@ -98,13 +130,4 @@ export interface ExqSubmissionRequest {
     text: string
     qa: boolean
     evalId: string
-}
-
-export interface ExqSearchRequest {
-    query: string
-}
-
-export interface ExqQueryRewriteRequest {
-    query: string
-    positive: number
 }

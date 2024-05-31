@@ -1,6 +1,6 @@
 import type { 
     ExqURFRequest, 
-    ExqSearchResponse,
+    ExqURFResponse,
     ExqGetItemResponse, 
     ExqInitResponse,
     ExqRemoveModelRequest,
@@ -9,7 +9,7 @@ import type {
     ExqApplyFiltersRequest,
     ExqResetFilterRequest,
     ExqSubmissionRequest,
-    ExqSearchRequest,
+    ExqTextSearchRequest,
     ExqQueryRewriteRequest,
     ExqClearExcludedGroupRequest,
     ExqExcludeGroupRequest,
@@ -239,9 +239,9 @@ export const getExcludedGroups = async (req: ExqGetExcludedGroupsRequest): Promi
 
 
 // Get suggestions from the current model
-export const doURF = async (req: ExqURFRequest): Promise<ExqSearchResponse> => {
+export const searchURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => {
     if (mock) return await mockDoURF(req)
-    const resp : ExqSearchResponse = await fetch(exqURI+'/exq/search/urf', {
+    const resp : ExqURFResponse = await fetch(exqURI+'/exq/search/urf', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -252,31 +252,21 @@ export const doURF = async (req: ExqURFRequest): Promise<ExqSearchResponse> => {
     return resp
 }
 
-export const searchVLM = async (req: ExqSearchRequest): Promise<ChatEntryQueryText> => {
+export const searchVLM = async (req: ExqTextSearchRequest): Promise<ChatEntryQueryText> => {
     // if (mock) return { userQuery: req.query, vlmResults: [30,99,102,101]} // LSC
-    if (mock) return { userQuery: req.query, vlmResults: [33,15,20,22]} // VBS
+    if (mock) return { userQuery: req.text, vlmResults: [33,15,20,22]} // VBS
     // return { userQuery: req.query, vlmResults: [10,20,14,50]} // Test
     // Calling different server instead of the Exquisitor Server
-    const amReq = { query: req.query, amount: 30 }
-    const resp: { results: number[] } = await fetch('http://mandla-1:5001/searchVLM', {
+    const resp: { results: number[] } = await fetch(exqURI+'/exq/search/text', {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(amReq)
+        body: JSON.stringify(req)
     }).then(val => val.json())
     console.log(resp)
-    // Logging on Exqusitor server
-    fetch(exqURI+'/searchVLM', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({userQuery: req.query, results: resp.results})
-    }).then(val => val.json())
-    return {userQuery: req.query, vlmResults: resp.results}
+   return {userQuery: req.text, vlmResults: resp.results}
 }
 
 export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<ChatEntryQueryPos> => {
