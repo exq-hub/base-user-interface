@@ -6,7 +6,7 @@
         <v-btn size="small" icon="mdi-close" @click="clearFilters"></v-btn>
     </v-sheet>
     <template v-for="filter in filters">
-        <v-sheet v-if="filter.filter == FilterType.Single"
+        <v-sheet v-if="filter.filterType == FilterType.Single"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
@@ -21,7 +21,7 @@
              dense
             />
         </v-sheet>        
-        <v-sheet v-if="filter.filter == FilterType.Multi"
+        <v-sheet v-if="filter.filterType == FilterType.Multi"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
@@ -39,7 +39,7 @@
              @update:model-value="(vals) => updateFilter(filter.id, vals)"
             />
         </v-sheet>        
-        <v-sheet v-if="filter.filter == FilterType.NumberRange"
+        <v-sheet v-if="filter.filterType == FilterType.NumberRange"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
@@ -49,26 +49,26 @@
             @value-update="(vals) => updateRangeFilter(filter.id, vals)"
            />
         </v-sheet>
-        <v-sheet v-if="filter.filter == FilterType.Count"
+        <v-sheet v-if="filter.filterType == FilterType.Count"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
             <count-filter
                 :model-id="activeModelId"
                 :name="filter.name"
-                :items="filter.values"
+                :values="filter.values"
                 :count="filter.count!"
                 :is-multi="false"
             />
         </v-sheet>
-        <v-sheet v-if="filter.filter == FilterType.MultiCount"
+        <v-sheet v-if="filter.filterType == FilterType.MultiCount"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
             <count-filter
                 :model-id="activeModelId"
                 :name="filter.name"
-                :items="filter.values"
+                :values="filter.values"
                 :count="filter.count!"
                 :is-multi="true"
             />
@@ -114,7 +114,7 @@ const filterValues = reactive<{ [key: number]: (string | number)[] }>({})
 function initializeFilters() {
     filters.value.forEach(filter => {
         filterValues[filter.id] = [];
-        if (filter.filter === FilterType.Single || filter.filter === FilterType.Multi) {
+        if (filter.filterType === FilterType.Single || filter.filterType === FilterType.Multi) {
             const values = filterStore.getFilterValues(activeModelId.value, filter.id);
             filterValues[filter.id] = values.map(index => filter.values[index]);
         }

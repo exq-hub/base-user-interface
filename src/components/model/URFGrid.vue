@@ -68,6 +68,7 @@ const activeModel = computed(() => modelStore.activeModel)
 const grids = reactive({grids:activeModel.value.grid})
 
 const itemStore = useItemStore()
+const filterStore = useFilterStore()
 
 const checkFilters = ref(true)
 const checkAddNegs = ref(false)
@@ -79,9 +80,6 @@ watch(activeModel, () => {
 
 async function updateItems() {
     console.log('Updating Items')
-    let filters : {names: string[], values: number[][]} = {names: [], values: []}
-    if (checkFilters.value)
-        filters = useFilterStore().getModelFilters(activeModel.value.id)
     let gridItems = grids.grids[0].items 
     console.log('gridItems', gridItems)
     itemStore.addItemsToSet(gridItems, activeModel.value.id, ILSets.History)
@@ -91,16 +89,23 @@ async function updateItems() {
     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
     hist.push(...pos)
     hist.push(...neg)
-    const reqObj : ExqURFRequest = {
-        session: useAppStore().session, 
-        modelId: activeModel.value.id,
+    let reqObj : ExqURFRequest = {
+        session_info: {
+            session: useAppStore().session, 
+            modelId: activeModel.value.id,
+        },
         n: n,
         pos: pos,
         neg: neg,
         seen: hist,
-        filters: filters,
         excluded: [] //TODO
     }
+
+    if (checkFilters.value) {
+        let filters = useFilterStore().getModelFilters(activeModel.value.id)
+        reqObj.filters = filters
+    }
+
     await modelStore.getSuggestions(reqObj, grids.grids[0].id)
     grids.grids = activeModel.value.grid
 }
@@ -113,18 +118,20 @@ async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
     hist.push(...pos)
     hist.push(...neg)
     hist.push(...grids.grids[gridIdx].items)
-    let filters : {names: string[], values: number[][]} = {names: [], values: []}
-    if (checkFilters.value)
-        filters = useFilterStore().getModelFilters(activeModel.value.id)
-    const reqObj : ExqURFRequest = {
-        session: useAppStore().session, 
-        modelId: activeModel.value.id,
+    let reqObj : ExqURFRequest = {
+        session_info: {
+            session: useAppStore().session, 
+            modelId: activeModel.value.id,
+        },
         n: 1,
         pos: pos,
         neg: neg,
         seen: hist,
-        filters: filters,
         excluded: [] //TODO
+    }
+    if (checkFilters.value) {
+        let filters = useFilterStore().getModelFilters(activeModel.value.id)
+        reqObj.filters = filters
     }
     await modelStore.getSuggestions(reqObj, gridIdx, itemIdx)
     grids.grids = activeModel.value.grid
@@ -134,6 +141,7 @@ async function clearModel() {
     itemStore.removeModelFromItems(activeModel.value.id)
     itemStore.modelItems.get(activeModel.value.id)?.clear()
     modelStore.resetModel(activeModel.value)
+    filterStore.clearFilters(activeModel.value.id)
     grids.grids = activeModel.value.grid
 }
 </script>

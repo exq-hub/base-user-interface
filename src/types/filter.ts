@@ -21,7 +21,7 @@ export interface Filter {
     collectionId : string
     name: string
     values : string[] | number[]
-    filter : FilterType
+    filterType : FilterType
     range? : [number,number]
     rangeLabel? : [number,string][] // Only if LabelRange is used
     count? : [number,number][]

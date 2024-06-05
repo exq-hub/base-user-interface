@@ -55,6 +55,7 @@ export const useFilterStore = defineStore('filter', () => {
     }
 
     function updateActiveFilters(modelId:number, setFilters:number[][]) {
+        console.log(modelId, setFilters)
         activeFilters.set(modelId, setFilters)
     }
 
@@ -62,13 +63,17 @@ export const useFilterStore = defineStore('filter', () => {
         let filterObj : { names: string[], values: number[][] } = { names: [], values: []}
         if (activeFilters.has(modelId)) {
             const modelFilters = activeFilters.get(modelId)!
+            console.log('modelFilters', modelFilters)
             if (modelFilters.length > 0) {
                 filters.forEach(element => {
-                    filterObj.names.push(element.name)
-                    filterObj.values.push(modelFilters[element.id])
+                    if (modelFilters[element.id].length > 0) {
+                        filterObj.names.push(element.name)
+                        filterObj.values.push(modelFilters[element.id])
+                    }
                 })
             }
         }
+        console.log(filterObj)
         return filterObj
     }
 

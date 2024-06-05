@@ -24,17 +24,19 @@ export interface ExqRemoveModelRequest {
 }
 
 export interface ExqURFRequest {
-    session: string
-    modelId: number
+    session_info: {
+        session: string
+        modelId: number
+    }
     n: number
     pos: number[]
     neg: number[]
     seen: number[]
-    filters: {
+    filters?: {
         names: string[]
         values: number[][]
     }
-    excluded: number[]
+    excluded?: number[]
 }
 
 export interface ExqURFResponse {
@@ -42,12 +44,14 @@ export interface ExqURFResponse {
 }
 
 export interface ExqTextSearchRequest {
-    session: string
-    modelId: number
+    session_info: {
+        session: string
+        modelId: number
+    }
     n: number
     text: string
-    seen: number[]
-    filters: {
+    seen?: number[]
+    filters?: {
         names: string[]
         values: number[][]
     }

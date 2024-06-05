@@ -28,9 +28,9 @@ import {
 import type { ChatEntryQueryText, ChatEntryQueryPos } from "@/types/chat"
 import { useAppStore } from "@/stores/app"
 
-const exqURI = 'http://localhost:5001'
+const exqURI = 'http://localhost:8000'
 // const exqURI = 'http://bjth.itu.dk:5001'
-const mock = true 
+const mock = false 
 
 function generateString(length: number) : string {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -95,7 +95,13 @@ export const getItem = async (session: string, exqId: number, modelId: number): 
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ session: session, modelId: modelId, itemId: exqId })
+            body: JSON.stringify({ 
+                session_info: {
+                    session: session,
+                    modelId: modelId
+                },
+                itemId: exqId
+            })
         })
         .then(val => val.json())
     return { 
@@ -253,11 +259,10 @@ export const searchURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => 
 }
 
 export const searchVLM = async (req: ExqTextSearchRequest): Promise<ChatEntryQueryText> => {
-    // if (mock) return { userQuery: req.query, vlmResults: [30,99,102,101]} // LSC
-    if (mock) return { userQuery: req.text, vlmResults: [33,15,20,22]} // VBS
+    if (mock) return { userQuery: req.text, vlmResults: [33,15,20,22]} // VBS / LSC
     // return { userQuery: req.query, vlmResults: [10,20,14,50]} // Test
     // Calling different server instead of the Exquisitor Server
-    const resp: { results: number[] } = await fetch(exqURI+'/exq/search/text', {
+    const resp: { suggestions: number[] } = await fetch(exqURI+'/exq/search/text', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -266,7 +271,7 @@ export const searchVLM = async (req: ExqTextSearchRequest): Promise<ChatEntryQue
         body: JSON.stringify(req)
     }).then(val => val.json())
     console.log(resp)
-   return {userQuery: req.text, vlmResults: resp.results}
+   return {userQuery: req.text, vlmResults: resp.suggestions}
 }
 
 export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<ChatEntryQueryPos> => {

@@ -85,8 +85,10 @@ const query = ref('')
 async function search() {
     loading.value = true
     const entry = await searchVLM({
-        session: session.value,
-        modelId: activeModel.value.id,
+        session_info: {
+            session: session.value,
+            modelId: activeModel.value.id
+        },
         n: 10,
         text: query.value,
         seen: [],
@@ -100,6 +102,7 @@ async function search() {
         loaded.value = true
         return res
     })
+    console.log('entry', entry)
     chatEntries.push(entry)
     convStore.addConversation(activeModel.value.id, entry)
 }

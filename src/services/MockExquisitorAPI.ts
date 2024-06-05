@@ -101,7 +101,7 @@ const mockFilters : Filter[] = [
             'Saturday',
             'Sunday'
         ],
-        filter: FilterType.Single,
+        filterType: FilterType.Single,
     },
     {
         id: 1,
@@ -119,7 +119,7 @@ const mockFilters : Filter[] = [
             'Black',
             'White'
         ],
-        filter: FilterType.Single,
+        filterType: FilterType.Single,
         property: FilterProperty.Color
     },
     {
@@ -140,23 +140,23 @@ const mockFilters : Filter[] = [
             'November',
             'December',
         ],
-        filter: FilterType.Multi,
+        filterType: FilterType.Multi,
     },
     {
         id: 3,
         collectionId: 'mock',
         name: 'Hour',
-        values: [0,24],
-        filter: FilterType.NumberRange,
-        range: [0,24]
+        values: [0,23],
+        filterType: FilterType.NumberRange,
+        range: [0,23]
     },
     {
         id: 4,
         collectionId: 'mock',
         name: 'Hour',
-        values: [0,24],
-        filter: FilterType.NumberMultiRange,
-        range: [0,24]
+        values: [0,23],
+        filterType: FilterType.NumberMultiRange,
+        range: [0,23]
     },
     {
         id: 5,
@@ -169,7 +169,7 @@ const mockFilters : Filter[] = [
             'skateboard',
             'ski',
         ],
-        filter: FilterType.Count,
+        filterType: FilterType.Count,
         count: [[0,4],[1,3],[2,6],[3,5],[2,4]]
     },
     {
@@ -183,7 +183,7 @@ const mockFilters : Filter[] = [
             'skateboard',
             'ski',
         ],
-        filter: FilterType.MultiCount,
+        filterType: FilterType.MultiCount,
         count: [[0,4],[1,3],[2,6],[3,5],[2,4]]
     }
 ]

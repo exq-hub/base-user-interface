@@ -130,7 +130,7 @@ export const useModelStore = defineStore('model', () => {
 
     async function getSuggestions(req: ExqURFRequest, gridIdx: number, itemIdx?: number) {
         let suggs = await searchURF(req) // Call Exquisitor
-        let model = models.filter(e => e.id === req.modelId)[0] // Get model
+        let model = models.filter(e => e.id === req.session_info.modelId)[0] // Get model
         if (req.n == model.grid[gridIdx].itemsToShow) { // Is it a full update?
             // Returned items NOT equal to the requested amount
             if (suggs.suggestions.length != req.n) {

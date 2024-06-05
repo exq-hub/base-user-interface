@@ -8,13 +8,13 @@
             <v-combobox
              chips
              multiple
-             :items="items.map((e) => e)"
+             :items="values.map((e) => e)"
             />
         </v-card-text>
         <v-card-text v-else>
             None-multi
             <v-combobox
-             :items="items.map((v,_) => v)"
+             :items="values.map((v,_) => v)"
              @update:model-value="getCountRange"
             />
             <v-combobox
@@ -30,7 +30,7 @@ import { reactive } from 'vue';
 interface Props {
     modelId: number
     name: string
-    items: string[] | number[]
+    values: string[] | number[]
     count: [number,number][]
     isMulti: boolean
 }
@@ -42,7 +42,7 @@ const singleValue: [number,number,number] = reactive([-1,0,0])
 
 function getCountRange(val: any & number|string) {
     console.log(val)
-    const it = props.items.findIndex((v,_) => v == val)
+    const it = props.values.findIndex((v,_) => v == val)
     console.log(it)
     const min = props.count[it!][0]
     const max = props.count[it!][1]
