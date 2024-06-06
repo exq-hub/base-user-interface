@@ -1,13 +1,12 @@
 import type { 
     ExqURFRequest, 
     ExqInitResponse, 
-    ExqInitModelRequest,
-    ExqRemoveModelRequest,
     ExqInitModelResponse,
     ExqGetFiltersResponse,
     ExqApplyFiltersRequest,
     ExqResetFilterRequest,
-    ExqURFResponse
+    ExqURFResponse,
+    ExqSessionInfo
 } from "@/types/exq"
 import type { Filter } from "@/types/filter"
 import { FilterProperty, FilterType } from "@/types/filter"
@@ -33,7 +32,7 @@ export const initSession = (): ExqInitResponse => {
     return { session: 'testSession', totalItems: 100 }
 } 
 
-export const initModel = (req: ExqInitModelRequest): ExqInitModelResponse => {
+export const initModel = (req: ExqSessionInfo): ExqInitModelResponse => {
     var groups: GridGroup[] = []
     // for (var i = 0; i < req.groups.length; i++) {
     //     groups.push({
@@ -46,7 +45,7 @@ export const initModel = (req: ExqInitModelRequest): ExqInitModelResponse => {
     return { groups: groups }
 }
 
-export const removeModel = (req: ExqRemoveModelRequest) : void => {}
+export const removeModel = (req: ExqSessionInfo) : void => {}
 
 // Get information for collections 
 // export const getCollections = async (): Promise<string[]> =>
@@ -147,7 +146,7 @@ const mockFilters : Filter[] = [
         collectionId: 'mock',
         name: 'Hour',
         values: [0,23],
-        filterType: FilterType.NumberRange,
+        filterType: FilterType.RangeNumber,
         range: [0,23]
     },
     {
@@ -155,7 +154,7 @@ const mockFilters : Filter[] = [
         collectionId: 'mock',
         name: 'Hour',
         values: [0,23],
-        filterType: FilterType.NumberMultiRange,
+        filterType: FilterType.RangeNumberMulti,
         range: [0,23]
     },
     {
@@ -183,7 +182,7 @@ const mockFilters : Filter[] = [
             'skateboard',
             'ski',
         ],
-        filterType: FilterType.MultiCount,
+        filterType: FilterType.CountMulti,
         count: [[0,4],[1,3],[2,6],[3,5],[2,4]]
     }
 ]

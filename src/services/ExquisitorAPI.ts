@@ -3,8 +3,6 @@ import type {
     ExqURFResponse,
     ExqGetItemResponse, 
     ExqInitResponse,
-    ExqRemoveModelRequest,
-    ExqInitModelRequest,
     ExqGetFiltersResponse,
     ExqApplyFiltersRequest,
     ExqResetFilterRequest,
@@ -15,7 +13,8 @@ import type {
     ExqExcludeGroupRequest,
     ExqGetExcludedGroupsRequest,
     ExqGetExcludedGroupsResponse,
-    ExqExcludeGroupResponse
+    ExqExcludeGroupResponse,
+    ExqSessionInfo
 } from "@/types/exq"
 import type MediaItem from "@/types/mediaitem"
 import { type ItemInfo, type RelatedItems } from "@/types/mediaitem"
@@ -53,7 +52,7 @@ export const initSession = async () : Promise<ExqInitResponse> => {
 }
 
 // Initialize model for user
-export const initModel = (req: ExqInitModelRequest): void => {
+export const initModel = (req: ExqSessionInfo): void => {
     console.log(req)
     if (mock) return
     fetch(exqURI+'/exq/log/addModel', {
@@ -66,7 +65,7 @@ export const initModel = (req: ExqInitModelRequest): void => {
     })
 }
 
-export const removeModel = (req: ExqRemoveModelRequest) : void => {
+export const removeModel = (req: ExqSessionInfo) : void => {
     if (mock) return
     fetch(exqURI+'/exq/log/removeModel', {
         method: 'POST',

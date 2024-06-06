@@ -33,16 +33,14 @@
              class="chat-options mt-5 d-flex"
              rounded
             >
-                <v-btn stacked :elevation="0">
-                    <v-icon>mdi-approximately-equal</v-icon>
-                    Summarize
-                </v-btn>
-                <v-btn stacked :elevation="0">
-                    <v-icon>mdi-text</v-icon>
-                    Rephrase
-                </v-btn>
-                <v-checkbox hide-details label="Filters" />
-                <v-checkbox hide-details label="History" />
+                <v-checkbox hide-details label="Filters" v-model="checkFilters" />
+                <v-checkbox hide-details label="History" v-model="checkHistory"/>
+                <v-number-input hide-details 
+                 v-model="itemsToShow"
+                 control-variant="split"
+                 variant="solo"
+                 max-width="25%"
+                />
             </v-sheet>
             <v-text-field
              v-model="query"
@@ -69,6 +67,10 @@ import { reactive, ref } from 'vue';
 import Item from '@/components/items/Item.vue';
 import { useModelStore } from '@/stores/model';
 import { useAppStore } from '@/stores/app';
+import { useFilterStore } from '@/stores/filter';
+import { ExqTextSearchRequest } from '@/types/exq';
+import { useItemStore } from '@/stores/item';
+import { ILSets } from '@/types/mediaitem';
 
 const activeModel = computed(() => useModelStore().activeModel)
 const session = computed(() => useAppStore().session)
@@ -81,15 +83,21 @@ const loading = ref(false)
 const chatEntries : ChatEntryQueryText[] = reactive([])
 convStore.createConversation(activeModel.value.id)
 
+const checkFilters = ref(false)
+const checkHistory = ref(false)
+const itemsToShow = ref(10)
+
+const itemStore = useItemStore()
+
 const query = ref('')
 async function search() {
     loading.value = true
-    const entry = await searchVLM({
+    let reqObj : ExqTextSearchRequest = {
         session_info: {
             session: session.value,
             modelId: activeModel.value.id
         },
-        n: 10,
+        n: itemsToShow.value,
         text: query.value,
         seen: [],
         filters: {
@@ -97,7 +105,21 @@ async function search() {
             values: []
         },
         excluded: []
-    }).then((res) => {
+    }
+    if (checkFilters.value) {
+        let filters = useFilterStore().getModelFilters(activeModel.value.id)
+        reqObj.filters = filters
+    }
+    if (checkHistory.value) {
+        let pos = itemStore.getSetItems(activeModel.value.id, ILSets.Positives).map((e,_) => e.id)
+        let neg = itemStore.getSetItems(activeModel.value.id, ILSets.Negatives).map((e,_) => e.id)
+        let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
+        hist.push(...pos)
+        hist.push(...neg)
+        hist.push(...activeModel.value.grid[0].items)
+        reqObj.seen = hist
+    }
+    const entry = await searchVLM(reqObj).then((res) => {
         loading.value = false
         loaded.value = true
         return res

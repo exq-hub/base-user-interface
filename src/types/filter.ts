@@ -1,12 +1,12 @@
 export enum FilterType {
     Single=0,
     Multi,
-    NumberRange,
-    NumberMultiRange,
-    LabelRange,
-    LabelMultiRange,
+    RangeNumber,
+    RangeNumberMulti,
+    RangeLabel,
+    RangeLabelMulti,
     Count,
-    MultiCount,
+    CountMulti,
 }
 
 export enum FilterProperty {
@@ -20,10 +20,9 @@ export interface Filter {
     id: number
     collectionId : string
     name: string
-    values : string[] | number[]
+    values : number[] | string[]
     filterType : FilterType
-    range? : [number,number]
-    rangeLabel? : [number,string][] // Only if LabelRange is used
-    count? : [number,number][]
+    range?: [number, number] | [string, number][]
+    count?: [number, number][]
     property?: FilterProperty
 }

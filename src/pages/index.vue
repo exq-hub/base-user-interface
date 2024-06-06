@@ -27,11 +27,13 @@ import UrfGrid from '@/components/model/URFGrid.vue';
 import { initSession } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useModelStore } from '@/stores/model';
+import { useFilterStore } from '@/stores/filter';
 
 const modelStore = useModelStore()
 const sessionobj = await initSession()
 useAppStore().session = sessionobj.session
 modelStore.totalItems = sessionobj.totalItems
 modelStore.initializeModelItems(0)
+useFilterStore().loadFilters(0)
 
 </script>

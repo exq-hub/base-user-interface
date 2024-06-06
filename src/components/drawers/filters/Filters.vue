@@ -15,9 +15,9 @@
              clearable
              auto-select-first
              :label="filter.name"
-             :items="filter.values.map((v,_) => v)"
+             :items="filter.values as number[] | string[]"
              variant="solo-filled"
-             @update:model-value="(vals) => updateFilter(filter.id, vals)"
+             @update:model-value="(vals) => updateFilter(filter.id, [vals])"
              dense
             />
         </v-sheet>        
@@ -33,13 +33,13 @@
              multiple
              auto-select-first="exact"
              :label="filter.name"
-             :items="filter.values.map((v,_) => v)"
+             :items="filter.values as number[] | string[]"
              variant="solo-filled"
              dense
              @update:model-value="(vals) => updateFilter(filter.id, vals)"
             />
         </v-sheet>        
-        <v-sheet v-if="filter.filterType == FilterType.NumberRange"
+        <v-sheet v-if="filter.filterType == FilterType.RangeNumber"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
@@ -47,6 +47,7 @@
             :name="filter.name"
             :range="filter.range!"
             @value-update="(vals) => updateRangeFilter(filter.id, vals)"
+            :filter-type="filter.filterType"
            />
         </v-sheet>
         <v-sheet v-if="filter.filterType == FilterType.Count"
@@ -61,7 +62,7 @@
                 :is-multi="false"
             />
         </v-sheet>
-        <v-sheet v-if="filter.filterType == FilterType.MultiCount"
+        <v-sheet v-if="filter.filterType == FilterType.CountMulti"
          class="mx-auto pt-5 ml-2 mr-2"
          :color="color"
         >
@@ -109,19 +110,19 @@ watch(activeModelId, async () => {
 
 const filters = computed(() => filterStore.filters)
 
-const filterValues = reactive<{ [key: number]: (string | number)[] }>({})
+const filterValues = reactive<{ [key: number]: number[] | string[] | (string | number)[] }>({})
 
 function initializeFilters() {
     filters.value.forEach(filter => {
         filterValues[filter.id] = [];
         if (filter.filterType === FilterType.Single || filter.filterType === FilterType.Multi) {
-            const values = filterStore.getFilterValues(activeModelId.value, filter.id);
-            filterValues[filter.id] = values.map(index => filter.values[index]);
+            const values = filterStore.getFilterValues(activeModelId.value, filter.id)
+            filterValues[filter.id] = values
         }
     })
 }
 
-function updateFilter(filterId: number, value: string | number | (string|number)[]) {
+function updateFilter(filterId: number, value: (number | string)[]) {
     let valIds : number[] = []
     if (Array.isArray(value)) {
         value.forEach(element => {
@@ -135,8 +136,8 @@ function updateFilter(filterId: number, value: string | number | (string|number)
     console.log('filterValues', filterValues)
 }
 
-function updateRangeFilter(filterId: number, values: [number, number]) {
-    filterStore.applyRangeOrCountFilters(activeModelId.value, filterId, values);
+function updateRangeFilter(filterId: number, values: [number, number][]) {
+    // filterStore.applyRangeOrCountFilters(activeModelId.value, filterId, values);
     emit('filterUpdate');
 }
 

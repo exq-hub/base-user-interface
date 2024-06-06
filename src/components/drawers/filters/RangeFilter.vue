@@ -18,24 +18,25 @@
              variant="plain"
              density="compact"
              x-small
-             :disabled="ranges.values.length < 2"
+             :disabled="numRanges.values.length < 2"
              @click="removeSlider"
              icon="mdi-close"
             />
         </template>
-        <v-card-text class="ma-0 pa-0 mb-2">
-            <v-range-slider v-for="r in ranges.values"
-             v-model="r.range"
+        <v-card-text class="ma-0 pa-0 mb-2" 
+         v-if="filterType === FilterType.RangeNumber || filterType === FilterType.RangeNumberMulti">
+            <v-range-slider v-for="r in numRanges.values"
+             v-model="(r)"
              step="1"
-             :min="range[0]"
-             :max="range[1]"
+             :min="r[0]"
+             :max="r[1]"
              hide-details
              color="blue-grey-lighten-4"
              @change="valueUpdate"
             >
                 <template v-slot:prepend>
                     <v-text-field
-                        :model-value="r.range[0]"
+                        :model-value="r[0]"
                         single-line
                         hide-details
                         variant="underlined"
@@ -43,7 +44,7 @@
                 </template>
                 <template v-slot:append>
                     <v-text-field
-                        :model-value="r.range[1]"
+                        :model-value="r[1]"
                         single-line
                         hide-details
                         variant="underlined"
@@ -57,28 +58,36 @@
 
 
 <script setup lang="ts">
+import { FilterType } from '@/types/filter';
 import { reactive } from 'vue';
 
 interface Props {
     name : string
-    range : [number,number]
+    range : [number, number] | [string, number][]
+    filterType: FilterType
 }
 const props = defineProps<Props>()
 
-const ranges = reactive({ values: [{range: props.range}] })
+const numRanges : { values: [number,number][] } = reactive({ values: [props.range as [number,number]] })
+// const labelRanges : { values: { range: [string, number][] }[]} = reactive({ values: [{range: props.range as [string,number][]}] })
 
 const emit = defineEmits(['valueUpdate'])
 
 function valueUpdate() {
-    emit('valueUpdate', ranges.values)
+    if (props.filterType === FilterType.RangeNumber || props.filterType === FilterType.RangeNumberMulti)
+        emit('valueUpdate', numRanges.values)
 }
 
 function addSlider() {
-    ranges.values.push({ range: props.range })
+    if (props.filterType === FilterType.RangeNumber || props.filterType === FilterType.RangeNumberMulti)
+        numRanges.values.push(props.range as [number, number])
 }
 
 function removeSlider() {
-    ranges.values.pop()
+    if (props.filterType === FilterType.RangeNumber || props.filterType === FilterType.RangeNumberMulti)
+        numRanges.values.pop()
+    // else
+    //     labelRanges.values.pop()
 }
 </script>
 

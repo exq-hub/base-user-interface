@@ -4,37 +4,29 @@ import type { Filter } from "./filter"
 import type { MediaType } from "./mediaitem"
 import type { GridGroup } from "./model"
 
+export interface ExqSessionInfo {
+    session: string,
+    modelId: number
+}
+
 export interface ExqInitResponse {
     session: string,
     totalItems: number
-}
-
-export interface ExqInitModelRequest {
-    session: string,
-    modelId: number,
 }
 
 export interface ExqInitModelResponse {
     groups: GridGroup[]
 }
 
-export interface ExqRemoveModelRequest {
-    session: string
-    modelId: number
-}
-
 export interface ExqURFRequest {
-    session_info: {
-        session: string
-        modelId: number
-    }
+    session_info: ExqSessionInfo
     n: number
     pos: number[]
     neg: number[]
     seen: number[]
     filters?: {
         names: string[]
-        values: number[][]
+        values: (number | string)[][]
     }
     excluded?: number[]
 }
@@ -44,23 +36,19 @@ export interface ExqURFResponse {
 }
 
 export interface ExqTextSearchRequest {
-    session_info: {
-        session: string
-        modelId: number
-    }
+    session_info: ExqSessionInfo
     n: number
     text: string
     seen?: number[]
     filters?: {
         names: string[]
-        values: number[][]
+        values: (number | string)[][]
     }
     excluded: number[]
 }
 
 export interface ExqChatFeedbackRequest {
-    session: string
-    modelId: number
+    session_info: ExqSessionInfo
     n: number
     text: string
     pos: []
@@ -91,10 +79,9 @@ export interface ExqGetFiltersResponse {
 }
 
 export interface ExqApplyFiltersRequest {
-    session: string
-    model: number
-    names: string[]
-    values: number[][]
+    session_info : ExqSessionInfo
+    name: string
+    values: (number | string)[]
 }
 
 export interface ExqExcludeGroupRequest {
@@ -123,8 +110,7 @@ export interface ExqGetExcludedGroupsResponse {
 }
 
 export interface ExqResetFilterRequest {
-    session: string
-    model: number
+    session_info : ExqSessionInfo
 }
 
 export interface ExqSubmissionRequest {

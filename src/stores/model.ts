@@ -5,6 +5,7 @@ import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'
 import { ExqURFRequest } from '@/types/exq'
 import { searchURF, initModel, removeModel } from '@/services/ExquisitorAPI'
 import { useAppStore } from './app'
+import { useFilterStore } from './filter'
 
 export const useModelStore = defineStore('model', () => {
     const nModels = ref(0)
@@ -68,6 +69,7 @@ export const useModelStore = defineStore('model', () => {
             grid: [],
         })
         initializeModelItems(models.length-1)
+        useFilterStore().loadFilters(models.length-1)
         console.log(models)
         activeModel.value = models[models.length-1]
         console.log(activeModel.value.id)

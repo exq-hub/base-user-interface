@@ -31,7 +31,7 @@ interface Props {
     modelId: number
     name: string
     values: string[] | number[]
-    count: [number,number][]
+    count: [number, number][]
     isMulti: boolean
 }
 const props = defineProps<Props>();

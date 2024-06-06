@@ -3,7 +3,7 @@
         <v-img
          :id="'itemThumb'+item.id"
          :src="item.thumbPath"
-         @click="openOverlay = true"
+         @click="openOverlay = true; console.log('clicked item', item.id)"
          class="bg-transparent"
         >
             <template v-slot:placeholder>
@@ -17,6 +17,7 @@
                     />
                 </v-row>
             </template>
+            <span>{{ item.name }}</span>
         </v-img>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
@@ -72,6 +73,18 @@
             />
         </template>
     </v-snackbar>
+    <v-overlay v-if="overlay" 
+     v-model="openOverlay"
+     location-strategy="connected"
+     scroll-strategy="reposition"
+     class="align-center justify-center my-overlay"
+     >
+        <item-overlay
+         :model-id="modelId"
+         :srcItem="item"
+         :opened="openOverlay"
+        />
+    </v-overlay>
 </template>
 
 
@@ -79,6 +92,7 @@
 import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
+import ItemOverlay from './ItemOverlay.vue';
 import MediaItem, { ILSets } from '@/types/mediaitem';
 
 interface Props {
