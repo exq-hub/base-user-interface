@@ -164,7 +164,7 @@ async function switchMain(itemId: number) {
 
 async function nextClick() {
     console.log('Next Click')
-    if (end.value+8 < relatedItems.length-1) {
+    if (end.value+8 < relatedItems.length-1) { // Regular scenario
         shownItems.items = []
         for (let i = end.value; i < end.value+8; i++) {
             shownItems.items.push(await useItemStore().fetchMediaItem(relatedItems[i], props.modelId))
@@ -172,7 +172,7 @@ async function nextClick() {
         start.value = end.value
         end.value = end.value + 8
         updTimeline.value += 1
-    } else if (end.value < relatedItems.length) {
+    } else if (end.value < relatedItems.length) { // Last slide-group
         shownItems.items = []
         for (let i = relatedItems.length-8; i < relatedItems.length; i++) {
             shownItems.items.push(await useItemStore().fetchMediaItem(relatedItems[i], props.modelId))
@@ -186,18 +186,18 @@ async function nextClick() {
 
 async function prevClick() {
     console.log('Prev Click')
-    if (start.value-8 > 0) {
+    if (start.value-8 > 0) { // Regular scenario
         shownItems.items = []
-        for (let i = start.value-1; i > start.value-8; i--) {
-            shownItems.items.unshift(await useItemStore().fetchMediaItem(relatedItems[i], props.modelId))
+        for (let i = start.value-8; i < start.value; i++) {
+            shownItems.items.push(await useItemStore().fetchMediaItem(relatedItems[i], props.modelId))
         }
         end.value = start.value
         start.value = start.value - 8
         updTimeline.value += 1
-    } else if (start.value > 0) {
+    } else if (start.value > 0) { // First slide-group
         shownItems.items = []
-        for (let i = start.value-1; i > start.value; i--) {
-            shownItems.items.unshift(await useItemStore().fetchMediaItem(relatedItems[i], props.modelId))
+        for (let i = 0; i < 8; i++) {
+            shownItems.items.push(await useItemStore().fetchMediaItem(relatedItems[i], props.modelId))
         }
         start.value = 0
         end.value = 8
