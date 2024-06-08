@@ -12,6 +12,7 @@ declare module 'vue' {
     DeleteDialog: typeof import('./components/general/DeleteDialog.vue')['default']
     Dropdown: typeof import('./components/general/Dropdown.vue')['default']
     EditTextField: typeof import('./components/general/EditTextField.vue')['default']
+    ExcludedGroups: typeof import('./components/drawers/filters/ExcludedGroups.vue')['default']
     ExcludedVideos: typeof import('./components/drawers/filters/ExcludedVideos.vue')['default']
     Filters: typeof import('./components/drawers/filters/Filters.vue')['default']
     Item: typeof import('./components/items/Item.vue')['default']

@@ -23,7 +23,7 @@
                              :btn-ignore="false"
                              :btn-submit="true"
                              :provided="false"
-                             :overlay="true"
+                             :overlay="false"
                             />
                         </v-col>
                     </v-row>

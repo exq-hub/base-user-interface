@@ -11,13 +11,11 @@ import type {
     ExqQueryRewriteRequest,
     ExqClearExcludedGroupRequest,
     ExqExcludeGroupRequest,
-    ExqGetExcludedGroupsRequest,
-    ExqGetExcludedGroupsResponse,
     ExqExcludeGroupResponse,
     ExqSessionInfo
 } from "@/types/exq"
 import type MediaItem from "@/types/mediaitem"
-import { type ItemInfo, type RelatedItems } from "@/types/mediaitem"
+import { type ItemInfo } from "@/types/mediaitem"
 import {
     initSession as mockInitExq, 
     doURF as mockDoURF,
@@ -29,7 +27,7 @@ import { useAppStore } from "@/stores/app"
 
 const exqURI = 'http://localhost:8000'
 // const exqURI = 'http://bjth.itu.dk:5001'
-const mock = false 
+const mock = false
 
 function generateString(length: number) : string {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -117,39 +115,43 @@ export const getItem = async (session: string, exqId: number, modelId: number): 
 export const getItemInfo = async (model: number, itemId: number): Promise<ItemInfo> => {
     if (mock) return { infoPair: [['ID',[itemId.toString()]]] }
     const resp : ItemInfo = 
-        await fetch(exqURI+'/getItemInfo', {
+        await fetch(exqURI+'/exq/item/details', {
             method: 'POST',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ 
-                session: useAppStore().session,
-                model: model,
+                session_info: {
+                    session: useAppStore().session,
+                    modelId: model,
+                },
                 itemId: itemId
             })
         }).then(val => val.json())
     return resp
 }
 
-export const getRelatedItems = async (itemId: number): Promise<RelatedItems> => {
+export const getRelatedItems = async (model: number, itemId: number): Promise<number[]> => {
     if (mock) {
-        return {
-            nGroup: 10,
-            groupRange: [10,20],
-            groupItems: []
-        }
+        return []
     }
-    const resp: RelatedItems =
-        await fetch(exqURI+'/getRelatedItems', {
+    const resp: {'related': number[]} =
+        await fetch(exqURI+'/exq/item/related', {
             method: 'POST',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ itemId: itemId })
+            body: JSON.stringify({ 
+                session_info: {
+                    session: useAppStore().session,
+                    modelId: model,
+                },
+                itemId: itemId
+            })
         }).then(val => val.json())
-    return resp
+    return resp.related
 }
 
 
@@ -193,7 +195,7 @@ export const resetFilters = (req: ExqResetFilterRequest): void => {
 
 export const excludeGroup = async (req: ExqExcludeGroupRequest): Promise<void> => {
     if (mock) return
-    return await fetch(exqURI+'/excludeVideo', {
+    return await fetch(exqURI+'/exq/log/exclude', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -205,7 +207,7 @@ export const excludeGroup = async (req: ExqExcludeGroupRequest): Promise<void> =
 
 export const isGroupExcluded = async (req: ExqExcludeGroupRequest): Promise<boolean> => {
     if (mock) return false
-    const resp: ExqExcludeGroupResponse = await fetch(exqURI+'/isVideoExcluded', {
+    const resp: ExqExcludeGroupResponse = await fetch(exqURI+'/isItemExcluded', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -228,19 +230,6 @@ export const clearExcludedGroups = async (req: ExqClearExcludedGroupRequest): Pr
         body: JSON.stringify(req)
     }).then()
 }
-
-export const getExcludedGroups = async (req: ExqGetExcludedGroupsRequest): Promise<ExqGetExcludedGroupsResponse> => {
-    if (mock) return {excGroups: []}
-    return await fetch(exqURI+'/getExcludedVideos', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then(val => val.json())
-}
-
 
 
 // Get suggestions from the current model

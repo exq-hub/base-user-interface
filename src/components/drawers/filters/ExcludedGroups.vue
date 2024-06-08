@@ -19,7 +19,7 @@
              :btn-ignore="false"
              :btn-submit="true"
              :provided="false"
-             :overlay="true"
+             :overlay="false"
             />
         </v-list-item>
     </v-list>
@@ -29,9 +29,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import Item from '@/components/items/Item.vue';
-import { clearExcludedGroups, getExcludedGroups, } from '@/services/ExquisitorAPI';
+import { clearExcludedGroups } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useModelStore } from '@/stores/model';
+import { useItemStore } from '@/stores/item';
 
 const activeModelId = computed(() => useModelStore().activeModel.id)
 
@@ -41,18 +42,35 @@ const loaded = ref(false)
 
 const session = useAppStore().session
 
-async function getExcludedVids() {
-    excludedItems.items = await getExcludedGroups({session: session, model: activeModelId.value}).then(val => val.excGroups)
+const itemStore = useItemStore()
+
+async function getExcludedGroups() {
+    if (itemStore.modelExcluded.has(activeModelId.value)) {
+        excludedItems.items = Array.from(itemStore.modelExcluded.get(activeModelId.value)!)
+    } else {
+        excludedItems.items = []
+    }
     console.log(excludedItems.items)
     loaded.value = true
 }
 
 async function clearExcluded() {
-    await clearExcludedGroups({session: session, model: activeModelId.value, items: excludedItems.items})
-            .then(() => excludedItems.items = [])
+    excludedItems.items.forEach( v => 
+        itemStore.removeItemFromExclude(v, activeModelId.value)
+    )
+    // Logging
+    clearExcludedGroups({
+        session_info: {
+            session: session,
+            modelId: activeModelId.value
+        }, 
+        items: excludedItems.items
+    })
+
+    excludedItems.items = []
 }
 
-getExcludedVids()
+getExcludedGroups()
 </script>
 
 

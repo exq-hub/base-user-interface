@@ -3,7 +3,9 @@
         <v-img
          :id="'itemThumb'+item.id"
          :src="item.thumbPath"
-         @click="openOverlay = true; console.log('clicked item', item.id)"
+         @click="if (!overlay) { accessOverlay() };
+                 if (overlay) { $emit('replaceOverlay', itemId) }; 
+                 console.log('clicked item', item.id);"
          class="bg-transparent"
         >
             <template v-slot:placeholder>
@@ -17,11 +19,11 @@
                     />
                 </v-row>
             </template>
-            <span>{{ item.name }}</span>
+            <span>{{ item.name!.split('_')[0] }} {{ item.name!.split('_')[1] }}</span>
         </v-img>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
-             @click="addToSet(itemId, ILSets.Positives); $emit('replace', itemIndex, gridIndex, ILSets.Positives)"
+             @click="addToSet(itemId, ILSets.Positives); if (!overlay) { $emit('replace', itemIndex, gridIndex!, ILSets.Positives) };"
              :disabled="isPos(itemId, modelId)"
              size="small"
             >
@@ -30,7 +32,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnNeg"
-             @click="addToSet(itemId, ILSets.Negatives); $emit('replace', itemIndex, gridIndex, ILSets.Negatives)"
+             @click="addToSet(itemId, ILSets.Negatives); if (!overlay) { $emit('replace', itemIndex, gridIndex!, ILSets.Negatives) };"
              :disabled="isNeg(itemId, modelId)"
              size="small"
             >
@@ -39,7 +41,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnIgnore"
-             @click="addToSet(itemId, ILSets.History); $emit('replace', itemIndex, gridIndex, ILSets.History)"
+             @click="addToSet(itemId, ILSets.History); if (!overlay) { $emit('replace', itemIndex, gridIndex!, ILSets.History) };"
              :disabled="isHistory(itemId, modelId)"
              size="small"
             >
@@ -73,7 +75,7 @@
             />
         </template>
     </v-snackbar>
-    <v-overlay v-if="overlay" 
+    <v-overlay v-if="!overlay"
      v-model="openOverlay"
      location-strategy="connected"
      scroll-strategy="reposition"
@@ -81,8 +83,9 @@
      >
         <item-overlay
          :model-id="modelId"
-         :srcItem="item"
-         :opened="openOverlay"
+         :src-item="item"
+         :src-item-idx="srcItemIndex"
+         :is-opened="true"
         />
     </v-overlay>
 </template>
@@ -93,13 +96,13 @@ import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
 import ItemOverlay from './ItemOverlay.vue';
-import MediaItem, { ILSets } from '@/types/mediaitem';
+import MediaItem, { ILSets, MediaType } from '@/types/mediaitem';
 
 interface Props {
     itemId: number
     itemIndex: number
-    gridIndex: number
     modelId: number
+    gridIndex?: number
     item?: MediaItem
     btnPos: boolean
     btnNeg: boolean
@@ -109,10 +112,13 @@ interface Props {
     overlay: boolean
 }
 const props = defineProps<Props>()
-defineEmits<{'replace': [itemIndex: number, gridIndex: number, set: ILSets]}>()
+defineEmits<{
+    'replace': [ itemIndex: number, gridIndex: number, set: ILSets ],
+    'replaceOverlay': [ itemId: number ]
+}>()
 
 const itemStore = useItemStore()
-const item : MediaItem = reactive({id: -1, srcPath:'', thumbPath:''})
+const item : MediaItem = reactive({id: -1, srcPath:'', thumbPath:'', mediaType: MediaType.Image})
 async function getMediaItem() {
     await itemStore.fetchMediaItem(props.itemId, props.modelId)
     let mi = itemStore.items.get(props.itemId)!
@@ -123,7 +129,6 @@ async function getMediaItem() {
     item.mediaType = mi.mediaType
     item.srcPath = mi.srcPath
     item.thumbPath = mi.thumbPath
-    item.relatedItems = mi.relatedItems
 }
 if (!props.provided) {
     await getMediaItem()
@@ -136,6 +141,7 @@ if (!props.provided) {
     item.srcPath = props.item!.thumbPath
     item.thumbPath = props.item!.thumbPath
     item.relatedItems = props.item!.relatedItems
+    item.metadata = props.item!.metadata
 }
 
 const isPos = computed(() => itemStore.isItemInPos)
@@ -172,6 +178,27 @@ function addToSet(itemId: number, ilset: ILSets) {
 }
 
 const openOverlay = ref(false)
+
+const srcItemIndex = ref(0)
+
+async function accessOverlay() {
+    if (item.metadata === undefined && item.relatedItems === undefined) {
+        item.metadata = await itemStore.fetchItemInfo(props.modelId, item.id)
+        item.relatedItems = await itemStore.fetchRelatedItems(props.modelId, item.id)
+        console.log(item.metadata)
+        console.log(item.relatedItems)
+        if (item.relatedItems!.length > 0) {
+            for (let i = 0; i < item.relatedItems!.length; i++) {
+                if (item.relatedItems![i] === item.id) {
+                    srcItemIndex.value = i
+                    break
+                }
+            }
+        }
+    }
+    openOverlay.value = true; 
+}
+
 
 </script>
 

@@ -85,8 +85,7 @@ export interface ExqApplyFiltersRequest {
 }
 
 export interface ExqExcludeGroupRequest {
-    session: string
-    model: number
+    session_info: ExqSessionInfo
     itemId: number
 }
 
@@ -95,8 +94,7 @@ export interface ExqExcludeGroupResponse {
 }
 
 export interface ExqClearExcludedGroupRequest {
-    session: string
-    model: number
+    session_info: ExqSessionInfo
     items: number[]
 }
 

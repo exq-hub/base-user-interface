@@ -1,8 +1,8 @@
-import { ILSets, type ItemInfo, type RelatedItems} from "@/types/mediaitem";
+import { ILSets, type ItemInfo } from "@/types/mediaitem";
 import type MediaItem from "@/types/mediaitem";
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import { getItem, getItemInfo, getRelatedItems } from "@/services/ExquisitorAPI";
+import { excludeGroup, getItem, getItemInfo, getRelatedItems } from "@/services/ExquisitorAPI";
 import { useAppStore } from "@/stores/app";
 // import { getItem } from "@/services/MockExquisitorAPI";
 
@@ -11,6 +11,8 @@ export const useItemStore = defineStore('item', () => {
     const items : Map<number, MediaItem> = reactive(new Map<number,MediaItem>())
     // K = modelId, V = Set<ItemId>
     const modelItems : Map<number, Set<number>> = reactive(new Map<number,Set<number>>())
+    // K = modelId, V = Set<ItemId>
+    const modelExcluded : Map<number, Set<number>> = reactive(new Map<number,Set<number>>())
     
     async function fetchMediaItem(exqId: number, modelId: number) : Promise<MediaItem> {
         if (modelItems.has(modelId)) {
@@ -95,7 +97,7 @@ export const useItemStore = defineStore('item', () => {
             }
         })
         return true
-    }
+    } 
     
     function removeItemFromSet(exqId: number, modelId: number, ilset: ILSets) : void {
         items.get(exqId)!.currentSets!.get(modelId)![ilset] = false
@@ -151,21 +153,37 @@ export const useItemStore = defineStore('item', () => {
         return setItems
     }
     
-    function setItemMetadata(exqId: number, metadata: ItemInfo) {
-        items.get(exqId)!.metadata = metadata
-    }
-
     async function fetchItemInfo(modelId: number, itemId: number): Promise<ItemInfo> {
-        return await getItemInfo(modelId, itemId)
+        items.get(itemId)!.metadata = await getItemInfo(modelId, itemId)
+        return items.get(itemId)!.metadata!
     }
 
-    async function fetchRelatedItems(itemId: number): Promise<RelatedItems> {
-        return await getRelatedItems(itemId)
+    async function fetchRelatedItems(modelId: number, itemId: number): Promise<number[]> {
+        items.get(itemId)!.relatedItems = await getRelatedItems(modelId, itemId)
+        return items.get(itemId)!.relatedItems!
+    }
+
+    function excludeItemGroup(exqId: number, modelId: number) {
+        if (!modelExcluded.has(modelId)) {
+            modelExcluded.set(modelId, new Set<number>())
+        }
+        modelExcluded.get(modelId)!.add(exqId)
+    }
+
+    async function removeItemFromExclude(exqId: number, modelId: number) {
+        let items : number[] = await getRelatedItems(modelId, exqId)
+        for (let i = 0; i < items.length; i++) {
+            if (modelExcluded.get(modelId)!.has(items[i])) {
+                modelExcluded.get(modelId)!.delete(items[i])
+                break
+            }
+        }
     }
 
     return {
         items, 
         modelItems,
+        modelExcluded,
         fetchMediaItem, 
         fetchMediaItems, 
         addItemToSet, 
@@ -178,8 +196,9 @@ export const useItemStore = defineStore('item', () => {
         isItemInHistory,
         isItemInSubmitted,
         getSetItems,
-        setItemMetadata,
         fetchItemInfo,
-        fetchRelatedItems
+        fetchRelatedItems,
+        excludeItemGroup,
+        removeItemFromExclude
     }
 })

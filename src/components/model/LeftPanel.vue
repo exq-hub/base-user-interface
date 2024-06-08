@@ -43,14 +43,14 @@
      location="left"
      color="orange-lighten-2"
     >
-        <excluded-videos />
+        <excluded-groups />
     </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import filters from '@/components/drawers/filters/Filters.vue'
-import ExcludedVideos from '@/components/drawers/filters/ExcludedVideos.vue';
+import ExcludedGroups from '@/components/drawers/filters/ExcludedGroups.vue';
 
 const filterToggle = ref(false)
 const excludeToggle = ref(false)
