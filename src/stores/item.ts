@@ -2,7 +2,7 @@ import { ILSets, type ItemInfo } from "@/types/mediaitem";
 import type MediaItem from "@/types/mediaitem";
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import { excludeGroup, getItem, getItemInfo, getRelatedItems } from "@/services/ExquisitorAPI";
+import { getItem, getItemInfo, getRelatedItems } from "@/services/ExquisitorAPI";
 import { useAppStore } from "@/stores/app";
 // import { getItem } from "@/services/MockExquisitorAPI";
 
