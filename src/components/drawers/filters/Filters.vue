@@ -132,6 +132,7 @@ function updateFilter(filterId: number, value: (number | string)[]) {
         valIds.push(filters.value[filterId].values.findIndex((v) => v === value))
     }
     filterStore.applyFilters(activeModelId.value, filterId, valIds)
+    // filterStore.applyFilters(activeModelId.value, filterId, valIds)
     emit('filterUpdate')
     console.log('filterValues', filterValues)
 }

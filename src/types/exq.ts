@@ -89,6 +89,12 @@ export interface ExqExcludeGroupRequest {
     itemId: number
 }
 
+export interface ExqIsExcludedRequest {
+    session_info: ExqSessionInfo
+    itemId: number
+    excluded_ids: number[]
+}
+
 export interface ExqExcludeGroupResponse {
     excludedOrNot: boolean 
 }

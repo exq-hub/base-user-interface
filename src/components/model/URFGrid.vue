@@ -89,6 +89,10 @@ async function updateItems() {
     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
     hist.push(...pos)
     hist.push(...neg)
+    let exclude : number[] = []
+    if (itemStore.modelExcluded.has(activeModel.value.id)) {
+        exclude = Array.from(itemStore.modelExcluded.get(activeModel.value.id)!)
+    }
     let reqObj : ExqURFRequest = {
         session_info: {
             session: useAppStore().session, 
@@ -98,7 +102,7 @@ async function updateItems() {
         pos: pos,
         neg: neg,
         seen: hist,
-        excluded: [] //TODO
+        excluded: exclude
     }
 
     if (checkFilters.value) {
@@ -131,6 +135,7 @@ async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
     }
     if (checkFilters.value) {
         let filters = useFilterStore().getModelFilters(activeModel.value.id)
+        console.log(filters)
         reqObj.filters = filters
     }
     await modelStore.getSuggestions(reqObj, gridIdx, itemIdx)

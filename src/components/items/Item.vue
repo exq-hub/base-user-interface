@@ -158,7 +158,7 @@ function snack(item: string, set: string) {
     text.value = 'Item ' + item + ' has been added to ' + set
 }
 
-const { session, evalId } = useAppStore()
+// const { session, evalId } = useAppStore()
 function addToSet(itemId: number, ilset: ILSets) {
     itemStore.addItemToSet(itemId, props.modelId, ilset)
     if (ilset == ILSets.Positives) snackColor.value = 'success'
@@ -166,12 +166,12 @@ function addToSet(itemId: number, ilset: ILSets) {
     if (ilset == ILSets.Submitted) {
         snackColor.value = 'indigo'
         submitAnswer({ 
-            sessionId: session, 
+            sessionId: useAppStore().session, 
             modelId: props.modelId,
             name: itemStore.items.get(itemId)!.name!,
             text: '',
             qa: false,
-            evalId: evalId
+            evalId: useAppStore().evalId
         })
     }
     snack(itemStore.items.get(itemId)!.name!, ILSets[ilset])
@@ -182,10 +182,12 @@ const openOverlay = ref(false)
 const srcItemIndex = ref(0)
 
 async function accessOverlay() {
-    if (item.metadata === undefined && item.relatedItems === undefined) {
+    if (item.metadata === undefined) {
         item.metadata = await itemStore.fetchItemInfo(props.modelId, item.id)
-        item.relatedItems = await itemStore.fetchRelatedItems(props.modelId, item.id)
         console.log(item.metadata)
+    }
+    if (item.relatedItems === undefined) {
+        item.relatedItems = await itemStore.fetchRelatedItems(props.modelId, item.id)
         console.log(item.relatedItems)
         if (item.relatedItems!.length > 0) {
             for (let i = 0; i < item.relatedItems!.length; i++) {

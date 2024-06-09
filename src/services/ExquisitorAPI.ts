@@ -12,7 +12,8 @@ import type {
     ExqClearExcludedGroupRequest,
     ExqExcludeGroupRequest,
     ExqExcludeGroupResponse,
-    ExqSessionInfo
+    ExqSessionInfo,
+    ExqIsExcludedRequest
 } from "@/types/exq"
 import type MediaItem from "@/types/mediaitem"
 import { type ItemInfo } from "@/types/mediaitem"
@@ -113,7 +114,7 @@ export const getItem = async (session: string, exqId: number, modelId: number): 
 }
 
 export const getItemInfo = async (model: number, itemId: number): Promise<ItemInfo> => {
-    if (mock) return { infoPair: [['ID',[itemId.toString()]]] }
+    if (mock) return { infoPairs: [['ID',[itemId.toString()]]] }
     const resp : ItemInfo = 
         await fetch(exqURI+'/exq/item/details', {
             method: 'POST',
@@ -205,9 +206,9 @@ export const excludeGroup = async (req: ExqExcludeGroupRequest): Promise<void> =
     }).then()
 }
 
-export const isGroupExcluded = async (req: ExqExcludeGroupRequest): Promise<boolean> => {
+export const isGroupExcluded = async (req: ExqIsExcludedRequest): Promise<boolean> => {
     if (mock) return false
-    const resp: ExqExcludeGroupResponse = await fetch(exqURI+'/isItemExcluded', {
+    const resp: ExqExcludeGroupResponse = await fetch(exqURI+'/exq/item/excluded', {
         method: 'POST',
         mode: 'cors',
         headers: {

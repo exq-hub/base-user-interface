@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <v-container style="background-color: sandybrown; border-radius: 10px;">
         <v-row 
          align="center"
          height="500px"
@@ -45,11 +45,23 @@
             </v-col>
 
             <!-- Item Information -->
-            <v-col v-if="itemInfo" cols="4">
+            <v-col v-model="mainItem" v-if="itemInfo" cols="4">
                 <v-card class="item-details source-col">
-                    <v-card-text v-for="n in mainItem.metadata!.infoPair">
-                        {{ n[0] }}: {{ n[1] }}                    
-                    </v-card-text>
+                    {{ console.log('here,', info) }}
+                    <v-card-text class="pb-2" v-for="n in mainItem.metadata!.infoPairs">
+                        <strong>{{ n[0].toLocaleUpperCase() }}: </strong>
+                        <template v-for="m in n[1]">
+                            <v-chip 
+                             class="mr-1 mb-1"
+                             size="small"
+                             color="black"
+                             variant="flat"
+                             label
+                             v-if="m !== ''">
+                                {{m}}
+                            </v-chip>
+                        </template>
+                   </v-card-text>
                 </v-card>
             </v-col> 
         </v-row>
@@ -58,6 +70,7 @@
         <v-row>
             <v-slide-group
              :key="updTimeline"
+             style="border-radius: 5px;"
              center-active
              show-arrows="always"
             >
@@ -123,6 +136,7 @@ console.log('srcItem', props.srcItem)
 console.log('srcItemIdx', props.srcItemIdx)
 const mainItem = ref(props.srcItem)
 const relatedItems : number[] = mainItem.value.relatedItems!
+const info = ref(props.srcItem.metadata!.infoPairs)
 
 const itemStore = useItemStore()
 const appStore = useAppStore()
@@ -156,10 +170,11 @@ for (let i = start.value; i < end.value; i++) {
 
 async function switchMain(itemId: number) {
     console.log('Old', mainItem.value)
-    const newItem : MediaItem = await useItemStore().fetchMediaItem(itemId, props.modelId)
+    await useItemStore().fetchMediaItem(itemId, props.modelId)
     await useItemStore().fetchItemInfo(props.modelId, itemId)
+    const newItem : MediaItem = await useItemStore().fetchMediaItem(itemId, props.modelId)
     mainItem.value = newItem
-    console.log('New', mainItem.value)
+    console.log('NewMain', mainItem.value)
 }
 
 async function nextClick() {
@@ -225,12 +240,17 @@ function snack(excOrNot: boolean) {
 
 const isExcluded = ref(false)
 async function checkExclude() {
+    if (!itemStore.modelExcluded.has(props.modelId)) {
+        return false
+    }
+    const excludedItems = Array.from(itemStore.modelExcluded.get(props.modelId)!)
     let res = await isGroupExcluded({
         session_info: {
             session: appStore.session, 
             modelId: props.modelId
         },
-        itemId: mainItem.value.id
+        itemId: mainItem.value.id,
+        excluded_ids: excludedItems
     })
     isExcluded.value = res
 }
@@ -285,6 +305,7 @@ async function exclude() {
 }
 .item-details {
     background-color: azure;
+    color: black;
     height: fit-content;
 }
 .v-slide-group {

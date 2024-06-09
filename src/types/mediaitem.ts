@@ -11,7 +11,7 @@ export enum MediaType {
 }
 
 export interface ItemInfo {
-    infoPair: [string, string[]][]
+    infoPairs: [string, string[]][]
 }
 
 export default interface MediaItem {
