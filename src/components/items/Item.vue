@@ -23,7 +23,7 @@
         </v-img>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
-             @click="addToSet(itemId, ILSets.Positives); if (!overlay) { $emit('replace', itemIndex, gridIndex!, ILSets.Positives) };"
+             @click="addToSet(itemId, ILSets.Positives); { $emit('replace', itemIndex, ILSets.Positives) };"
              :disabled="isPos(itemId, modelId)"
              size="small"
             >
@@ -32,7 +32,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnNeg"
-             @click="addToSet(itemId, ILSets.Negatives); if (!overlay) { $emit('replace', itemIndex, gridIndex!, ILSets.Negatives) };"
+             @click="addToSet(itemId, ILSets.Negatives); { $emit('replace', itemIndex, ILSets.Negatives) };"
              :disabled="isNeg(itemId, modelId)"
              size="small"
             >
@@ -41,7 +41,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnIgnore"
-             @click="addToSet(itemId, ILSets.History); if (!overlay) { $emit('replace', itemIndex, gridIndex!, ILSets.History) };"
+             @click="addToSet(itemId, ILSets.History); { $emit('replace', itemIndex, ILSets.History) };"
              :disabled="isHistory(itemId, modelId)"
              size="small"
             >
@@ -102,7 +102,6 @@ interface Props {
     itemId: number
     itemIndex: number
     modelId: number
-    gridIndex?: number
     item?: MediaItem
     btnPos: boolean
     btnNeg: boolean
@@ -113,7 +112,7 @@ interface Props {
 }
 const props = defineProps<Props>()
 defineEmits<{
-    'replace': [ itemIndex: number, gridIndex: number, set: ILSets ],
+    'replace': [ itemIndex: number, set: ILSets ],
     'replaceOverlay': [ itemId: number ]
 }>()
 

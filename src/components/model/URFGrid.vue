@@ -78,6 +78,14 @@ watch(activeModel, () => {
     grids.grids = activeModel.value.grid
 })
 
+function getRandomItems() {
+    let rngItems = new Set<number>()
+    while (rngItems.size != 10) {
+        rngItems.add(Math.floor(Math.random()*modelStore.totalItems)+1)
+    }
+    return rngItems
+}
+
 async function updateItems() {
     console.log('Updating Items')
     let gridItems = grids.grids[0].items 
@@ -89,6 +97,10 @@ async function updateItems() {
     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
     hist.push(...pos)
     hist.push(...neg)
+    hist.push(...gridItems) //TODO: No hardcoded value here!!
+    if (checkAddNegs) {
+        neg.push(...getRandomItems())
+    }
     let exclude : number[] = []
     if (itemStore.modelExcluded.has(activeModel.value.id)) {
         exclude = Array.from(itemStore.modelExcluded.get(activeModel.value.id)!)
@@ -114,14 +126,21 @@ async function updateItems() {
     grids.grids = activeModel.value.grid
 }
 
-async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
-    console.log('Replacing Item', itemIdx, gridIdx, set)
+async function replaceItem(itemIdx: number, set: ILSets) {
+    console.log('Replacing Item', itemIdx, set)
     let pos = itemStore.getSetItems(activeModel.value.id, ILSets.Positives).map((e,_) => e.id)
     let neg = itemStore.getSetItems(activeModel.value.id, ILSets.Negatives).map((e,_) => e.id)
     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
     hist.push(...pos)
     hist.push(...neg)
-    hist.push(...grids.grids[gridIdx].items)
+    hist.push(...grids.grids[0].items) //TODO: No hardcoded value here!!
+    if (checkAddNegs) {
+        neg.push(...getRandomItems())
+    }
+    let exclude : number[] = []
+    if (itemStore.modelExcluded.has(activeModel.value.id)) {
+        exclude = Array.from(itemStore.modelExcluded.get(activeModel.value.id)!)
+    }
     let reqObj : ExqURFRequest = {
         session_info: {
             session: useAppStore().session, 
@@ -131,14 +150,14 @@ async function replaceItem(itemIdx: number, gridIdx: number, set: ILSets) {
         pos: pos,
         neg: neg,
         seen: hist,
-        excluded: [] //TODO
+        excluded: exclude
     }
     if (checkFilters.value) {
         let filters = useFilterStore().getModelFilters(activeModel.value.id)
         console.log(filters)
         reqObj.filters = filters
     }
-    await modelStore.getSuggestions(reqObj, gridIdx, itemIdx)
+    await modelStore.getSuggestions(reqObj, 0, itemIdx) //TODO: Fix hardcoded value!!
     grids.grids = activeModel.value.grid
 }
 

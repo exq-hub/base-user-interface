@@ -47,7 +47,6 @@
             <!-- Item Information -->
             <v-col v-model="mainItem" v-if="itemInfo" cols="4">
                 <v-card class="item-details source-col">
-                    {{ console.log('here,', info) }}
                     <v-card-text class="pb-2" v-for="n in mainItem.metadata!.infoPairs">
                         <strong>{{ n[0].toLocaleUpperCase() }}: </strong>
                         <template v-for="m in n[1]">
@@ -136,7 +135,6 @@ console.log('srcItem', props.srcItem)
 console.log('srcItemIdx', props.srcItemIdx)
 const mainItem = ref(props.srcItem)
 const relatedItems : number[] = mainItem.value.relatedItems!
-const info = ref(props.srcItem.metadata!.infoPairs)
 
 const itemStore = useItemStore()
 const appStore = useAppStore()
