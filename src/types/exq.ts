@@ -113,10 +113,6 @@ export interface ExqGetExcludedGroupsResponse {
     excGroups: number[]
 }
 
-export interface ExqResetFilterRequest {
-    session_info : ExqSessionInfo
-}
-
 export interface ExqSubmissionRequest {
     sessionId: string
     modelId: number

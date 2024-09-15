@@ -47,7 +47,7 @@ export const useFilterStore = defineStore('filter', () => {
         filters.forEach(element => {
             activeFilters.get(modelId)![element.id] = []
         });
-        resetFilters({session_info: {session: session, modelId: modelId}})
+        resetFilters({session: session, modelId: modelId})
     }
 
     function getModelFilters(modelId: number) : { names: string[], values: (number|string)[][] } {

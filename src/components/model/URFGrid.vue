@@ -98,7 +98,8 @@ async function updateItems() {
     hist.push(...pos)
     hist.push(...neg)
     hist.push(...gridItems) //TODO: No hardcoded value here!!
-    if (checkAddNegs) {
+    if (checkAddNegs.value) {
+        console.log('Adding Random Negatives')
         neg.push(...getRandomItems())
     }
     let exclude : number[] = []
@@ -134,7 +135,8 @@ async function replaceItem(itemIdx: number, set: ILSets) {
     hist.push(...pos)
     hist.push(...neg)
     hist.push(...grids.grids[0].items) //TODO: No hardcoded value here!!
-    if (checkAddNegs) {
+    if (checkAddNegs.value) {
+        console.log('Adding Random Negatives')
         neg.push(...getRandomItems())
     }
     let exclude : number[] = []

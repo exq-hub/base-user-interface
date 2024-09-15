@@ -5,7 +5,6 @@ import type {
     ExqInitResponse,
     ExqGetFiltersResponse,
     ExqApplyFiltersRequest,
-    ExqResetFilterRequest,
     ExqSubmissionRequest,
     ExqTextSearchRequest,
     ExqQueryRewriteRequest,
@@ -27,7 +26,6 @@ import type { ChatEntryQueryText, ChatEntryQueryPos } from "@/types/chat"
 import { useAppStore } from "@/stores/app"
 
 const exqURI = 'http://localhost:8000'
-// const exqURI = 'http://bjth.itu.dk:5001'
 const mock = false
 
 function generateString(length: number) : string {
@@ -180,7 +178,7 @@ export const applyFilters = (req: ExqApplyFiltersRequest): void => {
     }).then()
 }
 
-export const resetFilters = (req: ExqResetFilterRequest): void => {
+export const resetFilters = (req: ExqSessionInfo): void => {
     if (mock) return
     fetch(exqURI+'/exq/log/resetFilters', {
         method: 'POST',
