@@ -12,7 +12,8 @@ import type {
     ExqExcludeGroupRequest,
     ExqExcludeGroupResponse,
     ExqSessionInfo,
-    ExqIsExcludedRequest
+    ExqIsExcludedRequest,
+    ExqClearItemSetRequest
 } from "@/types/exq"
 import type MediaItem from "@/types/mediaitem"
 import { type ItemInfo } from "@/types/mediaitem"
@@ -26,7 +27,7 @@ import type { ChatEntryQueryText, ChatEntryQueryPos } from "@/types/chat"
 import { useAppStore } from "@/stores/app"
 
 const exqURI = 'http://localhost:8000'
-const mock = false
+const mock = true
 
 function generateString(length: number) : string {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -226,7 +227,7 @@ export const isGroupExcluded = async (req: ExqIsExcludedRequest): Promise<boolea
 // Remove one or more groups from the excluded list
 export const clearExcludedGroups = async (req: ExqClearExcludedGroupRequest): Promise<void> => {
     if (mock) return
-    return await fetch(exqURI+'/clearExcludedVideos', {
+    return await fetch(exqURI+'/log/clearExcludedGroups', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -296,6 +297,18 @@ export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => 
     console.log("EvalId:", req.evalId);
     if (mock) return 
     return await fetch(exqURI+'/dres/submit', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req)
+    }).then()
+}
+
+export const clearItemSet = async (req: ExqClearItemSetRequest): Promise<void> => {
+    if (mock) return
+    return await fetch(exqURI+'/log/clearItemSet', {
         method: 'POST',
         mode: 'cors',
         headers: {
