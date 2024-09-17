@@ -44,8 +44,14 @@ function generateString(length: number) : string {
 export const initSession = async () : Promise<ExqInitResponse> => {
     if (mock) return mockInitExq()
     const session = generateString(10)
-    const resp : ExqInitResponse = await fetch(exqURI+'/exq/init/'+session).then(val => val.json())
-    return resp
+    const resp : {session: string, totalItems: number} = await fetch(exqURI+'/exq/init/'+session).then(val => val.json())
+    const evals : {id: string, name: string}[] = await fetch(exqURI+'/dres/evaluation_list/').then(val => val.json())
+    const response = {
+        session: resp.session,
+        totalItems: resp.totalItems,
+        evaluations: evals
+    }
+    return response
 }
 
 // Initialize model for user
@@ -287,7 +293,8 @@ export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<C
 
 
 export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => {
-    if (mock) return
+    console.log("EvalId:", req.evalId);
+    if (mock) return 
     return await fetch(exqURI+'/dres/submit', {
         method: 'POST',
         mode: 'cors',

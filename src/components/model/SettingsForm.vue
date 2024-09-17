@@ -23,14 +23,17 @@
         </v-card>
         <v-card class="bg-indigo text-center ma-2">
             <v-card-title class="mb-2">
-                Evaluation Id
+                Active Evaluation
             </v-card-title>
             <v-card-actions>
-                <edit-text-field 
-                 :text="appStore.evalId"
-                 label="Name"
-                 @change="changeEvalId"
-                 /> 
+                <v-select
+                 v-model="appStore.selectedEvaluation"
+                 :items="appStore.evaluations"
+                 label="Select Evaluation"
+                 item-title="name"
+                 item-value="id"
+                 return-object
+                />
             </v-card-actions>
         </v-card>
         <v-card class="bg-indigo text-center ma-2">
@@ -84,18 +87,15 @@ function updateModelName(newName: string) {
 
 const qaAnswer = ref('')
 
-function changeEvalId(newId: string) {
-    appStore.setEvaluationId(newId)
-}
-
 function submitTextAnswerVBS() {
     const requestObject = {
-        sessionId: appStore.session,
+        session: appStore.session,
         modelId: activeModel.value.id,
+        itemId: -1,
         name: '',
         text: qaAnswer.value, 
         qa: true,
-        evalId: appStore.evalId
+        evalId: appStore.selectedEvaluation.id,
     }
     console.log(requestObject)
     submitAnswer(requestObject)

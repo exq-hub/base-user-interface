@@ -11,7 +11,8 @@ export interface ExqSessionInfo {
 
 export interface ExqInitResponse {
     session: string,
-    totalItems: number
+    totalItems: number,
+    evaluations: {id: string, name: string}[]
 }
 
 export interface ExqInitModelResponse {
@@ -114,10 +115,17 @@ export interface ExqGetExcludedGroupsResponse {
 }
 
 export interface ExqSubmissionRequest {
-    sessionId: string
+    session: string
     modelId: number
     name: string
     text: string
     qa: boolean
     evalId: string
+    itemId?: number
+}
+
+export interface ExqClearItemSetRequest {
+    session: string
+    modelId: number
+    name: string
 }

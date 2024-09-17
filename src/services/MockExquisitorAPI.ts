@@ -4,7 +4,6 @@ import type {
     ExqInitModelResponse,
     ExqGetFiltersResponse,
     ExqApplyFiltersRequest,
-    ExqResetFilterRequest,
     ExqURFResponse,
     ExqSessionInfo
 } from "@/types/exq"
@@ -29,7 +28,16 @@ const imgPaths : string[] = getTestImagePaths()
 // Initialize Exquisitor
 
 export const initSession = (): ExqInitResponse => { 
-    return { session: 'testSession', totalItems: 100 }
+    const evaluations: {id: string, name: string}[] = [
+        {
+            id: "1247184-fae-14o41",
+            name: "mock evaluation 1"
+        },
+        {
+            id: "1iahfewo-182319io-8492",
+            name: "mock evaluation 2"
+        }]
+    return { session: 'testSession', totalItems: 100, evaluations: evaluations}
 } 
 
 export const initModel = (req: ExqSessionInfo): ExqInitModelResponse => {
@@ -192,9 +200,5 @@ export const getFilters = async (): Promise<ExqGetFiltersResponse> => {
 }
 
 export const applyFilters = async (req: ExqApplyFiltersRequest): Promise<void> => {
-    return;
-}
-
-export const resetFilters = async (req: ExqResetFilterRequest): Promise<void> => {
     return;
 }

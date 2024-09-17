@@ -29,9 +29,11 @@ import { useAppStore } from '@/stores/app';
 import { useModelStore } from '@/stores/model';
 import { useFilterStore } from '@/stores/filter';
 
+const appStore = useAppStore()
 const modelStore = useModelStore()
 const sessionobj = await initSession()
-useAppStore().session = sessionobj.session
+appStore.session = sessionobj.session
+appStore.evaluations = sessionobj.evaluations
 modelStore.totalItems = sessionobj.totalItems
 modelStore.initializeModelItems(0)
 useFilterStore().loadFilters(0)

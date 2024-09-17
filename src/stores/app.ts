@@ -3,17 +3,13 @@ import { defineStore } from "pinia"
 export const useAppStore = defineStore('app', () => {
     const session = ref('')
     const success = ref(true)
-
-    const evalId = ref('') 
-
-    function setEvaluationId(s: string) {
-        evalId.value = s
-    }
+    const evaluations: {id: string, name: string}[] = reactive([])
+    const selectedEvaluation: {id: string, name: string} = reactive({id: '', name: ''})
 
     return {
-        evalId,
+        selectedEvaluation,
         session,
         success,
-        setEvaluationId
+        evaluations,
     }
 })

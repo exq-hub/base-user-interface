@@ -159,20 +159,27 @@ function snack(item: string, set: string) {
 
 // const { session, evalId } = useAppStore()
 function addToSet(itemId: number, ilset: ILSets) {
-    itemStore.addItemToSet(itemId, props.modelId, ilset)
     if (ilset == ILSets.Positives) snackColor.value = 'success'
     if (ilset == ILSets.Negatives) snackColor.value = 'error'
     if (ilset == ILSets.Submitted) {
+        if (useAppStore().selectedEvaluation.id === '') {
+            snackbar.value = true
+            snackColor.value = 'error'
+            text.value = 'EvaluationId is not set!'
+            return
+        }
         snackColor.value = 'indigo'
         submitAnswer({ 
-            sessionId: useAppStore().session, 
+            session: useAppStore().session, 
             modelId: props.modelId,
+            itemId: itemId,
             name: itemStore.items.get(itemId)!.name!,
             text: '',
             qa: false,
-            evalId: useAppStore().evalId
+            evalId: useAppStore().selectedEvaluation.id,
         })
     }
+    itemStore.addItemToSet(itemId, props.modelId, ilset)
     snack(itemStore.items.get(itemId)!.name!, ILSets[ilset])
 }
 
