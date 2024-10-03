@@ -36,13 +36,13 @@
                 <v-btn class="mr-10" stacked :elevation="0"
                  @click="updateItems"
                 >
-                    <v-icon>mdi-refresh</v-icon>
+                    <v-icon color="blue">mdi-refresh</v-icon>
                     Update
                 </v-btn>
                 <v-btn stacked :elevation="0"
                  @click="clearModel"
                 >
-                    <v-icon>mdi-close</v-icon>
+                    <v-icon color="red">mdi-close</v-icon>
                     Clear
                 </v-btn>
             </v-sheet>
@@ -62,6 +62,7 @@ import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
 import { ExqURFRequest } from '@/types/exq';
 import { useFilterStore } from '@/stores/filter';
+import { clearURFModel } from '@/services/ExquisitorAPI';
 
 const modelStore = useModelStore()
 const activeModel = computed(() => modelStore.activeModel)
@@ -164,6 +165,7 @@ async function replaceItem(itemIdx: number, set: ILSets) {
 }
 
 async function clearModel() {
+    clearURFModel({session: useAppStore().session, modelId: activeModel.value.id })
     itemStore.removeModelFromItems(activeModel.value.id)
     itemStore.modelItems.get(activeModel.value.id)?.clear()
     modelStore.resetModel(activeModel.value)

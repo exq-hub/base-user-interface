@@ -2,6 +2,7 @@
     <div class="w-50">
         <v-container class="d-block sticky-container" align="center">
             <v-virtual-scroll
+             ref="scroller"
              :items="chatEntries"
              height="70vh"
             >
@@ -33,14 +34,21 @@
              class="chat-options mt-5 d-flex"
              rounded
             >
-                <v-checkbox hide-details label="Filters" v-model="checkFilters" />
-                <v-checkbox hide-details label="History" v-model="checkHistory"/>
+                <v-checkbox hide-details label="Apply Filters" v-model="checkFilters" />
+                <v-checkbox hide-details label="Apply History" v-model="checkHistory"/>
                 <v-number-input hide-details 
                  v-model="itemsToShow"
                  control-variant="split"
                  variant="solo"
                  max-width="25%"
                 />
+                <v-btn stacked :elevation="0"
+                 @click="clearModelChat"
+                 style="align-self:center; height:100%"
+                >
+                    <v-icon color="red">mdi-close</v-icon>
+                    Clear
+                </v-btn>
             </v-sheet>
             <v-text-field
              v-model="query"
@@ -60,10 +68,10 @@
 </template>
 
 <script lang="ts" setup>
-import { searchVLM } from '@/services/ExquisitorAPI';
+import { clearConversation, searchVLM } from '@/services/ExquisitorAPI';
 import { useConversationStore } from '@/stores/conversations';
 import type { ChatEntryQueryText } from '@/types/chat';
-import { reactive, ref } from 'vue';
+import { ref } from 'vue';
 import Item from '@/components/items/Item.vue';
 import { useModelStore } from '@/stores/model';
 import { useAppStore } from '@/stores/app';
@@ -71,6 +79,7 @@ import { useFilterStore } from '@/stores/filter';
 import { ExqTextSearchRequest } from '@/types/exq';
 import { useItemStore } from '@/stores/item';
 import { ILSets } from '@/types/mediaitem';
+import { VVirtualScroll } from 'vuetify/components/VVirtualScroll';
 
 const activeModel = computed(() => useModelStore().activeModel)
 const session = computed(() => useAppStore().session)
@@ -80,8 +89,18 @@ const convStore = useConversationStore()
 const loaded = ref(false)
 const loading = ref(false)
 
-const chatEntries : ChatEntryQueryText[] = reactive([])
+const chatEntries = ref<ChatEntryQueryText[]>([])
 convStore.createConversation(activeModel.value.id)
+
+const scroller = ref<VVirtualScroll | null>(null);
+const scrollToBottom = () => {
+  if (scroller.value) {
+    const container = scroller.value.$el as HTMLElement;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+};
 
 const checkFilters = ref(false)
 const checkHistory = ref(false)
@@ -125,8 +144,15 @@ async function search() {
         return res
     })
     console.log('entry', entry)
-    chatEntries.push(entry)
+    chatEntries.value.push(entry)
     convStore.addConversation(activeModel.value.id, entry)
+    scrollToBottom()
+}
+
+function clearModelChat () {
+    convStore.clearConversation(activeModel.value.id)
+    chatEntries.value = []
+    clearConversation({session: session.value, modelId: activeModel.value.id})
 }
 
 </script>
@@ -149,6 +175,12 @@ async function search() {
     border-radius: 10px;
     border-color: cadetblue;
     border: solid 1px;
+}
+
+/* Additional styles if needed */
+.v-virtual-scroll__container {
+  /* Make sure this class has proper overflow settings */
+  max-height: 70vh;
 }
 
 .chat-options {
