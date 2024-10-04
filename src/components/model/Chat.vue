@@ -150,7 +150,6 @@ async function search() {
 }
 
 function clearModelChat () {
-    convStore.clearConversation(activeModel.value.id)
     chatEntries.value = []
     clearConversation({session: session.value, modelId: activeModel.value.id})
 }

@@ -21,14 +21,9 @@ export const useConversationStore = defineStore('conversations', () => {
         conversations.get(modelId)!.push(entry)
     }
 
-    function clearConversation(modelId: number) {
-
-    }
-
     return {
         createConversation,
         getConversation,
-        addConversation,
-        clearConversation
+        addConversation
     }
 })

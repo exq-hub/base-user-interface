@@ -317,3 +317,27 @@ export const clearItemSet = async (req: ExqClearItemSetRequest): Promise<void> =
         body: JSON.stringify(req)
     }).then()
 }
+
+export const clearURFModel = async (req: ExqSessionInfo): Promise<void> => {
+    if (mock) return
+    return await fetch(exqURI+'/log/clearURFModel', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req)
+    }).then()
+}
+
+export const clearConversation = async (req: ExqSessionInfo): Promise<void> => {
+    if (mock) return
+    return await fetch(exqURI+'/log/clearConversation', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req)
+    }).then()
+}

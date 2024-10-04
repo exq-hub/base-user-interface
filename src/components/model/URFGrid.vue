@@ -165,7 +165,7 @@ async function replaceItem(itemIdx: number, set: ILSets) {
 }
 
 async function clearModel() {
-    clearURFModel({session: useAppStore().session, modelId: activeModel.value.id })
+    clearURFModel({ session: useAppStore().session, modelId: activeModel.value.id })
     itemStore.removeModelFromItems(activeModel.value.id)
     itemStore.modelItems.get(activeModel.value.id)?.clear()
     modelStore.resetModel(activeModel.value)
