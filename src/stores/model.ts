@@ -26,7 +26,7 @@ export const useModelStore = defineStore('model', () => {
     const firstModel : Model = {
         session: useAppStore().session,
         id: 0,
-        name: 'Model 0',
+        name: 'Tab 1',
         settings: defaultSettings(),
         grid: [],
     }
@@ -58,7 +58,7 @@ export const useModelStore = defineStore('model', () => {
     function addModel(session: string, name?: string) : void {
         nModels.value++
         const mid = nModels.value
-        const mname = 'Model ' + mid
+        const mname = 'Tab ' + (mid+1)
         const settings = computed(() => defaultSettings())
         initModel({ modelId: mid, session: session })
         models.push({ 
