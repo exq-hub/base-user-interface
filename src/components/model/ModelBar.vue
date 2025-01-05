@@ -5,7 +5,7 @@
         <v-tabs 
          class="mr-2" 
          v-model="activeModel"
-         @update:model-value="modelStore.updateActiveModel(activeModel.id)"
+         @update:model-value="modelStore.updateActiveModel(activeModel!.id)"
         >
             <v-tab 
              v-for="m in models" 
@@ -22,20 +22,17 @@
                 />
             </v-tab>
         </v-tabs>
-        <div class="mr-2">
-            <v-btn 
-            color="black" 
-            style="background-color: white;" 
-            density="compact" 
-            @click="addModel" 
-            icon="mdi-plus" />
-        </div>
+        <add-model-dialog 
+         @confirm="addModel"
+         :available-collections="appStore.collections"
+        /> 
         <v-spacer></v-spacer>
-        <settings-form />
+        <settings-form /> 
     </v-app-bar>
 </template>
 
 <script lang="ts" setup>
+import AddModelDialog from './AddModelDialog.vue';
 import DeleteDialog from '@/components/general/DeleteDialog.vue';
 import SettingsForm from '@/components/model/SettingsForm.vue';
 import { useModelStore } from '@/stores/model';
@@ -55,8 +52,9 @@ const activeModel = ref(modelStore.activeModel)
 
 const emit = defineEmits(['modelChange'])
 
-function addModel (name?: string) {
-    modelStore.addModel(appStore.session, name)
+async function addModel (collection: string, name?: string) {
+    modelStore.addModel(appStore.session, collection, false, name)
+    console.log(modelStore.activeModel!)
     activeModel.value = modelStore.activeModel
 }
 

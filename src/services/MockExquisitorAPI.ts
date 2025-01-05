@@ -37,7 +37,7 @@ export const initSession = (): ExqInitResponse => {
             id: "1iahfewo-182319io-8492",
             name: "mock evaluation 2"
         }]
-    return { session: 'testSession', totalItems: 100, evaluations: evaluations}
+    return { session: 'testSession', collections: ["Test Collection 1", "Test Collection 2"], evaluations: evaluations}
 } 
 
 export const initModel = (req: ExqSessionInfo): ExqInitModelResponse => {

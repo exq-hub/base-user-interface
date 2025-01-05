@@ -7,17 +7,25 @@ export enum ILSets {
 
 export enum MediaType {
     Image=0,
-    Video
+    Video,
+    Audio
 }
 
 export interface ItemInfo {
     infoPairs: [string, string[]][]
 }
 
+export interface VideoSegment {
+    segmentId: string
+    start: number
+    end: number
+    previewUrl: string
+}
+
 export default interface MediaItem {
     id : number,
     mediaId? : number, // Id in its collection, if only one collection then id === mediaId
-    relatedGroupId? : number, // videoId | dayId | hourId
+    relatedGroupId? : string, // videoId | dayId | hourId
     name? : string,
     currentSets? : Map<number,boolean[]>, // K = modelId, V = boolean[Positives,Negatives,History,Submitted]
     mediaType : MediaType,

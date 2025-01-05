@@ -6,12 +6,13 @@ import type { GridGroup } from "./model"
 
 export interface ExqSessionInfo {
     session: string,
+    collection: string,
     modelId: number
 }
 
 export interface ExqInitResponse {
     session: string,
-    totalItems: number,
+    collections: string[], 
     evaluations: {id: string, name: string}[]
 }
 

@@ -21,11 +21,11 @@
 
             <v-divider :thickness="30" class="border-opacity-0"></v-divider>
 
-            <v-list-item
+            <!-- <v-list-item
              prepend-icon="mdi-history"
              @click="console.log('clicked history'); histToggle = !histToggle; getHistory()"
             >
-            </v-list-item>
+            </v-list-item> -->
         </v-list>
     </v-navigation-drawer>
 
@@ -147,7 +147,7 @@ import { useAppStore } from '@/stores/app';
 
 const session = useAppStore().session
 const itemStore = useItemStore()
-const activeModelId = computed(() => useModelStore().activeModel.id)
+const activeModelId = computed(() => useModelStore().activeModel!.id)
 const { getSetItems, removeItemsFromSet } = itemStore
 
 const posToggle = ref(false)

@@ -34,7 +34,6 @@ const modelStore = useModelStore()
 const sessionobj = await initSession()
 appStore.session = sessionobj.session
 appStore.evaluations = sessionobj.evaluations
-modelStore.totalItems = sessionobj.totalItems
 modelStore.initializeModelItems(0)
 useFilterStore().loadFilters(0)
 

@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import { reactive } from "vue";
 import { getItem, getItemInfo, getRelatedItems } from "@/services/ExquisitorAPI";
 import { useAppStore } from "@/stores/app";
+import { useModelStore } from "./model";
 // import { getItem } from "@/services/MockExquisitorAPI";
 
 export const useItemStore = defineStore('item', () => {
@@ -14,6 +15,8 @@ export const useItemStore = defineStore('item', () => {
     // K = modelId, V = Set<ItemId>
     const modelExcluded : Map<number, Set<number>> = reactive(new Map<number,Set<number>>())
     
+    const modelStore = useModelStore()
+
     async function fetchMediaItem(exqId: number, modelId: number) : Promise<MediaItem> {
         if (modelItems.has(modelId)) {
             modelItems.get(modelId)!.add(exqId)
@@ -30,14 +33,14 @@ export const useItemStore = defineStore('item', () => {
             return items.get(exqId)! // '!' Non-null
         } else {
             // console.log('Fetching media item ' + exqId + ' from API')
-            const item = await getItem(useAppStore().session, exqId, modelId)
+            const item = await getItem(useAppStore().session, exqId, modelId, modelStore.getModelCollection(modelId))
             items.set(exqId, item)
             console.log('exqId', items.get(exqId))
             return item
         }
     }
     
-    async function fetchMediaItems(exqIds: number[], modelId: number) : Promise<MediaItem[]> {
+    async function fetchMediaItems(exqIds: number[], modelId: number, collection: string) : Promise<MediaItem[]> {
         var mediaItems : MediaItem[] = []
         exqIds.forEach(async (v,_) => {
             if (modelItems.has(modelId)) {
@@ -53,7 +56,7 @@ export const useItemStore = defineStore('item', () => {
                 }
                 mediaItems.push(items.get(v)!)
             } else {
-                const item = await getItem(useAppStore().session, v, modelId)
+                const item = await getItem(useAppStore().session, v, modelId, collection)
                 console.log('Inserting ', item)
                 items.set(v, item)
                 mediaItems.push(item)

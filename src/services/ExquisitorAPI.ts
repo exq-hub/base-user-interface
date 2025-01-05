@@ -45,11 +45,11 @@ function generateString(length: number) : string {
 export const initSession = async () : Promise<ExqInitResponse> => {
     if (mock) return mockInitExq()
     const session = generateString(10)
-    const resp : {session: string, totalItems: number} = await fetch(exqURI+'/exq/init/'+session).then(val => val.json())
+    const resp : {session: string, totalItems: number[], collections: string[]} = await fetch(exqURI+'/exq/init/'+session).then(val => val.json())
     const evals : {id: string, name: string}[] = await fetch(exqURI+'/dres/evaluation_list/').then(val => val.json())
     const response = {
         session: resp.session,
-        totalItems: resp.totalItems,
+        collections: resp.collections,
         evaluations: evals
     }
     return response
@@ -87,7 +87,7 @@ export const getCollections = async (): Promise<string[]> =>
 
 
 
-export const getItem = async (session: string, exqId: number, modelId: number): Promise<MediaItem> => {
+export const getItem = async (session: string, exqId: number, modelId: number, collection: string): Promise<MediaItem> => {
     if (mock) return await mockGetItem(exqId, modelId)
     const sets = new Map<number,boolean[]>()
     sets.set(modelId, [false,false,false,false])
@@ -101,7 +101,8 @@ export const getItem = async (session: string, exqId: number, modelId: number): 
             body: JSON.stringify({ 
                 session_info: {
                     session: session,
-                    modelId: modelId
+                    modelId: modelId,
+                    collection: collection
                 },
                 itemId: exqId
             })
@@ -253,7 +254,12 @@ export const searchURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => 
 }
 
 export const searchVLM = async (req: ExqTextSearchRequest): Promise<ChatEntryQueryText> => {
-    if (mock) return { userQuery: req.text, vlmResults: [33,15,20,22]} // VBS / LSC
+    if (mock) {
+        if (req.text === 'test')
+            return { userQuery: req.text, vlmResults: [33,15,20,22]} // VBS / LSC
+        else 
+            return { userQuery: req.text, vlmResults: [21,59,68,25,99]} // VBS / LSC
+    }
     // return { userQuery: req.query, vlmResults: [10,20,14,50]} // Test
     // Calling different server instead of the Exquisitor Server
     const resp: { suggestions: number[] } = await fetch(exqURI+'/exq/search/text', {

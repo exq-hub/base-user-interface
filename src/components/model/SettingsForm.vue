@@ -11,11 +11,11 @@
         </template>
         <v-card class="bg-indigo text-center ma-2">
             <v-card-title class="mb-2">
-                Settings for {{ activeModel.name }}
+                Settings for {{ activeModel!.name }}
             </v-card-title>
             <v-card-actions>
                 <edit-text-field 
-                 :text="activeModel.name"
+                 :text="activeModel!.name"
                  label="Name"
                  @change="updateModelName"
                  /> 
@@ -82,7 +82,7 @@ const appStore = useAppStore()
 const activeModel = computed(() => modelStore.activeModel)
 
 function updateModelName(newName: string) {
-    modelStore.updateName(activeModel.value, newName)
+    modelStore.updateName(activeModel.value!, newName)
 }
 
 const qaAnswer = ref('')
@@ -90,7 +90,7 @@ const qaAnswer = ref('')
 function submitTextAnswerVBS() {
     const requestObject = {
         session: appStore.session,
-        modelId: activeModel.value.id,
+        modelId: activeModel.value!.id,
         itemId: -1,
         name: '',
         text: qaAnswer.value, 

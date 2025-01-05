@@ -8,3 +8,17 @@ export interface ChatEntryQueryPos {
     positive: number,
     rewriteSuggestion: string
 }
+
+export interface ChatQuery {
+    id: string
+    text: string
+    timestamp: number
+    resultIds: number[] 
+}
+
+export interface ChatSession {
+    queries: ChatQuery[]
+    positiveSelections: Set<string>
+    negativeSelections: Set<string>
+    filters: Record<string, any>  // multi-tag, range, date, etc.
+}

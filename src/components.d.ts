@@ -7,7 +7,11 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AddModelDialog: typeof import('./components/model/AddModelDialog.vue')['default']
+    AlbumViewer: typeof import('./components/alternate/AlbumViewer.vue')['default']
+    AudioPlayer: typeof import('./components/alternate/AudioPlayer.vue')['default']
     Chat: typeof import('./components/model/Chat.vue')['default']
+    ChatArea: typeof import('./components/alternate/ChatArea.vue')['default']
     CountFilter: typeof import('./components/drawers/filters/CountFilter.vue')['default']
     DeleteDialog: typeof import('./components/general/DeleteDialog.vue')['default']
     Dropdown: typeof import('./components/general/Dropdown.vue')['default']
@@ -19,13 +23,18 @@ declare module 'vue' {
     ItemOverlay: typeof import('./components/items/ItemOverlay.vue')['default']
     ItemSet: typeof import('./components/drawers/ItemSet.vue')['default']
     LeftPanel: typeof import('./components/model/LeftPanel.vue')['default']
+    MediaViewer: typeof import('./components/alternate/MediaViewer.vue')['default']
     Merge: typeof import('./components/drawers/Merge.vue')['default']
     ModelBar: typeof import('./components/model/ModelBar.vue')['default']
     RangeFilter: typeof import('./components/drawers/filters/RangeFilter.vue')['default']
+    RelatedItemGrid: typeof import('./components/alternate/RelatedItemGrid.vue')['default']
+    RelatedItemsGrid: typeof import('./components/alternate/RelatedItemsGrid.vue')['default']
+    ResultGrid: typeof import('./components/alternate/ResultGrid.vue')['default']
     RightPanel: typeof import('./components/model/RightPanel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SettingsForm: typeof import('./components/model/SettingsForm.vue')['default']
     URFGrid: typeof import('./components/model/URFGrid.vue')['default']
+    VideoPlayer: typeof import('./components/alternate/VideoPlayer.vue')['default']
   }
 }

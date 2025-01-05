@@ -18,7 +18,7 @@
                              :item-id="it"
                              :item-index="idx"
                              :grid-index="-1"
-                             :model-id="activeModel.id"
+                             :model-id="activeModel!.id"
                              :btn-pos="true"
                              :btn-neg="false"
                              :btn-ignore="false"
@@ -90,7 +90,7 @@ const loaded = ref(false)
 const loading = ref(false)
 
 const chatEntries = ref<ChatEntryQueryText[]>([])
-convStore.createConversation(activeModel.value.id)
+convStore.createConversation(activeModel.value!.id)
 
 const scroller = ref<VVirtualScroll | null>(null);
 const scrollToBottom = () => {
@@ -114,7 +114,7 @@ async function search() {
     let reqObj : ExqTextSearchRequest = {
         session_info: {
             session: session.value,
-            modelId: activeModel.value.id
+            modelId: activeModel.value!.id
         },
         n: itemsToShow.value,
         text: query.value,
@@ -126,16 +126,16 @@ async function search() {
         excluded: []
     }
     if (checkFilters.value) {
-        let filters = useFilterStore().getModelFilters(activeModel.value.id)
+        let filters = useFilterStore().getModelFilters(activeModel.value!.id)
         reqObj.filters = filters
     }
     if (checkHistory.value) {
-        let pos = itemStore.getSetItems(activeModel.value.id, ILSets.Positives).map((e,_) => e.id)
-        let neg = itemStore.getSetItems(activeModel.value.id, ILSets.Negatives).map((e,_) => e.id)
-        let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
+        let pos = itemStore.getSetItems(activeModel.value!.id, ILSets.Positives).map((e,_) => e.id)
+        let neg = itemStore.getSetItems(activeModel.value!.id, ILSets.Negatives).map((e,_) => e.id)
+        let hist = itemStore.getSetItems(activeModel.value!.id, ILSets.History).map((e,_) => e.id)
         hist.push(...pos)
         hist.push(...neg)
-        hist.push(...activeModel.value.grid[0].items)
+        hist.push(...activeModel.value!.grid[0].items)
         reqObj.seen = hist
     }
     const entry = await searchVLM(reqObj).then((res) => {
@@ -145,13 +145,13 @@ async function search() {
     })
     console.log('entry', entry)
     chatEntries.value.push(entry)
-    convStore.addConversation(activeModel.value.id, entry)
+    convStore.addConversation(activeModel.value!.id, entry)
     scrollToBottom()
 }
 
 function clearModelChat () {
     chatEntries.value = []
-    clearConversation({session: session.value, modelId: activeModel.value.id})
+    clearConversation({session: session.value, modelId: activeModel.value!.id})
 }
 
 </script>

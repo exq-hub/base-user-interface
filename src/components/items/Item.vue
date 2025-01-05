@@ -1,26 +1,30 @@
 <template>
     <v-card>
-        <v-img
-         :id="'itemThumb'+item.id"
-         :src="item.thumbPath"
-         @click="if (!overlay) { accessOverlay() };
-                 if (overlay) { $emit('replaceOverlay', itemId) }; 
-                 console.log('clicked item', item.id);"
-         class="bg-transparent"
-        >
-            <template v-slot:placeholder>
-                <v-row 
-                 class="fill-height ma-0"
-                 justify="center"
-                >
-                    <v-progress-circular 
-                     indeterminate
-                     color="grey-lighten-5"
-                    />
-                </v-row>
-            </template>
-            <span>{{ item.name!.split('_')[0] }} {{ item.name!.split('_')[1] }}</span>
-        </v-img>
+        <div class="thumbnail-wrapper"><!-- @mouseover="onHover(id)" @mouseleave="onLeave(id)"> -->
+            <img
+             :id="'itemThumb'+item.id"
+             :src="item.thumbPath"
+             :alt="item.name"
+             @click="if (!overlay) { accessOverlay() };
+                     if (overlay) { $emit('replaceOverlay', itemId) }; 
+                     console.log('clicked item', item.id);"
+             class="bg-transparent"
+             :style="{maxWidth: thumbSize + 'px'}"
+            />
+                <!-- <template v-slot:placeholder>
+                    <v-row 
+                    class="fill-height ma-0"
+                    justify="center"
+                    >
+                        <v-progress-circular 
+                        indeterminate
+                        color="grey-lighten-5"
+                        />
+                    </v-row>
+                </template>
+                <span>{{ item.name!.split('_')[0] }} {{ item.name!.split('_')[1] }}</span> -->
+            </img>
+        </div>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
              @click="addToSet(itemId, ILSets.Positives); { $emit('replace', itemIndex, ILSets.Positives) };"
@@ -97,6 +101,7 @@ import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
 import ItemOverlay from './ItemOverlay.vue';
 import MediaItem, { ILSets, MediaType } from '@/types/mediaitem';
+import { useModelStore } from '@/stores/model';
 
 interface Props {
     itemId: number
@@ -117,7 +122,10 @@ defineEmits<{
 }>()
 
 const itemStore = useItemStore()
+const modelStore = useModelStore()
+
 const item : MediaItem = reactive({id: -1, srcPath:'', thumbPath:'', mediaType: MediaType.Image})
+const thumbSize = computed(() => modelStore.getThumbnailSize(props.modelId))
 async function getMediaItem() {
     await itemStore.fetchMediaItem(props.itemId, props.modelId)
     let mi = itemStore.items.get(props.itemId)!
@@ -207,7 +215,31 @@ async function accessOverlay() {
     openOverlay.value = true; 
 }
 
+// Refs to manage video elements for hover
+const videoRefs = ref<{ [key: string]: HTMLVideoElement | null }>({})
 
+function onHover(id: number) {
+    const vid = videoRefs.value[id]
+    if (vid) {
+        vid.currentTime = 0
+        vid.play()
+        vid.loop = true
+    }
+}
+
+function onLeave(id: number) {
+    const vid = videoRefs.value[id]
+    if (vid) {
+        vid.pause()
+        vid.currentTime = 0
+    }
+}
+
+function onClickItem(id: number) {
+  // Possibly emit an event, or set something in Pinia to indicate the “Viewer” should open
+  // e.g. event: "open-media-viewer"
+  console.log('Clicked item ID:', id)
+}
 </script>
 
 
@@ -219,5 +251,11 @@ async function accessOverlay() {
 .v-card :deep(.v-card-actions) {
     justify-content: center;
     min-height: auto;
+}
+.thumbnail-wrapper {
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
 }
 </style>

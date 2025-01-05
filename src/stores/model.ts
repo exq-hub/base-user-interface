@@ -4,49 +4,34 @@ import { computed, reactive, ref } from 'vue'
 import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'
 import { ExqURFRequest } from '@/types/exq'
 import { searchURF, initModel, removeModel } from '@/services/ExquisitorAPI'
-import { useAppStore } from './app'
 import { useFilterStore } from './filter'
 
 export const useModelStore = defineStore('model', () => {
     const nModels = ref(0)
     const models = reactive<Model[]>([]) 
     const totalItems = ref(0)
+    const activeModel = ref<Model|null>()
 
     function defaultSettings() : Settings {
         return { 
-            groups: [{
-                id: 0, 
-                name: 'RF', 
-                itemsToShow: 20
-            }], 
-            resources: ResourceValues.Low 
+            itemsToShow: 50,
+            resources: ResourceValues.Low,
+            maxThumbSize: 200
         }
     }
 
-    const firstModel : Model = {
-        session: useAppStore().session,
-        id: 0,
-        name: 'Tab 1',
-        settings: defaultSettings(),
-        grid: [],
-    }
-    const activeModel = ref<Model>(firstModel)
-    models.push(firstModel)
 
     function initializeModelItems(modelId: number) {
-        for (let i = 0; i < models[modelId].settings.groups.length; i++) {
-            let grp : GridGroup = { 
-                id: models[modelId].settings.groups[i].id, 
-                itemsToShow: models[modelId].settings.groups[i].itemsToShow ,
-                items: [] 
-            }
-            let rngItems = new Set<number>()
-            while (rngItems.size != grp.itemsToShow) {
-                rngItems.add(Math.floor(Math.random()*totalItems.value)+1)
-            }
-            grp.items = Array.from(rngItems)
-            models[modelId].grid.push(grp)
+        let grp : GridGroup = { 
+            itemsToShow: models[modelId].settings.itemsToShow,
+            items: [] 
         }
+        let rngItems = new Set<number>()
+        while (rngItems.size != grp.itemsToShow) {
+            rngItems.add(Math.floor(Math.random()*totalItems.value)+1)
+        }
+        grp.items = Array.from(rngItems)
+        models[modelId].grid.push(grp)
     }
 
     function updateActiveModel(modelId: number) {
@@ -55,21 +40,23 @@ export const useModelStore = defineStore('model', () => {
         activeModel.value = models[indx]
     }
 
-    function addModel(session: string, name?: string) : void {
-        nModels.value++
+    function addModel(session: string, collection: string, first: boolean, name?: string) : void {
+        if (!first)
+            nModels.value++
         const mid = nModels.value
         const mname = 'Tab ' + (mid+1)
         const settings = computed(() => defaultSettings())
-        initModel({ modelId: mid, session: session })
+        initModel({ modelId: mid, session: session, collection: collection })
         models.push({ 
             session: session, 
             id: mid, 
+            collection: collection,
             name: mname, 
             settings: settings.value,
             grid: [],
         })
-        initializeModelItems(models.length-1)
-        useFilterStore().loadFilters(models.length-1)
+        // initializeModelItems(models.length-1)
+        // useFilterStore().loadFilters(models.length-1)
         console.log(models)
         activeModel.value = models[models.length-1]
         console.log(activeModel.value.id)
@@ -78,17 +65,17 @@ export const useModelStore = defineStore('model', () => {
     function deleteModel(session: string, model: Model) : void {
         let indx = models.findIndex(e => e.id === model.id && e.name === model.name)
         console.log(activeModel.value)
-        if (models[indx].id === activeModel.value.id) {
+        if (models[indx].id === activeModel.value!.id) {
             if (indx > 0)
                 activeModel.value = models[indx-1]
             else
                 activeModel.value = models[indx+1]
         }
         let m : Model = models.splice(indx, 1)[0]
-        removeModel({ session: session, modelId: model.id })
+        removeModel({ session: session, modelId: model.id, collection: m.collection })
         console.log('Removed Model:', m.id)
         console.log(m)
-        console.log(activeModel.value.id)
+        console.log(activeModel.value!.id)
     }
     
     // Load models from a saved file (assumed implementation)
@@ -113,14 +100,18 @@ export const useModelStore = defineStore('model', () => {
         models[idx].grid = []
         models[idx].activeFilters?.clear()
         models[idx].activeSearch = []
-        initModel({ modelId: model.id, session: model.session })
+        initModel({ modelId: model.id, session: model.session, collection: model.collection })
         initializeModelItems(model.id)
     }
     
     function getModel (id: number) : Model {
         return models.filter(e => e.id === id)[0]
     }
-    
+
+    function getModelCollection (id: number) : string {
+        return models.filter(e => e.id === id)[0].collection
+    }
+
     function getModelGrid(id: number) : GridGroup[] | undefined {
         return models[id].grid
     }
@@ -159,6 +150,11 @@ export const useModelStore = defineStore('model', () => {
         }
     }
 
+    function getThumbnailSize(modelId: number) {
+        let indx = models.findIndex(e => e.id === modelId)
+        return models[indx].settings.maxThumbSize
+    }
+
     return { 
         models, 
         activeModel,
@@ -172,7 +168,9 @@ export const useModelStore = defineStore('model', () => {
         resetModel,
         updateName, 
         getModel, 
+        getModelCollection,
         getModelGrid,
         getSuggestions,
+        getThumbnailSize,
     }    
 })
