@@ -7,14 +7,14 @@
                 <v-row>
                     <v-col
                      v-for="it,itIdx in shownIds"
-                     :key="it+itIdx"
+                     :key="activeModelId+it.toString()+itIdx.toString()+Math.floor(Math.random() * 9000)"
                      cols="auto"
                      class="d-flex flex-column align-center mb-2"
                     >
                         <item 
                          :item-id="it"
                          :item-index="itIdx"
-                         :model-id="modelStore.activeModel!.id"
+                         :model-id="activeModelId"
                          :btn-pos="true"
                          :btn-neg="true"
                          :btn-ignore="false"
@@ -23,26 +23,6 @@
                          :overlay="true"
                          @replace-overlay="updateItem"
                         />
-                        <!-- <div class="thumbnail-wrapper" @mouseover="onHover(id)" @mouseleave="onLeave(id)">
-                            <img
-                             v-if="items.get(id).mediaType !== MediaType.Video"
-                             :src="items.get(id)!.thumbPath"
-                             :alt="items.get(id)!.name"
-                             style="max-width: 100%;"
-                             @click="onClickItem(id)"
-                            />
-                            <video
-                             v-else
-                             :src="items.get(id)!.metadata!.segments?.[0].previewUrl"
-                             :poster="items.get(id)!.thumbPath"
-                             ref="videoRefs[id]"
-                             style="max-width: 100%;"
-                             @click="onClickItem(id)"
-                            />
-                        </div>
-                        <div class="mt-1 text-caption">
-                            {{ items.get(id)!.name }}
-                        </div> -->
                     </v-col>
                 </v-row>
             </v-container>
@@ -60,21 +40,24 @@
 import { ref, computed } from 'vue'
 import { useModelStore } from '@/stores/model';
 import Item from '../items/Item.vue';
+import { useChatStore } from '@/stores/chat';
 
 // Props: pass in an array of media IDs
 interface Props {
-    modelId: number
     resultIds: number[]
 }
 const props = defineProps<Props>()
 
 const modelStore = useModelStore()
+const chatStore = useChatStore()
+
+const activeModelId = reactive(computed(() => modelStore.activeModel!.id))
 
 // For controlling the amount shown initially
 const itemsPerPage = ref(modelStore.activeModel!.settings.itemsToShow)
 
 const emit = defineEmits<{
-    (e: 'load-more', resultIds: number[]): void,
+    (e: 'load-more'): void,
     (e: 'selected', itemId: number): void
 }>()
 
@@ -82,7 +65,8 @@ const shownIds = computed(() => {
     return props.resultIds.slice(0, itemsPerPage.value)
 })
 
-function onLoadMore() {
+async function onLoadMore() {
+    emit('load-more')
     itemsPerPage.value += 50 // Or some other logic
 }
 

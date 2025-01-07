@@ -10,7 +10,7 @@ import type {
 import type { Filter } from "@/types/filter"
 import { FilterProperty, FilterType } from "@/types/filter"
 import type MediaItem from "@/types/mediaitem"
-import { MediaType } from "@/types/mediaitem"
+import { ItemInfo, MediaType } from "@/types/mediaitem"
 import type { GridGroup } from "@/types/model"
 
 const mockItems : number[] = [...Array(200).keys()]
@@ -26,7 +26,6 @@ function getTestImagePaths() : string[] {
 const imgPaths : string[] = getTestImagePaths()
 
 // Initialize Exquisitor
-
 export const initSession = (): ExqInitResponse => { 
     const evaluations: {id: string, name: string}[] = [
         {
@@ -87,11 +86,21 @@ export const getItem = async (exqId: number, modelId: number): Promise<MediaItem
         name: 'name-' + exqId,
         mediaId: exqId, 
         currentSets: ilsets, 
+        relatedGroupId: '0',
         mediaType: MediaType.Image, 
         thumbPath: imgPaths[exqId], 
         srcPath: imgPaths[exqId],
     }
 }
+
+export const getItemInfoMock = async (itemId: number): Promise<ItemInfo> => {
+    var info: Record<string,any> = {}
+    info['ID'] = itemId.toString()
+    info['start_time'] = 15
+    info['end_time'] = 30
+    info['group'] = '00001'
+    return { infoPairs: info }
+} 
 
 
 const mockFilters : Filter[] = [

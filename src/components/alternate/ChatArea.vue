@@ -15,7 +15,7 @@
             <!-- Chat History -->
             <v-virtual-scroll
              ref="scroller"
-             :items="currentModelSession?.queries"
+             :items="currentModelSession?.queries.reverse()"
              height="70vh"
             >
                 <template v-slot:default="{ item }">
@@ -26,7 +26,7 @@
                          text
                          @click="onShowResults(item.text, item.resultIds)"
                         >
-                            Show These Results
+                            Show Results
                         </v-btn>
                     </div>
                 </template>
@@ -35,7 +35,7 @@
 
         <v-card-actions>
             <v-btn color="primary" @click="onShowPosNeg">
-                Show Positive/Negative Results
+                Show Feedback Results
             </v-btn>
         </v-card-actions>
     </v-card>
@@ -43,14 +43,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useChatStore } from '@/stores/alternate/chat'
-import { searchVLM } from '@/services/ExquisitorAPI'
-import { useFilterStore } from '@/stores/filter'
-import { ExqTextSearchRequest } from '@/types/exq'
-import { useAppStore } from '@/stores/app'
+import { useChatStore } from '@/stores/chat'
 import { useModelStore } from '@/stores/model'
 import { useItemStore } from '@/stores/item'
 import { VVirtualScroll } from 'vuetify/components/VVirtualScroll';
+import { ILSets } from '@/types/mediaitem';
+import { useAppStore } from '@/stores/app';
+import { ExqURFRequest } from '@/types/exq';
+import { searchURF } from '@/services/ExquisitorAPI';
 
 interface Props {
     modelId: number
@@ -58,8 +58,8 @@ interface Props {
 const props = defineProps<Props>()
 
 const chatStore = useChatStore()
-const session = useAppStore().session
 const modelStore = useModelStore()
+const itemStore = useItemStore()
 
 const inputText = ref<string>('')
 
@@ -68,7 +68,7 @@ const currentQuery = computed(() => chatStore.currentResultsQuery)
 
 const emit = defineEmits<{
     (e: 'show-search-results', resultIds: number[]): void,
-    (e: 'show-urf-results'): void
+    (e: 'show-urf-results', resultIds: number[]): void
 }>()
 
 // Show a previously returned set of results
@@ -78,8 +78,36 @@ function onShowResults(query: string, resultIds: number[]) {
 }
 
 // Show positive/negative results
-function onShowPosNeg() {
-    emit('show-urf-results')
+async function onShowPosNeg() {
+    const activeModelId = modelStore.activeModel!.id
+    let pos = itemStore.getSetItems(activeModelId, ILSets.Positives).map((e,_) => e.id)
+    let neg = itemStore.getSetItems(activeModelId, ILSets.Negatives).map((e,_) => e.id)
+    let hist = itemStore.getSetItems(activeModelId, ILSets.History).map((e,_) => e.id)
+    hist.push(...pos)
+    hist.push(...neg)
+    let exclude : number[] = []
+    if (itemStore.modelExcluded.has(activeModelId)) {
+        exclude = Array.from(itemStore.modelExcluded.get(activeModelId)!)
+    }
+    let reqObj : ExqURFRequest = {
+        session_info: {
+            session: useAppStore().session, 
+            modelId: activeModelId,
+            collection: modelStore.getModelCollection(activeModelId)
+        },
+        n: modelStore.activeModel!.settings.itemsToShow,
+        pos: pos,
+        neg: neg,
+        seen: hist,
+        excluded: exclude
+    }
+
+    // if (checkFilters.value) {
+    //     let filters = useFilterStore().getModelFilters(activeModel.value.id)
+    //     reqObj.filters = filters
+    // }
+    let suggs = await searchURF(reqObj)
+    emit('show-urf-results', suggs.suggestions)
 }
 
 function formatTime(ts: number) {
@@ -87,45 +115,11 @@ function formatTime(ts: number) {
 }
 
 async function search() {
-    // loading.value = true
-    let reqObj : ExqTextSearchRequest = {
-        session_info: {
-            session: session,
-            collection: modelStore.activeModel!.collection,
-            modelId: props.modelId
-        },
-        n: modelStore.activeModel!.settings.itemsToShow,
-        text: inputText.value,
-        seen: [],
-        filters: {
-            names: [],
-            values: []
-        },
-        excluded: []
-    }
-    // if (checkFilters.value) {
-        // let filters = useFilterStore().getModelFilters(modelStore.activeModel!.id)
-        // reqObj.filters = filters
-    // }
-    // if (checkHistory.value) {
-    //     let pos = itemStore.getSetItems(activeModel.value.id, ILSets.Positives).map((e,_) => e.id)
-    //     let neg = itemStore.getSetItems(activeModel.value.id, ILSets.Negatives).map((e,_) => e.id)
-    //     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
-    //     hist.push(...pos)
-    //     hist.push(...neg)
-    //     hist.push(...activeModel.value.grid[0].items)
-    //     reqObj.seen = hist
-    // }
-    const resultIds = await searchVLM(reqObj).then((res) => {
-        // loading.value = false
-        // loaded.value = true
-        return res
-    })
-    console.log('resultIds:', resultIds)
-    chatStore.addQueryToChat(props.modelId, inputText.value, resultIds.vlmResults)
-    await useItemStore().fetchMediaItems(resultIds.vlmResults, props.modelId, modelStore.activeModel!.collection)
+    if (inputText.value === '') return
+    const resultIds = await chatStore.search(modelStore.activeModel!.id, inputText.value, false)
+    await useItemStore().fetchMediaItems(resultIds, props.modelId, modelStore.activeModel!.collection)
     inputText.value = ''
-    emit('show-search-results', resultIds.vlmResults)
+    emit('show-search-results', resultIds)
 }
 
 </script>

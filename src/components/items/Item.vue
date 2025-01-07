@@ -11,19 +11,6 @@
              class="bg-transparent"
              :style="{maxWidth: thumbSize + 'px'}"
             />
-                <!-- <template v-slot:placeholder>
-                    <v-row 
-                    class="fill-height ma-0"
-                    justify="center"
-                    >
-                        <v-progress-circular 
-                        indeterminate
-                        color="grey-lighten-5"
-                        />
-                    </v-row>
-                </template>
-                <span>{{ item.name!.split('_')[0] }} {{ item.name!.split('_')[1] }}</span> -->
-            </img>
         </div>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
@@ -79,7 +66,7 @@
             />
         </template>
     </v-snackbar>
-    <v-overlay v-if="!overlay"
+    <!-- <v-overlay v-if="!overlay"
      v-model="openOverlay"
      location-strategy="connected"
      scroll-strategy="reposition"
@@ -91,7 +78,7 @@
          :src-item-idx="srcItemIndex"
          :is-opened="true"
         />
-    </v-overlay>
+    </v-overlay> -->
 </template>
 
 
@@ -99,7 +86,7 @@
 import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
-import ItemOverlay from './ItemOverlay.vue';
+// import ItemOverlay from './ItemOverlay.vue';
 import MediaItem, { ILSets, MediaType } from '@/types/mediaitem';
 import { useModelStore } from '@/stores/model';
 
@@ -118,17 +105,18 @@ interface Props {
 const props = defineProps<Props>()
 defineEmits<{
     'replace': [ itemIndex: number, set: ILSets ],
-    'replaceOverlay': [ itemId: number ]
+    'replaceOverlay': [ itemId: number ],
+    'itemClicked': [ itemId: number ]
 }>()
 
 const itemStore = useItemStore()
 const modelStore = useModelStore()
+const collection = modelStore.getModelCollection(props.modelId)
 
 const item : MediaItem = reactive({id: -1, srcPath:'', thumbPath:'', mediaType: MediaType.Image})
 const thumbSize = computed(() => modelStore.getThumbnailSize(props.modelId))
 async function getMediaItem() {
-    await itemStore.fetchMediaItem(props.itemId, props.modelId)
-    let mi = itemStore.items.get(props.itemId)!
+    let mi = await itemStore.fetchMediaItem(props.itemId, props.modelId)
     item.id = mi.id
     item.mediaId = mi.mediaId
     item.currentSets = mi.currentSets
@@ -180,15 +168,15 @@ function addToSet(itemId: number, ilset: ILSets) {
         submitAnswer({ 
             session: useAppStore().session, 
             modelId: props.modelId,
+            collection: modelStore.getModelCollection(props.modelId),
             itemId: itemId,
-            name: itemStore.items.get(itemId)!.name!,
             text: '',
             qa: false,
             evalId: useAppStore().selectedEvaluation.id,
         })
     }
     itemStore.addItemToSet(itemId, props.modelId, ilset)
-    snack(itemStore.items.get(itemId)!.name!, ILSets[ilset])
+    snack(itemStore.items.get(collection)!.get(itemId)!.name!, ILSets[ilset])
 }
 
 const openOverlay = ref(false)
@@ -216,30 +204,24 @@ async function accessOverlay() {
 }
 
 // Refs to manage video elements for hover
-const videoRefs = ref<{ [key: string]: HTMLVideoElement | null }>({})
+// const videoRefs = ref<{ [key: string]: HTMLVideoElement | null }>({})
 
-function onHover(id: number) {
-    const vid = videoRefs.value[id]
-    if (vid) {
-        vid.currentTime = 0
-        vid.play()
-        vid.loop = true
-    }
-}
+// function onHover(id: number) {
+//     const vid = videoRefs.value[id]
+//     if (vid) {
+//         vid.currentTime = 0
+//         vid.play()
+//         vid.loop = true
+//     }
+// }
 
-function onLeave(id: number) {
-    const vid = videoRefs.value[id]
-    if (vid) {
-        vid.pause()
-        vid.currentTime = 0
-    }
-}
-
-function onClickItem(id: number) {
-  // Possibly emit an event, or set something in Pinia to indicate the “Viewer” should open
-  // e.g. event: "open-media-viewer"
-  console.log('Clicked item ID:', id)
-}
+// function onLeave(id: number) {
+//     const vid = videoRefs.value[id]
+//     if (vid) {
+//         vid.pause()
+//         vid.currentTime = 0
+//     }
+// }
 </script>
 
 

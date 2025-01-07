@@ -1,7 +1,7 @@
 // Return types for ExquisitorAPI calls
 
 import type { Filter } from "./filter"
-import type { MediaType } from "./mediaitem"
+import type { MediaType, VideoSegment } from "./mediaitem"
 import type { GridGroup } from "./model"
 
 export interface ExqSessionInfo {
@@ -74,6 +74,8 @@ export interface ExqGetItemResponse {
     mediaType: MediaType
     thumbPath: string
     srcPath: string
+    relatedGroupId: string
+    segmentInfo?: VideoSegment
 }
 
 export interface ExqGetFiltersResponse {
@@ -118,10 +120,13 @@ export interface ExqGetExcludedGroupsResponse {
 export interface ExqSubmissionRequest {
     session: string
     modelId: number
-    name: string
+    collection: string
+    name?: string
     text: string
     qa: boolean
     evalId: string
+    start?: number
+    end?: number
     itemId?: number
 }
 

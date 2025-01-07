@@ -17,15 +17,10 @@
 </template>
 
 <script setup lang="ts">
+import MediaItem from '@/types/mediaitem';
 import { computed } from 'vue'
 
-interface MediaItem {
-    id: number
-    title: string
-    type: 'video' | 'image' | 'audio'
-    thumbnailUrl: string
-    audioUrl?: string
-}
+
 
 // Props
 const props = defineProps<{
@@ -34,7 +29,7 @@ const props = defineProps<{
 
 // Compute if item has an audioUrl
 const audioUrl = computed(() => {
-    return props.item.audioUrl || ''
+    return props.item.srcPath || ''
 })
 </script>
 

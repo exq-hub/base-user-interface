@@ -1,38 +1,42 @@
 <template>
-    <template v-if="activeModelId === -1"></template>
+    <template v-if="!activeModel"></template>
     <template v-else>
-        <model-bar />
+        <model-bar @model-change="updateModel" />
 
-        <left-panel />
+        <left-panel :key="activeModel!.id.toString() + Math.floor(Math.random()*9000)"/>
 
         <v-container fluid>
             <v-row>
                 <!-- 20%: Chat -->
-                <v-col class="border-right">
+                <v-col cols="2" class="pa-1">
                     <ChatArea 
-                     :model-id="activeModelId" 
+                     :key="'chatarea'+activeModel!.id+Math.floor(Math.random()*9000)"
+                     :model-id="activeModel!.id" 
                      @show-search-results="updateResultIds"
-                     @show-urf-results="console.log('Fetch URF results')"
+                     @show-urf-results="updateResultIds"
                     />
                 </v-col>
 
                 <!-- 50%: Results -->
-                <v-col cols="9" class="border-right">
+                <v-col :cols="showMedia ? 6 : 10" class="pa-1">
                     <ResultGrid 
-                     :model-id="activeModelId"
+                     :model-id="activeModel!.id"
                      :result-ids="currentResultIds"
                      @selected="updateSelectedItem"
+                     @load-more="loadMoreResults"
                     />
                 </v-col>
 
                 <!-- 30%: Viewer -->
-                <v-col cols="4" v-if="selectedMediaId">
-                    <MediaViewer :mediaId="selectedMediaId" />
+                <v-col cols="4" class="pa-1" v-if="showMedia">
+                    <MediaViewer 
+                     :key="'viewer'+modelStore.activeModel!.id+Math.floor(Math.random()*9000)"
+                     @selected-segment="updateSelectedItem"
+                    />
                 </v-col>
             </v-row>
         </v-container>
 
-        <right-panel />
     </template>
 </template>
 
@@ -42,36 +46,55 @@ import ChatArea from '@/components/alternate/ChatArea.vue'
 import ResultGrid from '@/components/alternate/ResultGrid.vue'
 import MediaViewer from '@/components/alternate/MediaViewer.vue'
 import ModelBar from '@/components/model/ModelBar.vue'
-import RightPanel from '@/components/model/RightPanel.vue';
 import { useModelStore } from '@/stores/model'
 import { useRouter } from 'vue-router'
+import { useItemStore } from '@/stores/item'
+import { useChatStore } from '@/stores/chat'
 
 const modelStore = useModelStore() 
-
-const activeModelId = ref(-1)
+const itemStore = useItemStore()
+const chatStore = useChatStore()
+const activeModel = computed(() => useModelStore().activeModel)
+const showMedia = ref(false)
 
 onMounted(() => {
-    if (!modelStore.activeModel) useRouter().push({name: 'home'})
+    if (!activeModel.value) useRouter().push({name: 'home'})
 })
 
-if (!modelStore.activeModel)
-    activeModelId.value = -1
-else
-    activeModelId.value = modelStore.activeModel.id
-
 const currentResultIds = ref<number[]>([])
-const selectedMediaId = ref<number | null>(null)
+const selectedMediaGroupIndex = ref<number | null>(null)
+const urf = ref(false)
 
 function updateResultIds(resultIds: number[]) {
     currentResultIds.value = resultIds
     console.log("Current:", currentResultIds.value)
 }
 
-function updateSelectedItem (id: number) {
-    selectedMediaId.value = id
+async function updateSelectedItem (itemId: number) {
+    selectedMediaGroupIndex.value = await itemStore.setSelectedItem(itemId)
+    showMedia.value = true
 }
 
-// You'd typically receive these from a store or from events emitted by ChatArea/ResultGrid.
+function updateModel() {
+    console.log('updating model')
+    showMedia.value = false
+    const chat = useChatStore().getOrCreateChat(activeModel.value!.id)
+    if (chat.queries.length > 0) {
+        currentResultIds.value = chat.queries.reverse()[0].resultIds
+        useChatStore().currentResultsQuery = chat.queries.reverse()[0].text 
+    } else {
+        currentResultIds.value = []
+    }
+}
+
+async function loadMoreResults() {
+    if (urf.value) {
+        // currentResultIds.value = 
+    } else {
+        currentResultIds.value = await chatStore.search(activeModel.value!.id, chatStore.currentResultsQuery, true)
+    }
+}
+
 </script>
 
 <style scoped>

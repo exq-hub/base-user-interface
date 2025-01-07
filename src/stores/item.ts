@@ -9,15 +9,19 @@ import { useModelStore } from "./model";
 
 export const useItemStore = defineStore('item', () => {
     // K = ItemId, V = MediaItem
-    const items : Map<number, MediaItem> = reactive(new Map<number,MediaItem>())
+    const items : Map<string, Map<number, MediaItem>> = reactive(new Map<string, Map<number,MediaItem>>())
     // K = modelId, V = Set<ItemId>
     const modelItems : Map<number, Set<number>> = reactive(new Map<number,Set<number>>())
     // K = modelId, V = Set<ItemId>
     const modelExcluded : Map<number, Set<number>> = reactive(new Map<number,Set<number>>())
     
     const modelStore = useModelStore()
+    const activeModel = reactive(computed(() => modelStore.activeModel))
+
+    const selectedItem : Map<number, MediaItem> = reactive(new Map<number, MediaItem>())
 
     async function fetchMediaItem(exqId: number, modelId: number) : Promise<MediaItem> {
+        const collection = modelStore.getModelCollection(modelId)
         if (modelItems.has(modelId)) {
             modelItems.get(modelId)!.add(exqId)
         } else {
@@ -25,23 +29,29 @@ export const useItemStore = defineStore('item', () => {
             modelItems.get(modelId)!.add(exqId)
         }
 
-        if (items.has(exqId)) {
+        if (!items.has(collection)) {
+            items.set(collection, new Map<number, MediaItem>())
+        }
+        if (items.get(collection)!.has(exqId)) {
             // console.log('Fetching media item ' + exqId + ' from memory')
-            if (!items.get(exqId)!.currentSets!.has(modelId)) {
-                items.get(exqId)!.currentSets!.set(modelId, [false,false,false,false])
+            if (!items.get(collection)!.get(exqId)!.currentSets!.has(modelId)) {
+                items.get(collection)!.get(exqId)!.currentSets!.set(modelId, [false,false,false,false])
             }
-            return items.get(exqId)! // '!' Non-null
+            return items.get(collection)!.get(exqId)! // '!' Non-null
         } else {
             // console.log('Fetching media item ' + exqId + ' from API')
             const item = await getItem(useAppStore().session, exqId, modelId, modelStore.getModelCollection(modelId))
-            items.set(exqId, item)
-            console.log('exqId', items.get(exqId))
+            items.get(collection)!.set(exqId, item)
+            console.log('exqId', items.get(collection)!.get(exqId))
             return item
         }
-    }
+   }
     
     async function fetchMediaItems(exqIds: number[], modelId: number, collection: string) : Promise<MediaItem[]> {
         var mediaItems : MediaItem[] = []
+        if (!items.has(collection)) {
+            items.set(collection, new Map<number, MediaItem>())
+        }
         exqIds.forEach(async (v,_) => {
             if (modelItems.has(modelId)) {
                 modelItems.get(modelId)!.add(v)
@@ -49,16 +59,16 @@ export const useItemStore = defineStore('item', () => {
                 modelItems.set(modelId, new Set<number>())
                 modelItems.get(modelId)!.add(v)
             }           
-            if (items.has(v)) {
-                console.log('Getting ', items.get(v))
-                if (!items.get(v)!.currentSets!.has(modelId)) {
-                    items.get(v)!.currentSets!.set(modelId, [false,false,false,false])
+            if (items.get(collection)!.has(v)) {
+                console.log('Getting ', items.get(collection)!.get(v))
+                if (!items.get(collection)!.get(v)!.currentSets!.has(modelId)) {
+                    items.get(collection)!.get(v)!.currentSets!.set(modelId, [false,false,false,false])
                 }
-                mediaItems.push(items.get(v)!)
+                mediaItems.push(items.get(collection)!.get(v)!)
             } else {
                 const item = await getItem(useAppStore().session, v, modelId, collection)
                 console.log('Inserting ', item)
-                items.set(v, item)
+                items.get(collection)!.set(v, item)
                 mediaItems.push(item)
             }    
         })
@@ -67,34 +77,36 @@ export const useItemStore = defineStore('item', () => {
 
     function addItemToSet(exqId: number, modelId: number, ilset: ILSets) : void {
         console.log('Adding Item:', exqId, 'to set', ilset, 'for model', modelId)
+        const collection = modelStore.getModelCollection(modelId)
         switch (ilset) {
             case ILSets.Positives:
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = true
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = false
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = false
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = true
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = false
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = false
                 return
             case ILSets.Negatives:
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = false
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = true
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = false
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = false
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = true
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = false
                 return
             case ILSets.History:
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = false
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = false
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = true
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = false
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = false
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = true
                 return
             case ILSets.Submitted:
-                items.get(exqId)!.currentSets!.get(modelId)![ILSets.Submitted] = true
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Submitted] = true
                 return
             default:
-                items.get(exqId)!.currentSets!.get(modelId)![ilset] = true 
+                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ilset] = true 
         }
     }
     
     function addItemsToSet(exqIds: number[], modelId: number, ilset: ILSets) : boolean {
+        const collection = modelStore.getModelCollection(modelId)
         exqIds.forEach((v,_) => {
-            items.get(v)!.currentSets!.get(modelId)![ilset] = true 
-            if (!items.get(v)!.currentSets!.get(modelId)![ilset]) {
+            items.get(collection)!.get(v)!.currentSets!.get(modelId)![ilset] = true 
+            if (!items.get(collection)!.get(v)!.currentSets!.get(modelId)![ilset]) {
                 console.log('Unable to add set to item: ' + ilset + ' ' + v)
                 return false
             }
@@ -103,13 +115,15 @@ export const useItemStore = defineStore('item', () => {
     } 
     
     function removeItemFromSet(exqId: number, modelId: number, ilset: ILSets) : void {
-        items.get(exqId)!.currentSets!.get(modelId)![ilset] = false
+        const collection = modelStore.getModelCollection(modelId)
+        items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ilset] = false
     }
     
     function removeItemsFromSet(exqIds: number[], modelId: number, ilset: ILSets) : boolean {
+        const collection = modelStore.getModelCollection(modelId)
         exqIds.forEach((v,_) => {
-            items.get(v)!.currentSets!.get(modelId)![ilset] = false
-            if (items.get(v)!.currentSets!.get(modelId)![ilset]) {
+            items.get(collection)!.get(v)!.currentSets!.get(modelId)![ilset] = false
+            if (items.get(collection)!.get(v)!.currentSets!.get(modelId)![ilset]) {
                 console.log('Unable to delete set from item: ' + ilset + ' ' + v)
                 return false
             }
@@ -118,52 +132,64 @@ export const useItemStore = defineStore('item', () => {
     }
     
     function removeModelFromItems(modelId: number) : void {
-        items.forEach(item => item.currentSets!.delete(modelId))
+        const collection = modelStore.getModelCollection(modelId)
+        items.get(collection)!.forEach(item => item.currentSets!.delete(modelId))
     }
     
     function isItemInPos(exqId: number, modelId: number) : boolean {
-        if (!items.has(exqId)) return false
-        if (!items.get(exqId)!.currentSets!.has(modelId)) return false
-        return items.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives]
+        const collection = modelStore.getModelCollection(modelId)
+        if (!items.has(collection)) return false
+        if (!items.get(collection)!.has(exqId)) return false
+        if (!items.get(collection)!.get(exqId)!.currentSets!.has(modelId)) return false
+        return items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives]
     }
 
     function isItemInNeg(exqId: number, modelId: number) : boolean {
-        if (!items.has(exqId)) return false
-        if (!items.get(exqId)!.currentSets!.has(modelId)) return false
-        return items.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives]
+        const collection = modelStore.getModelCollection(modelId)
+        if (!items.has(collection)) return false
+        if (!items.get(collection)!.has(exqId)) return false
+        if (!items.get(collection)!.get(exqId)!.currentSets!.has(modelId)) return false
+        return items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives]
     }
 
     function isItemInHistory(exqId: number, modelId: number) : boolean {
-        if (!items.has(exqId)) return false
-        if (!items.get(exqId)!.currentSets!.has(modelId)) return false
-        return items.get(exqId)!.currentSets!.get(modelId)![ILSets.History]
+        const collection = modelStore.getModelCollection(modelId)
+        if (!items.has(collection)) return false
+        if (!items.get(collection)!.has(exqId)) return false
+        if (!items.get(collection)!.get(exqId)!.currentSets!.has(modelId)) return false
+        return items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History]
     }
 
     function isItemInSubmitted(exqId: number, modelId: number) : boolean {
-        if (!items.has(exqId)) return false
-        if (!items.get(exqId)!.currentSets!.has(modelId)) return false
-        return items.get(exqId)!.currentSets!.get(modelId)![ILSets.Submitted]
+        const collection = modelStore.getModelCollection(modelId)
+        if (!items.has(collection)) return false
+        if (!items.get(collection)!.has(exqId)) return false
+        if (!items.get(collection)!.get(exqId)!.currentSets!.has(modelId)) return false
+        return items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Submitted]
     }
 
     function getSetItems(modelId: number, set: ILSets) : MediaItem[] {
+        const collection = modelStore.getModelCollection(modelId)
         let setItems : MediaItem[] = []
         // Get all items for the current model
         let mItems = modelItems.get(modelId)
         mItems?.forEach((value, _) => {
-            if (items.get(value)!.currentSets!.get(modelId)![set])
-                setItems.push(items.get(value)!)
+            if (items.get(collection)!.get(value)!.currentSets!.get(modelId)![set])
+                setItems.push(items.get(collection)!.get(value)!)
         })
         return setItems
     }
     
     async function fetchItemInfo(modelId: number, itemId: number): Promise<ItemInfo> {
-        items.get(itemId)!.metadata = await getItemInfo(modelId, itemId)
-        return items.get(itemId)!.metadata!
+        const collection = modelStore.getModelCollection(modelId)
+        items.get(collection)!.get(itemId)!.metadata = await getItemInfo(modelId, itemId, collection)
+        return items.get(collection)!.get(itemId)!.metadata!
     }
 
     async function fetchRelatedItems(modelId: number, itemId: number): Promise<number[]> {
-        items.get(itemId)!.relatedItems = await getRelatedItems(modelId, itemId)
-        return items.get(itemId)!.relatedItems!
+        const collection = modelStore.getModelCollection(modelId)
+        items.get(collection)!.get(itemId)!.relatedItems = await getRelatedItems(modelId, itemId, collection)
+        return items.get(collection)!.get(itemId)!.relatedItems!
     }
 
     function excludeItemGroup(exqId: number, modelId: number) {
@@ -173,14 +199,48 @@ export const useItemStore = defineStore('item', () => {
         modelExcluded.get(modelId)!.add(exqId)
     }
 
-    async function removeItemFromExclude(exqId: number, modelId: number) {
-        let items : number[] = await getRelatedItems(modelId, exqId)
-        for (let i = 0; i < items.length; i++) {
-            if (modelExcluded.get(modelId)!.has(items[i])) {
-                modelExcluded.get(modelId)!.delete(items[i])
-                break
+    async function removeItemFromExclude(exqId: number) {
+        if (activeModel.value) {
+            const collection = modelStore.getModelCollection(activeModel.value.id)
+            let items : number[] = await getRelatedItems(activeModel.value.id, exqId, collection)
+            for (let i = 0; i < items.length; i++) {
+                if (modelExcluded.get(activeModel.value.id)!.has(items[i])) {
+                    modelExcluded.get(activeModel.value.id)!.delete(items[i])
+                    break
+                }
             }
         }
+    }
+
+    async function setSelectedItem(itemId: number) {
+        if (activeModel.value) {
+            const collection = modelStore.getModelCollection(activeModel.value.id)
+            let item = items.get(collection)!.get(itemId)!
+            let groupId = 0
+            if (item.metadata === undefined) {
+                item.metadata = await fetchItemInfo(activeModel.value!.id, item.id)
+                console.log(item.metadata)
+            }
+            if (item.relatedItems === undefined) {
+                item.relatedItems = await fetchRelatedItems(activeModel.value!.id, item.id)
+                console.log(item.relatedItems)
+                if (item.relatedItems!.length > 0) {
+                    for (let i = 0; i < item.relatedItems!.length; i++) {
+                        if (item.relatedItems![i] === item.id) {
+                            groupId = i
+                            break
+                        }
+                    }
+                }
+            }
+            selectedItem.set(activeModel.value.id, items.get(collection)!.get(itemId)!)
+            return groupId
+        }
+        return -1
+    }
+
+    function getSelectedItem() : MediaItem {
+        return selectedItem.get(activeModel.value!.id)!
     }
 
     return {
@@ -202,6 +262,8 @@ export const useItemStore = defineStore('item', () => {
         fetchItemInfo,
         fetchRelatedItems,
         excludeItemGroup,
-        removeItemFromExclude
+        removeItemFromExclude,
+        setSelectedItem,
+        getSelectedItem
     }
 })

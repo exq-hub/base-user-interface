@@ -10,7 +10,7 @@ export const useModelStore = defineStore('model', () => {
     const nModels = ref(0)
     const models = reactive<Model[]>([]) 
     const totalItems = ref(0)
-    const activeModel = ref<Model|null>()
+    const activeModel = ref<Model | undefined>()
 
     function defaultSettings() : Settings {
         return { 
@@ -124,7 +124,7 @@ export const useModelStore = defineStore('model', () => {
     async function getSuggestions(req: ExqURFRequest, gridIdx: number, itemIdx?: number) {
         let suggs = await searchURF(req) // Call Exquisitor
         let model = models.filter(e => e.id === req.session_info.modelId)[0] // Get model
-        if (req.n == model.grid[gridIdx].itemsToShow) { // Is it a full update?
+        if (req.n == model.settings.itemsToShow) { // Is it a full update?
             // Returned items NOT equal to the requested amount
             if (suggs.suggestions.length != req.n) {
                 // Remove grid items

@@ -5,7 +5,7 @@
         <v-tabs 
          class="mr-2" 
          v-model="activeModel"
-         @update:model-value="modelStore.updateActiveModel(activeModel!.id)"
+         @update:model-value="modelStore.updateActiveModel(activeModel!.id); emit('modelChange')"
         >
             <v-tab 
              v-for="m in models" 
@@ -56,6 +56,7 @@ async function addModel (collection: string, name?: string) {
     modelStore.addModel(appStore.session, collection, false, name)
     console.log(modelStore.activeModel!)
     activeModel.value = modelStore.activeModel
+    emit('modelChange')
 }
 
 async function deleteModel(model: Model) {
@@ -63,6 +64,7 @@ async function deleteModel(model: Model) {
     useItemStore().removeModelFromItems(model.id)
     modelStore.deleteModel(appStore.session, model)
     activeModel.value = modelStore.activeModel
+    emit('modelChange')
 } 
 
 </script>

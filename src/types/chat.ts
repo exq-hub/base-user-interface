@@ -18,7 +18,5 @@ export interface ChatQuery {
 
 export interface ChatSession {
     queries: ChatQuery[]
-    positiveSelections: Set<string>
-    negativeSelections: Set<string>
     filters: Record<string, any>  // multi-tag, range, date, etc.
 }

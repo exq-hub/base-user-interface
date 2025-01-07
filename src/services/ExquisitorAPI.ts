@@ -13,21 +13,22 @@ import type {
     ExqExcludeGroupResponse,
     ExqSessionInfo,
     ExqIsExcludedRequest,
-    ExqClearItemSetRequest
+    ExqClearItemSetRequest,
 } from "@/types/exq"
 import type MediaItem from "@/types/mediaitem"
-import { type ItemInfo } from "@/types/mediaitem"
+import { MediaType, type ItemInfo } from "@/types/mediaitem"
 import {
     initSession as mockInitExq, 
     doURF as mockDoURF,
     getItem as mockGetItem,
     getFilters as mockGetFilters,
+    getItemInfoMock,
 } from "@/services/MockExquisitorAPI"
 import type { ChatEntryQueryText, ChatEntryQueryPos } from "@/types/chat"
 import { useAppStore } from "@/stores/app"
 
 const exqURI = 'http://localhost:8000'
-const mock = true
+const mock = false
 
 function generateString(length: number) : string {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -87,7 +88,12 @@ export const getCollections = async (): Promise<string[]> =>
 
 
 
-export const getItem = async (session: string, exqId: number, modelId: number, collection: string): Promise<MediaItem> => {
+export const getItem = async (
+    session: string,
+    exqId: number,
+    modelId: number,
+    collection: string
+): Promise<MediaItem> => {
     if (mock) return await mockGetItem(exqId, modelId)
     const sets = new Map<number,boolean[]>()
     sets.set(modelId, [false,false,false,false])
@@ -108,19 +114,33 @@ export const getItem = async (session: string, exqId: number, modelId: number, c
             })
         })
         .then(val => val.json())
+    if (resp.mediaType === MediaType.Video) {
+        return { 
+            id: resp.id, 
+            name: resp.name,
+            mediaId: resp.mediaId, 
+            currentSets: sets, 
+            relatedGroupId: resp.relatedGroupId,
+            mediaType: resp.mediaType, 
+            thumbPath: resp.thumbPath, 
+            srcPath: resp.srcPath,
+            segmentInfo: resp.segmentInfo
+        }
+    }
     return { 
         id: resp.id, 
         name: resp.name,
         mediaId: resp.mediaId, 
         currentSets: sets, 
+        relatedGroupId: resp.relatedGroupId,
         mediaType: resp.mediaType, 
         thumbPath: resp.thumbPath, 
         srcPath: resp.srcPath
     }
 }
 
-export const getItemInfo = async (model: number, itemId: number): Promise<ItemInfo> => {
-    if (mock) return { infoPairs: [['ID',[itemId.toString()]]] }
+export const getItemInfo = async (model: number, itemId: number, collection: string): Promise<ItemInfo> => {
+    if (mock) return getItemInfoMock(itemId)
     const resp : ItemInfo = 
         await fetch(exqURI+'/exq/item/details', {
             method: 'POST',
@@ -132,6 +152,7 @@ export const getItemInfo = async (model: number, itemId: number): Promise<ItemIn
                 session_info: {
                     session: useAppStore().session,
                     modelId: model,
+                    collection: collection
                 },
                 itemId: itemId
             })
@@ -139,11 +160,9 @@ export const getItemInfo = async (model: number, itemId: number): Promise<ItemIn
     return resp
 }
 
-export const getRelatedItems = async (model: number, itemId: number): Promise<number[]> => {
-    if (mock) {
-        return []
-    }
-    const resp: {'related': number[]} =
+export const getRelatedItems = async (model: number, itemId: number, collection: string): Promise<number[]> => {
+    if (mock) return [10, 20, 30, 40, 50]
+    const resp: { related: number[] } =
         await fetch(exqURI+'/exq/item/related', {
             method: 'POST',
             mode: 'cors',
@@ -154,6 +173,7 @@ export const getRelatedItems = async (model: number, itemId: number): Promise<nu
                 session_info: {
                     session: useAppStore().session,
                     modelId: model,
+                    collection: collection
                 },
                 itemId: itemId
             })
@@ -298,7 +318,6 @@ export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<C
 }
 
 
-
 export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => {
     console.log("EvalId:", req.evalId);
     if (mock) return 
@@ -311,6 +330,7 @@ export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => 
         body: JSON.stringify(req)
     }).then()
 }
+
 
 export const clearItemSet = async (req: ExqClearItemSetRequest): Promise<void> => {
     if (mock) return

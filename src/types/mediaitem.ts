@@ -12,14 +12,14 @@ export enum MediaType {
 }
 
 export interface ItemInfo {
-    infoPairs: [string, string[]][]
+    // infoPairs: [string, string[]][]
+    infoPairs: Record<string,any>
 }
 
 export interface VideoSegment {
     segmentId: string
     start: number
     end: number
-    previewUrl: string
 }
 
 export default interface MediaItem {
@@ -32,5 +32,6 @@ export default interface MediaItem {
     thumbPath : string, // For Items in Grid and Overlays
     srcPath : string // Enlarged version for Summary View, if downloading and rendering is not a performance hit use this path in thumbPath
     metadata?: ItemInfo
+    segmentInfo?: VideoSegment
     relatedItems?: number[]
 }
