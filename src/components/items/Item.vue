@@ -166,9 +166,11 @@ function addToSet(itemId: number, ilset: ILSets) {
         }
         snackColor.value = 'indigo'
         submitAnswer({ 
-            session: useAppStore().session, 
-            modelId: props.modelId,
-            collection: modelStore.getModelCollection(props.modelId),
+            session_info: {
+                session: useAppStore().session, 
+                modelId: props.modelId,
+                collection: modelStore.getModelCollection(props.modelId)
+            },
             itemId: itemId,
             text: '',
             qa: false,

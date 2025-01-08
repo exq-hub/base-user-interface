@@ -142,15 +142,21 @@ function submitCurrent() {
         return
     }
     snackColor.value = 'indigo'
-    let start = currentTime.value - 1
-    let end = currentTime.value + 1
-    if (currentTime.value < 1) {
+    let start = currentTime.value - 3
+    let end = currentTime.value + 3
+    if (start < 1) {
         start = currentTime.value
     }
+    if (end > (videoPlayer.value! as HTMLMediaElement).duration) {
+        end = (videoPlayer.value! as HTMLMediaElement).duration
+        start = end - 7
+    }
     submitAnswer({ 
-        session: useAppStore().session, 
-        modelId: activeModelId.value,
-        collection: modelStore.getModelCollection(activeModelId.value),
+        session_info: {
+            session: useAppStore().session, 
+            modelId: activeModelId.value,
+            collection: modelStore.getModelCollection(activeModelId.value)
+        },
         name: selectedItem.value.relatedGroupId!,
         text: '',
         qa: false,

@@ -321,14 +321,14 @@ export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<C
 export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => {
     console.log("EvalId:", req.evalId);
     if (mock) return 
-    return await fetch(exqURI+'/dres/submit', {
+    await fetch(exqURI+'/dres/submit', {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    }).then()
+    }).then(val => val.json)
 }
 
 

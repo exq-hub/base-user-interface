@@ -89,9 +89,11 @@ const qaAnswer = ref('')
 
 function submitTextAnswerVBS() {
     const requestObject = {
-        session: appStore.session,
-        modelId: activeModel.value!.id,
-        itemId: -1,
+        session_info: {
+            session: appStore.session,
+            modelId: activeModel.value!.id,
+            collection: modelStore.getModelCollection(activeModel.value!.id)
+        },
         name: '',
         text: qaAnswer.value, 
         qa: true,

@@ -118,9 +118,7 @@ export interface ExqGetExcludedGroupsResponse {
 }
 
 export interface ExqSubmissionRequest {
-    session: string
-    modelId: number
-    collection: string
+    session_info: ExqSessionInfo
     name?: string
     text: string
     qa: boolean
