@@ -4,6 +4,13 @@
         <!-- Header or Title -->
         <v-card-title>
             {{ selectedItem.name }}
+            <v-btn 
+             icon
+             :color="isExcluded ? 'grey' : 'orange'"
+             @click="exclude"
+             >
+                <v-icon>mdi-filter-remove</v-icon> <!-- You can customize the icon here -->
+            </v-btn>
         </v-card-title>
         
         <!-- Main Viewer Content -->
@@ -81,8 +88,9 @@ import { MediaType } from '@/types/mediaitem'
 import { useItemStore } from '@/stores/item'
 import { useModelStore } from '@/stores/model'
 import { useAppStore } from '@/stores/app'
-import { submitAnswer } from '@/services/ExquisitorAPI'
+import { clearExcludedGroups, excludeGroup, isGroupExcluded, submitAnswer } from '@/services/ExquisitorAPI'
 
+const appStore = useAppStore()
 const modelStore = useModelStore()
 const itemStore = useItemStore()
 const activeModelId = reactive(computed(() => modelStore.activeModel!.id))
@@ -99,6 +107,57 @@ const snackbar = ref(false)
 const snackTimeout = ref(4000)
 const snackColor = ref('white')
 const text = ref('')
+
+const isExcluded = ref(false)
+async function checkExclude() {
+    let modelId = modelStore.activeModel!.id
+    if (!itemStore.modelExcluded.has(modelId)) {
+        return false
+    }
+    const excludedItems = Array.from(itemStore.modelExcluded.get(modelId)!)
+    let res = await isGroupExcluded({
+        session_info: {
+            session: useAppStore().session, 
+            collection: useModelStore().getModelCollection(modelId),
+            modelId: modelId
+        },
+        itemId: selectedItem.value.id,
+        excluded_ids: excludedItems
+    })
+    isExcluded.value = res
+}
+checkExclude()
+
+async function exclude() {
+    let modelId = modelStore.activeModel!.id
+    if (!isExcluded.value) {
+        itemStore.excludeItemGroup(selectedItem.value.id, modelId)
+        isExcluded.value = true
+        // Logging
+        excludeGroup({
+            session_info: {
+                session: appStore.session,
+                collection: useModelStore().getModelCollection(modelId),
+                modelId: modelId
+            }, 
+            itemId: selectedItem.value.id
+        })
+        // snack(true)
+    } else {
+        itemStore.removeItemFromExclude(selectedItem.value.id)
+        isExcluded.value = false
+        // Logging
+        clearExcludedGroups({
+            session_info: {
+                session: appStore.session,
+                collection: useModelStore().getModelCollection(modelId),
+                modelId: modelId
+            }, 
+            items: [selectedItem.value.id]
+        })
+        // snack(false)
+    }
+}
 
 const emit = defineEmits<{
     (e: 'selectedSegment', itemId: number): void 

@@ -4,12 +4,14 @@ import { ExqTextSearchRequest } from '@/types/exq'
 import { defineStore } from 'pinia'
 import { useAppStore } from './app'
 import { useModelStore } from './model'
+import { useItemStore } from './item'
 
 export const useChatStore = defineStore('chat', () => {
     const chatSessions = reactive<Map<number,ChatSession>>(new Map<number,ChatSession>())
     const currentResultsQuery = ref('')
     const modelStore = useModelStore()
     const appStore = useAppStore()
+    const itemStore = useItemStore()
 
     function getOrCreateChat(modelId: number): ChatSession {
         if (chatSessions.has(modelId)) {
@@ -33,6 +35,10 @@ export const useChatStore = defineStore('chat', () => {
             qIdx = chatSessions.get(modelId)!.queries.findIndex((val) => val.text === queryText)
             seen = chatSessions.get(modelId)!.queries[qIdx].resultIds
         }
+        let exclude : number[] = []
+        if (itemStore.modelExcluded.has(modelStore.activeModel!.id)) {
+            exclude = Array.from(itemStore.modelExcluded.get(modelStore.activeModel!.id)!)
+        }
         let reqObj : ExqTextSearchRequest = {
             session_info: {
                 session: appStore.session,
@@ -46,7 +52,7 @@ export const useChatStore = defineStore('chat', () => {
                 names: [],
                 values: []
             },
-            excluded: []
+            excluded: exclude
         }
         // if (checkFilters.value) {
             // let filters = useFilterStore().getModelFilters(modelStore.activeModel!.id)
