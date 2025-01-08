@@ -16,7 +16,7 @@ export const useModelStore = defineStore('model', () => {
         return { 
             itemsToShow: 50,
             resources: ResourceValues.Low,
-            maxThumbSize: 200
+            maxThumbSize: 190
         }
     }
 
