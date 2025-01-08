@@ -113,7 +113,7 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    max-height: 400px; /* or however tall you want the grid container to be */
+    max-height: 45vh; /* or however tall you want the grid container to be */
     overflow-y: auto;
 }
 

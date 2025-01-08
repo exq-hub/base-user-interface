@@ -4,8 +4,8 @@
         <h4 class="text-center" v-if="shownIds.length === 0">Results will appear here</h4>
         <v-card-text>
             <v-container>
-                <v-row>
-                    <v-col
+                <div ref="gridRef" class="result-items-grid">
+                    <div
                      v-for="it,itIdx in shownIds"
                      :key="activeModelId+it.toString()+itIdx.toString()+Math.floor(Math.random() * 9000)"
                      cols="auto"
@@ -23,8 +23,8 @@
                          :overlay="true"
                          @replace-overlay="updateItem"
                         />
-                    </v-col>
-                </v-row>
+                    </div>
+                </div>
             </v-container>
         </v-card-text>
 
@@ -51,6 +51,7 @@ const props = defineProps<Props>()
 const modelStore = useModelStore()
 const chatStore = useChatStore()
 
+const gridRef = ref<HTMLElement | null>(null)
 const activeModelId = reactive(computed(() => modelStore.activeModel!.id))
 
 // For controlling the amount shown initially
@@ -60,6 +61,7 @@ const emit = defineEmits<{
     (e: 'load-more'): void,
     (e: 'selected', itemId: number): void
 }>()
+
 
 const shownIds = computed(() => {
     return props.resultIds.slice(0, itemsPerPage.value)
@@ -81,5 +83,13 @@ function updateItem(id: number) {
     position: relative;
     cursor: pointer;
     overflow: hidden;
+}
+
+.result-items-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    max-height: 75vh; /* or however tall you want the grid container to be */
+    overflow-y: auto;
 }
 </style>
