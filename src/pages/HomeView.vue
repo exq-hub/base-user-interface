@@ -1,6 +1,6 @@
 <template>
     <v-container class="text-center">
-        <h1 class="text-h1">Welcome to Exquistor</h1>
+        <h1 class="text-h1">Welcome to Exquisitor</h1>
         <br/>
         <v-row>
             <v-col cols="12">
