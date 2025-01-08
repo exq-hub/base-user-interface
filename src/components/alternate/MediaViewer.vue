@@ -201,8 +201,8 @@ function submitCurrent() {
         return
     }
     snackColor.value = 'indigo'
-    let start = currentTime.value - 3
-    let end = currentTime.value + 3
+    let start = currentTime.value - 2
+    let end = currentTime.value + 2
     if (start < 1) {
         start = currentTime.value
     }
