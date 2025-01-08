@@ -201,14 +201,14 @@ function submitCurrent() {
         return
     }
     snackColor.value = 'indigo'
-    let start = currentTime.value - 2
-    let end = currentTime.value + 2
+    let start = currentTime.value - 1
+    let end = currentTime.value + 1
     if (start < 1) {
         start = currentTime.value
     }
     if (end > (videoPlayer.value! as HTMLMediaElement).duration) {
         end = (videoPlayer.value! as HTMLMediaElement).duration
-        start = end - 5
+        start = end - 3
     }
     submitAnswer({ 
         session_info: {
