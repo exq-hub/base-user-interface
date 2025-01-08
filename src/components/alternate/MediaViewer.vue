@@ -208,7 +208,7 @@ function submitCurrent() {
     }
     if (end > (videoPlayer.value! as HTMLMediaElement).duration) {
         end = (videoPlayer.value! as HTMLMediaElement).duration
-        start = end - 7
+        start = end - 5
     }
     submitAnswer({ 
         session_info: {
