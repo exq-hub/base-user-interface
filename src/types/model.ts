@@ -1,5 +1,4 @@
 export interface GridGroup {
-    id : number,
     itemsToShow: number,
     items: number[],
     name? : string,
@@ -18,13 +17,15 @@ export enum ResourceValues {
 }
 
 export interface Settings {
-    groups: GridGroupInfo[]
-    resources: ResourceValues
+    itemsToShow: number,
+    resources: ResourceValues,
+    maxThumbSize: number
 }
 
 export default interface Model {
     session: string,
     id : number,
+    collection: string,
     name : string,
     settings : Settings, //Settings type, number of suggestions, modalities, etc.
     grid : GridGroup[],

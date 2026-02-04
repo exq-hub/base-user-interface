@@ -1,28 +1,22 @@
 <template>
     <v-card>
-        <v-img
-         :id="'itemThumb'+item.id"
-         :src="item.thumbPath"
-         @click="if (!overlay) { accessOverlay() };
-                 if (overlay) { $emit('replaceOverlay', itemId) }; 
-                 console.log('clicked item', item.id);"
-         class="bg-transparent"
-        >
-            <template v-slot:placeholder>
-                <v-row 
-                 class="fill-height ma-0"
-                 justify="center"
-                >
-                    <v-progress-circular 
-                     indeterminate
-                     color="grey-lighten-5"
-                    />
-                </v-row>
-            </template>
-            <span>{{ item.name!.split('_')[0] }} {{ item.name!.split('_')[1] }}</span>
-        </v-img>
+        <div class="thumbnail-wrapper"><!-- @mouseover="onHover(id)" @mouseleave="onLeave(id)"> -->
+            <img
+             :data-eid="'item_thumbnail_' + item.id + '_model_' + modelId"
+             ref="imageRef"
+             :key="'itemThumb'+item.id"
+             :id="'itemThumb'+item.id"
+             :src="item.thumbPath"
+             :alt="item.name"
+             @click="if (!overlay) { accessOverlay() };
+                     if (overlay) { $emit('replaceOverlay', itemId) };"
+             class="bg-transparent"
+             :style="{maxWidth: thumbSize + 'px'}"
+            />
+        </div>
         <template v-slot:actions>
             <v-btn v-if="btnPos"
+             :data-eid="'btn_pos_' + itemId + '_model_' + modelId"
              @click="addToSet(itemId, ILSets.Positives); { $emit('replace', itemIndex, ILSets.Positives) };"
              :disabled="isPos(itemId, modelId)"
              size="small"
@@ -32,6 +26,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnNeg"
+             :data-eid="'btn_neg_' + itemId + '_model_' + modelId"
              @click="addToSet(itemId, ILSets.Negatives); { $emit('replace', itemIndex, ILSets.Negatives) };"
              :disabled="isNeg(itemId, modelId)"
              size="small"
@@ -41,6 +36,7 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnIgnore"
+             :data-eid="'btn_ignore_' + itemId + '_model_' + modelId"
              @click="addToSet(itemId, ILSets.History); { $emit('replace', itemIndex, ILSets.History) };"
              :disabled="isHistory(itemId, modelId)"
              size="small"
@@ -50,12 +46,22 @@
                 </v-icon>
             </v-btn>
             <v-btn v-if="btnSubmit"
+             :data-eid="'btn_submit_' + itemId + '_model_' + modelId"
              @click="addToSet(itemId, ILSets.Submitted);"
              :disabled="isSubmitted(itemId, modelId)"
              size="small"
             >
                 <v-icon>
                     mdi-send-outline
+                </v-icon>
+            </v-btn>
+            <v-btn
+             :data-eid="'btn_gif_' + itemId + '_model_' + modelId"
+             @click="getGif"
+             size="small"
+            >
+                <v-icon>
+                    mdi-tray-arrow-down
                 </v-icon>
             </v-btn>
         </template>
@@ -75,19 +81,6 @@
             />
         </template>
     </v-snackbar>
-    <v-overlay v-if="!overlay"
-     v-model="openOverlay"
-     location-strategy="connected"
-     scroll-strategy="reposition"
-     class="align-center justify-center my-overlay"
-     >
-        <item-overlay
-         :model-id="modelId"
-         :src-item="item"
-         :src-item-idx="srcItemIndex"
-         :is-opened="true"
-        />
-    </v-overlay>
 </template>
 
 
@@ -95,8 +88,9 @@
 import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
-import ItemOverlay from './ItemOverlay.vue';
-import MediaItem, { ILSets, MediaType } from '@/types/mediaitem';
+// import ItemOverlay from './ItemOverlay.vue';
+import MediaItem, { GroupMetadata, ILSets, MediaType } from '@/types/mediaitem';
+import { useModelStore } from '@/stores/model';
 
 interface Props {
     itemId: number
@@ -113,14 +107,19 @@ interface Props {
 const props = defineProps<Props>()
 defineEmits<{
     'replace': [ itemIndex: number, set: ILSets ],
-    'replaceOverlay': [ itemId: number ]
+    'replaceOverlay': [ itemId: number ],
+    'itemClicked': [ itemId: number ]
 }>()
 
 const itemStore = useItemStore()
-const item : MediaItem = reactive({id: -1, srcPath:'', thumbPath:'', mediaType: MediaType.Image})
+const modelStore = useModelStore()
+const collection = modelStore.getModelCollection(props.modelId)
+
+const item : MediaItem = reactive({id: -1, name: '', mediaId: -1, srcPath:'', thumbPath:'', mediaType: MediaType.Image})
+const group: GroupMetadata = reactive({ src: '', metadata: {}, groupMediaType: MediaType.Other, items: []})
+const thumbSize = computed(() => modelStore.getThumbnailSize(props.modelId))
 async function getMediaItem() {
-    await itemStore.fetchMediaItem(props.itemId, props.modelId)
-    let mi = itemStore.items.get(props.itemId)!
+    let mi = await itemStore.fetchMediaItem(props.itemId, props.modelId)
     item.id = mi.id
     item.mediaId = mi.mediaId
     item.currentSets = mi.currentSets
@@ -139,9 +138,11 @@ if (!props.provided) {
     item.mediaType = props.item!.mediaType
     item.srcPath = props.item!.thumbPath
     item.thumbPath = props.item!.thumbPath
-    item.relatedItems = props.item!.relatedItems
+    item.groupId = props.item!.groupId
     item.metadata = props.item!.metadata
 }
+
+const imageRef = ref<HTMLImageElement>()
 
 const isPos = computed(() => itemStore.isItemInPos)
 const isNeg = computed(() => itemStore.isItemInNeg)
@@ -169,18 +170,43 @@ function addToSet(itemId: number, ilset: ILSets) {
             return
         }
         snackColor.value = 'indigo'
-        submitAnswer({ 
-            session: useAppStore().session, 
-            modelId: props.modelId,
-            itemId: itemId,
-            name: itemStore.items.get(itemId)!.name!,
-            text: '',
-            qa: false,
-            evalId: useAppStore().selectedEvaluation.id,
-        })
+
+        let item = itemStore.items.get(collection)!.get(itemId)!
+        if (item.metadata === undefined) {
+            itemStore.fetchItemInfo(props.modelId, item.id).then((meta) => {
+                item.metadata = meta
+                submitAnswer({ 
+                    session_info: {
+                        session: useAppStore().session, 
+                        modelId: props.modelId,
+                        collection: modelStore.getModelCollection(props.modelId)
+                    },
+                    name: item.metadata!['Video ID'] as string,
+                    text: '',
+                    qa: false,
+                    start: item.metadata!['Start (ms)'] as number,
+                    end: item.metadata!['End (ms)'] as number,
+                    evalId: useAppStore().selectedEvaluation.id,
+                })
+            })
+        } else {
+            submitAnswer({ 
+                session_info: {
+                    session: useAppStore().session, 
+                    modelId: props.modelId,
+                    collection: modelStore.getModelCollection(props.modelId)
+                },
+                name: item.metadata!['Video ID'] as string,
+                text: '',
+                qa: false,
+                start: item.metadata!['Start (ms)'] as number,
+                end: item.metadata!['End (ms)'] as number,
+                evalId: useAppStore().selectedEvaluation.id,
+            })
+        }
     }
     itemStore.addItemToSet(itemId, props.modelId, ilset)
-    snack(itemStore.items.get(itemId)!.name!, ILSets[ilset])
+    snack(itemStore.items.get(collection)!.get(itemId)!.name!, ILSets[ilset])
 }
 
 const openOverlay = ref(false)
@@ -190,14 +216,19 @@ const srcItemIndex = ref(0)
 async function accessOverlay() {
     if (item.metadata === undefined) {
         item.metadata = await itemStore.fetchItemInfo(props.modelId, item.id)
-        console.log(item.metadata)
     }
-    if (item.relatedItems === undefined) {
-        item.relatedItems = await itemStore.fetchRelatedItems(props.modelId, item.id)
-        console.log(item.relatedItems)
-        if (item.relatedItems!.length > 0) {
-            for (let i = 0; i < item.relatedItems!.length; i++) {
-                if (item.relatedItems![i] === item.id) {
+    if (group.metadata === undefined) {
+        let gi = await itemStore.fetchGroupInfo(props.modelId, item.groupId!)
+        group.src = gi.src
+        group.metadata = gi.metadata
+        group.groupMediaType = gi.groupMediaType
+        group.items = gi.items
+    }
+    if (group.items.length === 0) {
+        group.items = await itemStore.fetchRelatedItems(props.modelId, item.groupId!)
+        if (group.items!.length > 0) {
+            for (let i = 0; i < group.items!.length; i++) {
+                if (group.items![i] === item.id) {
                     srcItemIndex.value = i
                     break
                 }
@@ -207,7 +238,37 @@ async function accessOverlay() {
     openOverlay.value = true; 
 }
 
+onBeforeUnmount(() => {
+    imageRef.value?.removeAttribute('src')
+})
 
+// Refs to manage video elements for hover
+// const videoRefs = ref<{ [key: string]: HTMLVideoElement | null }>({})
+
+// function onHover(id: number) {
+//     const vid = videoRefs.value[id]
+//     if (vid) {
+//         vid.currentTime = 0
+//         vid.play()
+//         vid.loop = true
+//     }
+// }
+
+// function onLeave(id: number) {
+//     const vid = videoRefs.value[id]
+//     if (vid) {
+//         vid.pause()
+//         vid.currentTime = 0
+//     }
+// }
+
+async function getGif() {
+    return
+    const exqURI = useAppStore().exqURI
+    const session = useAppStore().session
+    const url = `${exqURI}/exq/item/GIFIT/${session}_${collection}_${item.id}`
+    window.open(url, '_blank')
+}
 </script>
 
 
@@ -219,5 +280,11 @@ async function accessOverlay() {
 .v-card :deep(.v-card-actions) {
     justify-content: center;
     min-height: auto;
+}
+.thumbnail-wrapper {
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
 }
 </style>

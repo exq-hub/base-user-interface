@@ -4,14 +4,15 @@
      class="text-center pt-3 pb-3"
      color="orange-lighten-2"
     >
-        <v-btn size="small" icon="mdi-close" @click="clearExcluded"></v-btn>
+        <v-btn :data-eid="'exc_groups_clear_btn_model_' + activeModelId" size="small" @click="clearExcluded">
+            Clear List
+        </v-btn>
     </v-sheet>
     <!-- Result List -->
-    <v-list v-model="loaded" :key="activeModelId">
-        <v-list-item v-for="(it,idx) in excludedItems.items">
+    <v-list :key="activeModelId">
+        <v-list-item v-for="(it,idx) in excludedItems()">
             <item 
              :item-id="it"
-             :grid-index="0"
              :item-index="idx"
              :model-id="activeModelId"
              :btn-pos="true"
@@ -27,50 +28,30 @@
 
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
 import Item from '@/components/items/Item.vue';
-import { clearExcludedGroups } from '@/services/ExquisitorAPI';
-import { useAppStore } from '@/stores/app';
 import { useModelStore } from '@/stores/model';
 import { useItemStore } from '@/stores/item';
 
-const activeModelId = computed(() => useModelStore().activeModel.id)
-
-const excludedItems: { items: number[] } = reactive({ items: [] })
-
-const loaded = ref(false)
-
-const session = useAppStore().session
+const activeModelId = computed(() => useModelStore().activeModel!.id)
 
 const itemStore = useItemStore()
 
-async function getExcludedGroups() {
+const excludedItems = computed(() => getExcludedGroups)
+
+function getExcludedGroups() {
     if (itemStore.modelExcluded.has(activeModelId.value)) {
-        excludedItems.items = Array.from(itemStore.modelExcluded.get(activeModelId.value)!)
+        return Array.from(itemStore.modelExcluded.get(activeModelId.value)!)
     } else {
-        excludedItems.items = []
+        return []
     }
-    console.log(excludedItems.items)
-    loaded.value = true
 }
 
 async function clearExcluded() {
-    excludedItems.items.forEach( v => 
-        itemStore.removeItemFromExclude(v, activeModelId.value)
+    excludedItems.value().forEach( v => 
+        itemStore.removeItemFromExclude(v)
     )
-    // Logging
-    clearExcludedGroups({
-        session_info: {
-            session: session,
-            modelId: activeModelId.value
-        }, 
-        items: excludedItems.items
-    })
-
-    excludedItems.items = []
 }
 
-getExcludedGroups()
 </script>
 
 

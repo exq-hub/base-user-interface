@@ -7,7 +7,8 @@
 // Styles
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
-import { VNumberInput } from 'vuetify/labs/VNumberInput'
+// import { VNumberInput } from 'vuetify/labs/VNumberInput'
+import { VFileUpload } from 'vuetify/labs/VFileUpload'
 
 // Composables
 import { createVuetify } from 'vuetify'
@@ -15,9 +16,10 @@ import { createVuetify } from 'vuetify'
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   components: {
-    VNumberInput
+    // VNumberInput
+    VFileUpload
   },
   theme: {
-    defaultTheme: 'dark',
+    defaultTheme: 'light',
   },
 })

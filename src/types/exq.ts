@@ -1,17 +1,18 @@
 // Return types for ExquisitorAPI calls
 
-import type { Filter } from "./filter"
+import type { ActiveFiltersDB, FilterInfo } from "./filter"
 import type { MediaType } from "./mediaitem"
 import type { GridGroup } from "./model"
 
 export interface ExqSessionInfo {
     session: string,
+    collection: string,
     modelId: number
 }
 
 export interface ExqInitResponse {
     session: string,
-    totalItems: number,
+    collections: string[], 
     evaluations: {id: string, name: string}[]
 }
 
@@ -19,20 +20,18 @@ export interface ExqInitModelResponse {
     groups: GridGroup[]
 }
 
-export interface ExqURFRequest {
+export interface ExqRFRequest {
     session_info: ExqSessionInfo
     n: number
     pos: number[]
     neg: number[]
     seen: number[]
-    filters?: {
-        names: string[]
-        values: (number | string)[][]
-    }
+    filters?: ActiveFiltersDB
     excluded?: number[]
+    query?: string
 }
 
-export interface ExqURFResponse {
+export interface ExqRFResponse {
     suggestions : number[]
 }
 
@@ -41,11 +40,19 @@ export interface ExqTextSearchRequest {
     n: number
     text: string
     seen?: number[]
-    filters?: {
-        names: string[]
-        values: (number | string)[][]
-    }
+    filters?: ActiveFiltersDB
     excluded: number[]
+    search_model?: string
+}
+
+export interface ExqImageSearchRequest {
+    session_info: ExqSessionInfo
+    n: number
+    image_b64: string
+    seen?: number[]
+    filters?: ActiveFiltersDB
+    excluded: number[]
+    search_model?: string
 }
 
 export interface ExqChatFeedbackRequest {
@@ -66,6 +73,17 @@ export interface ExqQueryRewriteRequest {
     positive: number
 }
 
+export interface ExqTemporalSearchRequest {
+    session_info: ExqSessionInfo
+    n: number
+    queries: string[]
+    seen?: number[]
+    filters?: (ActiveFiltersDB | undefined)[]
+    excluded: number[]
+    search_model?: string[]
+}
+
+
 export interface ExqGetItemResponse {
     id: number
     name: string
@@ -73,10 +91,11 @@ export interface ExqGetItemResponse {
     mediaType: MediaType
     thumbPath: string
     srcPath: string
+    groupId?: number
 }
 
-export interface ExqGetFiltersResponse {
-    filters : Filter[]
+export interface ExqGetFiltersInfoResponse {
+    filters : FilterInfo[]
 }
 
 export interface ExqApplyFiltersRequest {
@@ -115,12 +134,13 @@ export interface ExqGetExcludedGroupsResponse {
 }
 
 export interface ExqSubmissionRequest {
-    session: string
-    modelId: number
-    name: string
+    session_info: ExqSessionInfo
+    name?: string
     text: string
     qa: boolean
     evalId: string
+    start?: number
+    end?: number
     itemId?: number
 }
 

@@ -121,6 +121,7 @@
 import { clearExcludedGroups, excludeGroup, isGroupExcluded } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
+import { useModelStore } from '@/stores/model';
 import MediaItem, { MediaType } from '@/types/mediaitem';
 
 interface Props {
@@ -245,6 +246,7 @@ async function checkExclude() {
     let res = await isGroupExcluded({
         session_info: {
             session: appStore.session, 
+            collection: useModelStore().getModelCollection(props.modelId),
             modelId: props.modelId
         },
         itemId: mainItem.value.id,
@@ -262,18 +264,20 @@ async function exclude() {
         excludeGroup({
             session_info: {
                 session: appStore.session,
+                collection: useModelStore().getModelCollection(props.modelId),
                 modelId: props.modelId
             }, 
             itemId: mainItem.value.id
         })
         snack(true)
     } else {
-        itemStore.removeItemFromExclude(mainItem.value.id, props.modelId)
+        itemStore.removeItemFromExclude(mainItem.value.id)
         isExcluded.value = false
         // Logging
         clearExcludedGroups({
             session_info: {
                 session: appStore.session,
+                collection: useModelStore().getModelCollection(props.modelId),
                 modelId: props.modelId
             }, 
             items: [mainItem.value.id]

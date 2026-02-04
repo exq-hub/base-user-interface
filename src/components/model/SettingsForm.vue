@@ -4,6 +4,7 @@
      width="50%">
         <template v-slot:activator="{ props }">
             <v-btn
+             data-eid="open_settings_form_btn"
              color="black"
              icon="mdi-cog-outline"
              v-bind="props"
@@ -11,22 +12,24 @@
         </template>
         <v-card class="bg-indigo text-center ma-2">
             <v-card-title class="mb-2">
-                Settings for {{ activeModel.name }}
+                Settings for {{ activeModel!.name }}
             </v-card-title>
             <v-card-actions>
                 <edit-text-field 
-                 :text="activeModel.name"
+                 :data-eid="'model_name_field_' + activeModel!.id"
+                 :text="activeModel!.name"
                  label="Name"
                  @change="updateModelName"
                  /> 
             </v-card-actions>
         </v-card>
-        <v-card class="bg-indigo text-center ma-2">
+        <v-card v-if="appStore.evaluations.length > 0" class="bg-indigo text-center ma-2">
             <v-card-title class="mb-2">
                 Active Evaluation
             </v-card-title>
             <v-card-actions>
                 <v-select
+                 :data-eid="'select_active_evaluation_dropdown_' + activeModel!.id"
                  v-model="appStore.selectedEvaluation"
                  :items="appStore.evaluations"
                  label="Select Evaluation"
@@ -36,15 +39,17 @@
                 />
             </v-card-actions>
         </v-card>
-        <v-card class="bg-indigo text-center ma-2">
+        <v-card v-if="appStore.evaluations.length > 0" class="bg-indigo text-center ma-2">
             <v-card-title class="mb-2">
-                Q&A Answer (VBS)
+                Q&A Answer
             </v-card-title>
                 <v-text-field
+                 :data-eid="'qa_answer_field_' + activeModel!.id"
                  v-model="qaAnswer"
                  label="Q&A Answer"
                 />
                 <v-btn 
+                 :data-eid="'submit_qa_answer_btn_' + activeModel!.id"
                  class="mb-3"
                  icon="mdi-check-underline"
                  location="bottom center"
@@ -73,7 +78,7 @@
 import { ref } from 'vue';
 import { useModelStore } from '@/stores/model';
 import EditTextField from '@/components/general/EditTextField.vue';
-import { submitAnswer } from '@/services/ExquisitorAPI';
+import { logEvents, submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 
 const modelStore = useModelStore()
@@ -82,16 +87,18 @@ const appStore = useAppStore()
 const activeModel = computed(() => modelStore.activeModel)
 
 function updateModelName(newName: string) {
-    modelStore.updateName(activeModel.value, newName)
+    modelStore.updateName(activeModel.value!, newName)
 }
 
 const qaAnswer = ref('')
 
 function submitTextAnswerVBS() {
     const requestObject = {
-        session: appStore.session,
-        modelId: activeModel.value.id,
-        itemId: -1,
+        session_info: {
+            session: appStore.session,
+            modelId: activeModel.value!.id,
+            collection: modelStore.getModelCollection(activeModel.value!.id)
+        },
         name: '',
         text: qaAnswer.value, 
         qa: true,
@@ -115,6 +122,25 @@ function snack() {
     snackColor.value = 'success'
     text.value = 'Submitted answer "' + qaAnswer.value + '".'
 }
+
+watch(dialog, (newVal) => {
+    if (newVal) {
+        logEvents([{
+            ts: Date.now(),
+            action: 'Open Settings Form',
+            session: appStore.session,
+            element_id: 'settings_form'
+        }])
+    } else {
+        logEvents([{
+            ts: Date.now(),
+            action: 'Close Settings Form',
+            session: appStore.session,
+            element_id: 'settings_form'
+        }])
+    }
+})
+
 </script>
 
 

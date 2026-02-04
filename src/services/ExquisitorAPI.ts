@@ -1,37 +1,37 @@
 import type { 
-    ExqURFRequest, 
-    ExqURFResponse,
+    ExqRFRequest as ExqRFRequest, 
+    ExqRFResponse as ExqRFResponse,
     ExqGetItemResponse, 
     ExqInitResponse,
-    ExqGetFiltersResponse,
-    ExqApplyFiltersRequest,
     ExqSubmissionRequest,
     ExqTextSearchRequest,
     ExqQueryRewriteRequest,
-    ExqClearExcludedGroupRequest,
     ExqExcludeGroupRequest,
     ExqExcludeGroupResponse,
     ExqSessionInfo,
     ExqIsExcludedRequest,
-    ExqClearItemSetRequest
+    ExqImageSearchRequest,
+    ExqTemporalSearchRequest,
 } from "@/types/exq"
 import type MediaItem from "@/types/mediaitem"
-import { type ItemInfo } from "@/types/mediaitem"
 import {
     initSession as mockInitExq, 
     doURF as mockDoURF,
     getItem as mockGetItem,
     getFilters as mockGetFilters,
+    getItemInfoMock,
 } from "@/services/MockExquisitorAPI"
-import type { ChatEntryQueryText, ChatEntryQueryPos } from "@/types/chat"
+import type { ExqSearchResponse, ExqQueryRewriteResponse } from "@/types/chat"
 import { useAppStore } from "@/stores/app"
+import { FilterInfo, FilterValue } from "@/types/filter"
 
-const exqURI = 'http://localhost:8000'
-const mock = true
+const exqURI = 'https://localhost:5000'
+const mock = false
+
 
 function generateString(length: number) : string {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = ' ';
+    let result = '';
     const charactersLength = characters.length;
     for ( let i = 0; i < length; i++ ) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -40,16 +40,21 @@ function generateString(length: number) : string {
     return result;
 }
 
+export const getMainURI = () => { return exqURI } 
 // Initialize Session
 // TODO: Start Page options?
 export const initSession = async () : Promise<ExqInitResponse> => {
     if (mock) return mockInitExq()
     const session = generateString(10)
-    const resp : {session: string, totalItems: number} = await fetch(exqURI+'/exq/init/'+session).then(val => val.json())
-    const evals : {id: string, name: string}[] = await fetch(exqURI+'/dres/evaluation_list/').then(val => val.json())
+    const resp : {session: string, totalItems: number[], collections: string[]} =
+        await fetch(exqURI+'/exq/init/'+session)
+              .then(val => val.json())
+    const evals : {id: string, name: string}[] = 
+        await fetch(exqURI+'/dres/evaluation_list/')
+              .then(val => val.status !== 404 ? val.json() : [])
     const response = {
         session: resp.session,
-        totalItems: resp.totalItems,
+        collections: resp.collections,
         evaluations: evals
     }
     return response
@@ -85,9 +90,32 @@ export const removeModel = (req: ExqSessionInfo) : void => {
 export const getCollections = async (): Promise<string[]> =>
     await fetch('CALL_TO_API_HERE').then((val) => val.json())
 
+export const logEvents = (events: ClientEvent[]): void => {
+    if (mock) return
+    console.log("Logging events:", events)
+    if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(events)], { type: "application/json" })
+        navigator.sendBeacon(getMainURI() + '/exq/log/clientEvent', blob)
+        return
+    }
+    fetch(getMainURI() + '/log/clientEvent', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(events),
+    }).then()
+}
 
 
-export const getItem = async (session: string, exqId: number, modelId: number): Promise<MediaItem> => {
+export const getItem = async (
+    session: string,
+    exqId: number,
+    modelId: number,
+    collection: string,
+    opts?: { signal?: AbortSignal }
+): Promise<MediaItem> => {
     if (mock) return await mockGetItem(exqId, modelId)
     const sets = new Map<number,boolean[]>()
     sets.set(modelId, [false,false,false,false])
@@ -101,26 +129,32 @@ export const getItem = async (session: string, exqId: number, modelId: number): 
             body: JSON.stringify({ 
                 session_info: {
                     session: session,
-                    modelId: modelId
+                    modelId: modelId,
+                    collection: collection
                 },
-                itemId: exqId
-            })
+                mediaId: exqId,
+            }),
+            signal: opts?.signal
         })
-        .then(val => val.json())
+        .then(val => val.json()) 
     return { 
         id: resp.id, 
         name: resp.name,
         mediaId: resp.mediaId, 
         currentSets: sets, 
+        groupId: resp.groupId,
         mediaType: resp.mediaType, 
         thumbPath: resp.thumbPath, 
         srcPath: resp.srcPath
     }
 }
 
-export const getItemInfo = async (model: number, itemId: number): Promise<ItemInfo> => {
-    if (mock) return { infoPairs: [['ID',[itemId.toString()]]] }
-    const resp : ItemInfo = 
+export const getItemInfo = async (
+    model: number, mediaId: number, collection: string, 
+    filterIds: number[]
+): Promise<Record<string, number | string | (number | string)[]>> => {
+    if (mock) return getItemInfoMock(mediaId)
+    const resp : Record<string, number | string | (number | string)[]> = 
         await fetch(exqURI+'/exq/item/details', {
             method: 'POST',
             mode: 'cors',
@@ -131,18 +165,18 @@ export const getItemInfo = async (model: number, itemId: number): Promise<ItemIn
                 session_info: {
                     session: useAppStore().session,
                     modelId: model,
+                    collection: collection
                 },
-                itemId: itemId
+                mediaId: mediaId,
+                filterIds: filterIds,
             })
         }).then(val => val.json())
     return resp
 }
 
-export const getRelatedItems = async (model: number, itemId: number): Promise<number[]> => {
-    if (mock) {
-        return []
-    }
-    const resp: {'related': number[]} =
+export const getRelatedItems = async (model: number, mediaId: number, collection: string): Promise<number[]> => {
+    if (mock) return [10, 20, 30, 40, 50]
+    const resp: { related: number[] } =
         await fetch(exqURI+'/exq/item/related', {
             method: 'POST',
             mode: 'cors',
@@ -153,8 +187,9 @@ export const getRelatedItems = async (model: number, itemId: number): Promise<nu
                 session_info: {
                     session: useAppStore().session,
                     modelId: model,
+                    collection: collection
                 },
-                itemId: itemId
+                mediaId: mediaId
             })
         }).then(val => val.json())
     return resp.related
@@ -162,9 +197,10 @@ export const getRelatedItems = async (model: number, itemId: number): Promise<nu
 
 
 
-export const getFilters = async (session: string): Promise<ExqGetFiltersResponse> => {
-    if (mock) return await mockGetFilters()
-    return await fetch(exqURI+'/exq/filters/'+session, {
+export const getFiltersInfo = async (session: string, collection: string): Promise<FilterInfo[]> => {
+//Promise<ExqGetFiltersInfoResponse> => {
+    if (mock) return (await mockGetFilters()).filters
+    return await fetch(exqURI+'/exq/info/filters/' + session + '/' + collection, {
         method: 'GET',
         mode: 'cors',
         headers: {
@@ -173,30 +209,17 @@ export const getFilters = async (session: string): Promise<ExqGetFiltersResponse
     }).then(val => val.json())
 }
 
-export const applyFilters = (req: ExqApplyFiltersRequest): void => {
-    if (mock) return
-    fetch(exqURI+'/exq/log/applyFilters', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then()
-}
 
-export const resetFilters = (req: ExqSessionInfo): void => {
-    if (mock) return
-    fetch(exqURI+'/exq/log/resetFilters', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then()
-}
-
+export const getFilterValues = async (session: string, collection: string, tagtypeId: number, filterId: number): 
+    Promise<FilterValue[]> => { 
+        return await fetch(exqURI + '/exq/info/filters/values/' + session + '/' + collection + '/' + tagtypeId + '/' + filterId, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(val => val.json())
+    }
 
 
 export const excludeGroup = async (req: ExqExcludeGroupRequest): Promise<void> => {
@@ -224,24 +247,10 @@ export const isGroupExcluded = async (req: ExqIsExcludedRequest): Promise<boolea
     return resp.excludedOrNot
 }
 
-// Remove one or more groups from the excluded list
-export const clearExcludedGroups = async (req: ExqClearExcludedGroupRequest): Promise<void> => {
-    if (mock) return
-    return await fetch(exqURI+'/log/clearExcludedGroups', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then()
-}
-
-
 // Get suggestions from the current model
-export const searchURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => {
+export const searchRF = async (req: ExqRFRequest): Promise<ExqRFResponse> => {
     if (mock) return await mockDoURF(req)
-    const resp : ExqURFResponse = await fetch(exqURI+'/exq/search/urf', {
+    const resp : ExqRFResponse = await fetch(exqURI+'/exq/search/rf', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -252,11 +261,24 @@ export const searchURF = async (req: ExqURFRequest): Promise<ExqURFResponse> => 
     return resp
 }
 
-export const searchVLM = async (req: ExqTextSearchRequest): Promise<ChatEntryQueryText> => {
-    if (mock) return { userQuery: req.text, vlmResults: [33,15,20,22]} // VBS / LSC
-    // return { userQuery: req.query, vlmResults: [10,20,14,50]} // Test
+export const searchText = async (req: ExqTextSearchRequest): Promise<ExqSearchResponse> => {
+    if (mock) {
+        if (req.text === 'test')
+            return { suggestions: [33,15,20,22]} // VBS / LSC
+        else 
+            return { suggestions: [21,59,68,25,99]} // VBS / LSC
+    }
     // Calling different server instead of the Exquisitor Server
-    const resp: { suggestions: number[] } = await fetch(exqURI+'/exq/search/text', {
+    let search_uri = '/exq/search/clip'
+    if (req.search_model == 'caption')
+        search_uri = '/exq/search/caption'
+    else if (req.search_model == 'aggregate')
+        search_uri = '/exq/search/aggregate'
+
+    delete req.search_model  // Remove before sending to server
+
+    console.log("Search object", req)
+    const resp: { suggestions: number[] } = await fetch(exqURI+search_uri, {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -264,11 +286,23 @@ export const searchVLM = async (req: ExqTextSearchRequest): Promise<ChatEntryQue
         },
         body: JSON.stringify(req)
     }).then(val => val.json())
-    console.log(resp)
-   return {userQuery: req.text, vlmResults: resp.suggestions}
+    return resp
 }
 
-export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<ChatEntryQueryPos> => {
+export const searchImage = async (req: ExqImageSearchRequest): Promise<ExqSearchResponse> => {
+    delete req.search_model  // Remove before sending to server
+    const resp: { suggestions: number[] } = await fetch(exqURI+'/exq/search/image', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req)
+    }).then(val => val.json())
+    return resp
+}
+
+export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<ExqQueryRewriteResponse> => {
     if (mock) return { userQuery: req.query, positive: req.positive, rewriteSuggestion: 'textual response' }
     const resp: string = await fetch('http://mandla-1:5001/rewriteQuery', {
         method: 'POST',
@@ -292,52 +326,29 @@ export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<C
 }
 
 
+export const searchTemporal = async (req: ExqTemporalSearchRequest): Promise<ExqSearchResponse> => {
+    if (mock) return { suggestions: Array(100).fill(0).map((_, idx) => idx + 1) }
+    const resp: { suggestions: number[] } = await fetch(exqURI+'/exq/search/temporal', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req)
+    }).then(val => val.json())
+    return resp
+}
+
 
 export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => {
     console.log("EvalId:", req.evalId);
     if (mock) return 
-    return await fetch(exqURI+'/dres/submit', {
+    await fetch(exqURI+'/dres/submit', {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    }).then()
-}
-
-export const clearItemSet = async (req: ExqClearItemSetRequest): Promise<void> => {
-    if (mock) return
-    return await fetch(exqURI+'/log/clearItemSet', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then()
-}
-
-export const clearURFModel = async (req: ExqSessionInfo): Promise<void> => {
-    if (mock) return
-    return await fetch(exqURI+'/log/clearURFModel', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then()
-}
-
-export const clearConversation = async (req: ExqSessionInfo): Promise<void> => {
-    if (mock) return
-    return await fetch(exqURI+'/log/clearConversation', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req)
-    }).then()
+    }).then(val => val.json)
 }
