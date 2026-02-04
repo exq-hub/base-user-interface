@@ -5,6 +5,7 @@
      >
         <template v-slot:activator="{ props }">
             <v-btn 
+            :data-eid="'open_delete_dialog_btn_' + id.toString()"
              class="v-btn--flat" 
              density="compact" 
              icon="mdi-close" 
@@ -13,7 +14,8 @@
         </template>
         <v-card class="bg-grey-lighten-4">
             <v-card-title 
-             class="text-center bg-red" >
+             class="text-center bg-red"
+            >
                 Delete {{ title }}
             </v-card-title>
             <v-card-text class="text-center">
@@ -24,6 +26,7 @@
              style="display:block"
              >
                 <v-btn 
+                 :data-eid="'confirm_delete_btn_' + id.toString()"
                  class="confirm" 
                  @click="emit('submit'); showDialog=false;"
                  >
@@ -38,6 +41,8 @@
 
 
 <script setup lang="ts">
+import { logEvents } from '@/services/ExquisitorAPI';
+import { useAppStore } from '@/stores/app';
 import { ref } from 'vue';
 
 interface Props {
@@ -45,11 +50,27 @@ interface Props {
     title: string,
     name: string,
 }
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const showDialog = ref(false)
 
 const emit = defineEmits(['submit'])
+
+watch(showDialog, (newVal) => {
+    if (!newVal) {
+        logEvents([{
+            ts: Date.now(),
+            action: `Close Delete Dialog`,
+            session: useAppStore().session,
+        }])
+    } else {
+        logEvents([{
+            ts: Date.now(),
+            action: 'Open Delete Dialog for'+props.title,
+            session: useAppStore().session,
+        }])
+    }
+})
 
 </script>
 

@@ -2,9 +2,9 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'
-import { ExqURFRequest } from '@/types/exq'
-import { searchURF, initModel, removeModel } from '@/services/ExquisitorAPI'
-import { useFilterStore } from './filter'
+import { ExqRFRequest } from '@/types/exq'
+import { searchRF, initModel, removeModel } from '@/services/ExquisitorAPI'
+import { useFeedbackStore } from './feedback'
 
 export const useModelStore = defineStore('model', () => {
     const nModels = ref(0)
@@ -53,18 +53,14 @@ export const useModelStore = defineStore('model', () => {
             collection: collection,
             name: mname, 
             settings: settings.value,
-            grid: [],
+            grid: [{ itemsToShow: defaultSettings().itemsToShow, items: [] }],
         })
-        // initializeModelItems(models.length-1)
-        // useFilterStore().loadFilters(models.length-1)
-        console.log(models)
         activeModel.value = models[models.length-1]
-        console.log(activeModel.value.id)
+        useFeedbackStore().getOrCreateRF(activeModel.value!.id)
     }
     
     function deleteModel(session: string, model: Model) : void {
         let indx = models.findIndex(e => e.id === model.id && e.name === model.name)
-        console.log(activeModel.value)
         if (models[indx].id === activeModel.value!.id) {
             if (indx > 0)
                 activeModel.value = models[indx-1]
@@ -74,8 +70,6 @@ export const useModelStore = defineStore('model', () => {
         let m : Model = models.splice(indx, 1)[0]
         removeModel({ session: session, modelId: model.id, collection: m.collection })
         console.log('Removed Model:', m.id)
-        console.log(m)
-        console.log(activeModel.value!.id)
     }
     
     // Load models from a saved file (assumed implementation)
@@ -121,8 +115,8 @@ export const useModelStore = defineStore('model', () => {
         models[indx].name = newName
     }
 
-    async function getSuggestions(req: ExqURFRequest, gridIdx: number, itemIdx?: number) {
-        let suggs = await searchURF(req) // Call Exquisitor
+    async function getSuggestions(req: ExqRFRequest, gridIdx: number, itemIdx?: number) {
+        let suggs = await searchRF(req) // Call Exquisitor
         let model = models.filter(e => e.id === req.session_info.modelId)[0] // Get model
         if (req.n == model.settings.itemsToShow) { // Is it a full update?
             // Returned items NOT equal to the requested amount

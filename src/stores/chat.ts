@@ -1,97 +1,138 @@
-import { searchVLM } from '@/services/ExquisitorAPI'
-import { ChatSession } from '@/types/chat'
-import { ExqTextSearchRequest } from '@/types/exq'
+import { searchImage, searchText } from '@/services/ExquisitorAPI'
+import { ChatQuery, ExqSearchResponse } from '@/types/chat'
+import { ExqImageSearchRequest, ExqTextSearchRequest } from '@/types/exq'
 import { defineStore } from 'pinia'
 import { useAppStore } from './app'
 import { useModelStore } from './model'
 import { useItemStore } from './item'
+import { useFilterStore } from './filter'
+import { ActiveFiltersDB, AppliedFilters } from '@/types/filter'
 
 export const useChatStore = defineStore('chat', () => {
-    const chatSessions = reactive<Map<number,ChatSession>>(new Map<number,ChatSession>())
-    const currentResultsQuery = ref('')
+    const chatSessions = reactive<Map<number,ChatQuery[]>>(new Map<number,ChatQuery[]>())
+    const currentQueryId = ref('')
     const modelStore = useModelStore()
     const appStore = useAppStore()
     const itemStore = useItemStore()
 
-    function getOrCreateChat(modelId: number): ChatSession {
+    function getOrCreateChat(modelId: number): ChatQuery[] {
         if (chatSessions.has(modelId)) {
             return chatSessions.get(modelId)!
         }
         chatSessions.set(
             modelId, 
-            {
-                queries: [],
-                filters: {},
-            }
+            [],
         )
         return chatSessions.get(modelId)!
     } 
 
-    async function search(modelId: number, queryText: string, current: boolean) {
-        // loading.value = true
+    async function search(
+        modelId: number,
+        queryName: string,
+        queryText: string,
+        current: boolean,
+        searchType: string,
+        searchModel: string,
+        activeFilters: AppliedFilters = {},
+        refresh: boolean,
+        n?: number
+    ): Promise<number[]> {
         let seen: number[] = []
+        let query = queryText
         let qIdx = -1
         if (current) {
-            qIdx = chatSessions.get(modelId)!.queries.findIndex((val) => val.text === queryText)
-            seen = chatSessions.get(modelId)!.queries[qIdx].resultIds
+            qIdx = chatSessions.get(modelId)!.findIndex(
+                (val) => val.id === currentQueryId.value 
+            )
+            seen = chatSessions.get(modelId)![qIdx].resultIds
+            query = chatSessions.get(modelId)![qIdx].text
+            searchType = chatSessions.get(modelId)![qIdx].searchType
+            // searchModel = chatSessions.get(modelId)![qIdx].searchModel
+        }
+        let n_items = modelStore.activeModel!.settings.itemsToShow
+        if (n !== undefined) {
+            n_items = n
         }
         let exclude : number[] = []
         if (itemStore.modelExcluded.has(modelStore.activeModel!.id)) {
             exclude = Array.from(itemStore.modelExcluded.get(modelStore.activeModel!.id)!)
         }
-        let reqObj : ExqTextSearchRequest = {
-            session_info: {
-                session: appStore.session,
-                collection: modelStore.activeModel!.collection,
-                modelId: modelStore.activeModel!.id
-            },
-            n: modelStore.activeModel!.settings.itemsToShow,
-            text: queryText,
-            seen: seen,
-            filters: {
-                names: [],
-                values: []
-            },
-            excluded: exclude
+        let prepFilters: ActiveFiltersDB | undefined = useFilterStore().prepareFilters(
+            modelStore.activeModel!.id, 
+            activeFilters
+        )
+
+        if (Object.keys(activeFilters).length !== 0) {
+            console.log(activeFilters)
+            // prepFilters = useFilterStore().prepareFilters(modelStore.activeModel!.id, activeFilters)
         }
-        // if (checkFilters.value) {
-            // let filters = useFilterStore().getModelFilters(modelStore.activeModel!.id)
-            // reqObj.filters = filters
-        // }
-        // if (checkHistory.value) {
-        //     let pos = itemStore.getSetItems(activeModel.value.id, ILSets.Positives).map((e,_) => e.id)
-        //     let neg = itemStore.getSetItems(activeModel.value.id, ILSets.Negatives).map((e,_) => e.id)
-        //     let hist = itemStore.getSetItems(activeModel.value.id, ILSets.History).map((e,_) => e.id)
-        //     hist.push(...pos)
-        //     hist.push(...neg)
-        //     hist.push(...activeModel.value.grid[0].items)
-        //     reqObj.seen = hist
-        // }
-        const resultIds = await searchVLM(reqObj).then((res) => {
-            // loading.value = false
-            // loaded.value = true
-            return res
-        })
-        console.log('resultIds:', resultIds.vlmResults)
+        let resultIds : ExqSearchResponse = { suggestions: [] }
+        if (searchType === 'text') {
+            let reqObj : ExqTextSearchRequest = {
+                session_info: {
+                    session: appStore.session,
+                    collection: modelStore.activeModel!.collection,
+                    modelId: modelStore.activeModel!.id
+                },
+                n: n_items,
+                text: query,
+                seen: seen,
+                filters: prepFilters,
+                excluded: exclude,
+                search_model: searchModel
+            }
+            resultIds = await searchText(reqObj).then((res) => {
+                return res
+            })
+        } else if (searchType === 'image') {
+            let reqObj : ExqImageSearchRequest = {
+                session_info: {
+                    session: appStore.session,
+                    collection: modelStore.activeModel!.collection,
+                    modelId: modelStore.activeModel!.id
+                },
+                n: n_items,
+                image_b64: query,
+                seen: seen,
+                filters: prepFilters,
+                excluded: exclude,
+                search_model: searchModel
+            }
+            resultIds = await searchImage(reqObj).then((res) => {
+                return res
+            })
+        }
+        console.log('resultIds:', resultIds.suggestions)
         if (!current) {
             const chat = chatSessions.get(modelId)
-            chat!.queries.push({
+            chat!.push({
                 id: generateUniqueId(),
-                text: queryText,
+                name: queryName,
+                text: query,
                 timestamp: Date.now(),
-                resultIds: resultIds.vlmResults
+                resultIds: resultIds.suggestions,
+                searchType: searchType,
+                searchModel: searchModel,
+                filters: activeFilters
             })
-            currentResultsQuery.value = queryText
-            return resultIds.vlmResults
+            currentQueryId.value = chat![chat!.length-1].id
+            return resultIds.suggestions
         } else {
-            chatSessions.get(modelId)!.queries[qIdx].resultIds.push(...resultIds.vlmResults)
-            return chatSessions.get(modelId)!.queries[qIdx].resultIds
+            if (!refresh) {
+                console.log('Using old resultIds array')
+                chatSessions.get(modelId)![qIdx].resultIds.push(...resultIds.suggestions)
+            } else {
+                console.log('New resultIds')
+                chatSessions.get(modelId)![qIdx].resultIds = resultIds.suggestions
+            }
+            chatSessions.get(modelId)![qIdx].filters = activeFilters
+            return chatSessions.get(modelId)![qIdx].resultIds
         }
     }
 
     return {
         chatSessions,
-        currentResultsQuery,
+        currentQueryId,
         getOrCreateChat,
         search
     }

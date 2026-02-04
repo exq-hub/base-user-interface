@@ -16,7 +16,7 @@
                 md="6"
                 lg="4"
             >
-                <v-card @click="onSelectCollection(collection.name)" class="mb-4" hover>
+                <v-card :data-eid="'collection_btn_' + collection.name" @click="onSelectCollection(collection.name)" class="mb-4" hover>
                     <v-card-title>{{ collection.name }}</v-card-title>
                     <v-card-text>
                         <div>{{ collection.description }}</div>

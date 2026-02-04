@@ -89,7 +89,7 @@
                  :btn-pos="true"
                  :btn-neg="false"
                  :btn-ignore="true"
-                 :btn-submit="true"
+                 :btn-submit="false"
                  :provided="true"
                  :overlay="false"
                  @replace="getNegatives"

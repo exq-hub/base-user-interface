@@ -1,13 +1,6 @@
 # exq-ui
 User Interface for Exquisitor.
 
-Routes:
-
-* /index: Split-Screen with Chat and User Relevance Feedback (In progress)
-* /chat: Chat only (Not Implemented)
-* /urf: URF only (Not Implemented)
-* /urf-multi: URF with multiple models (Not Implemented)
-
 
 ## Setup
 To install the application

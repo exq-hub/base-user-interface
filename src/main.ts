@@ -19,6 +19,11 @@ import { createApp } from 'vue'
 
 const app = createApp(App)
 
+app.config.warnHandler = (msg, instance, trace) => {
+  if (msg.includes('Slot "default" invoked outside of the render function')) return
+  console.warn(msg + trace)
+}
+
 registerPlugins(app)
 
 app.mount('#app')

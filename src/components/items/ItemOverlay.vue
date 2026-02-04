@@ -271,7 +271,7 @@ async function exclude() {
         })
         snack(true)
     } else {
-        itemStore.removeItemFromExclude(mainItem.value.id, props.modelId)
+        itemStore.removeItemFromExclude(mainItem.value.id)
         isExcluded.value = false
         // Logging
         clearExcludedGroups({

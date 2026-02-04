@@ -4,41 +4,30 @@
      rail
     >
         <v-list>
-            <v-list-item
-             prepend-icon="mdi-filter-outline"
-             @click="console.log('clicked filter'); filterToggle = !filterToggle;"
-            >
-            </v-list-item>
-
             <v-divider :thickness="30" class="border-opacity-0"></v-divider>
 
             <v-list-item
+             data-eid="left_panel_exclude_btn"
              prepend-icon="mdi-filter-remove-outline"
              @click="console.log('clicked excluded'); excludeToggle = !excludeToggle;"
             >
             </v-list-item>
 
-            <!-- <v-divider :thickness="30" class="border-opacity-0"></v-divider>
-
-            <v-list-item
-             prepend-icon="mdi-call-merge"
-             @click="console.log('clicked merge')"
-            >
-            </v-list-item> -->
-
             <v-divider :thickness="30" class="border-opacity-0"></v-divider>
 
             <v-list-item
+             data-eid="left_panel_positives_btn"
              prepend-icon="mdi-thumb-up-outline"
-             @click="console.log('clicked positives'); posToggle = !posToggle; getPositives()"
+             @click="console.log('clicked positives'); posToggle = !posToggle;"
             >
             </v-list-item>
 
             <v-divider :thickness="30" class="border-opacity-0"></v-divider>
 
             <v-list-item
+             data-eid="left_panel_negatives_btn"
              prepend-icon="mdi-thumb-down-outline"
-             @click="console.log('clicked negatives'); negToggle = !negToggle; getNegatives()"
+             @click="console.log('clicked negatives'); negToggle = !negToggle;"
             >
             </v-list-item>
 
@@ -53,16 +42,6 @@
         </v-list>
     </v-navigation-drawer>
     
-    <v-navigation-drawer 
-     v-if="filterToggle"
-     location="left"
-     color="indigo-lighten-3"
-    >
-        <filters
-         :color="'indigo-lighten-3'"
-         @filter-update="$emit('filterUpdate')"/>
-    </v-navigation-drawer>
-
     <v-navigation-drawer
      v-if="excludeToggle"
      location="left"
@@ -81,7 +60,9 @@
         class="text-center pt-3 pb-3"
         color="success"
         >
-            <v-btn size="small" icon="mdi-close" @click="clearPositives"></v-btn>
+            <v-btn :data-eid="'left_panel_clear_positives_btn_model_' + activeModelId" size="small" @click="clearPositives">
+                Clear List
+            </v-btn>
         </v-sheet>
         <v-list>
             <v-list-item 
@@ -91,7 +72,6 @@
                 <item 
                  :item-id="it.id"
                  :item-index="idx"
-                 :grid-index="-1"
                  :item="it"
                  :model-id="activeModelId"
                  :btn-pos="false"
@@ -100,7 +80,6 @@
                  :btn-submit="true"
                  :provided="true"
                  :overlay="false"
-                 @replace="getPositives"
                 />
             </v-list-item>
         </v-list>
@@ -115,7 +94,9 @@
          class="text-center pt-3 pb-3"
          color="error"
         >
-            <v-btn size="small" icon="mdi-close" @click="clearNegatives"></v-btn>
+            <v-btn :data-eid="'left_panel_clear_negatives_btn_model_' + activeModelId" size="small" @click="clearNegatives">
+                Clear List
+            </v-btn>
         </v-sheet>
         <v-list>
             <v-list-item
@@ -125,7 +106,6 @@
                 <item 
                  :item-id="it.id"
                  :item-index="idx"
-                 :grid-index="-1"
                  :item="it"
                  :model-id="activeModelId"
                  :btn-pos="true"
@@ -134,7 +114,6 @@
                  :btn-submit="true"
                  :provided="true"
                  :overlay="false"
-                 @replace="getNegatives"
                 />
             </v-list-item>
         </v-list>
@@ -149,7 +128,7 @@
          class="text-center pt-3 pb-3"
          color="grey"
         >
-            <v-btn size="small" icon="mdi-close" @click="clearHistory"></v-btn>
+            <v-btn data-eid="left_panel_clear_history_btn" size="small" icon="mdi-close" @click="clearHistory"></v-btn>
         </v-sheet>
         <v-list>
             <v-list-item
@@ -165,11 +144,11 @@
                  :btn-pos="true"
                  :btn-neg="true"
                  :btn-ignore="false"
-                 :btn-submit="true"
+                 :btn-submit="false"
                  :provided="true"
                  :overlay="false"
-                 @replace="getHistory"
                 />
+                 <!-- @replace="getHistory" -->
             </v-list-item>
         </v-list>
     </v-navigation-drawer>
@@ -178,18 +157,13 @@
 <script setup lang="ts">
 import { useItemStore } from '@/stores/item';
 import { computed, ref } from 'vue';
-import type MediaItem from '@/types/mediaitem';
 import Item from '@/components/items/Item.vue';
 import { useModelStore } from '@/stores/model';
 import { ILSets } from '@/types/mediaitem';
-import { clearItemSet } from '@/services/ExquisitorAPI';
-import { useAppStore } from '@/stores/app';
-import filters from '@/components/drawers/filters/Filters.vue'
 import ExcludedGroups from '@/components/drawers/filters/ExcludedGroups.vue';
 
-const filterToggle = ref(false)
+// const filterToggle = ref(false)
 const excludeToggle = ref(false)
-const session = useAppStore().session
 const itemStore = useItemStore()
 const activeModelId = computed(() => useModelStore().activeModel!.id)
 const { getSetItems, removeItemsFromSet } = itemStore
@@ -199,50 +173,20 @@ const posToggle = ref(false)
 const negToggle = ref(false)
 const histToggle = ref(false)
 
-const positives = ref<MediaItem[]>([])
-const negatives = ref<MediaItem[]>([])
-const history = ref<MediaItem[]>([])
-
-function getPositives() {
-    positives.value = getSetItems(activeModelId.value, ILSets.Positives)
-}
-
-function getNegatives() {
-    negatives.value = getSetItems(activeModelId.value, ILSets.Negatives)
-}
-
-function getHistory() {
-    history.value = getSetItems(activeModelId.value, ILSets.History)
-}
+const positives = computed(() => getSetItems(activeModelId.value, ILSets.Positives))
+const negatives = computed(() => getSetItems(activeModelId.value, ILSets.Negatives))
+const history = computed(() => getSetItems(activeModelId.value, ILSets.Negatives))
 
 function clearPositives() {
     removeItemsFromSet(positives.value.map((it) => it.id), activeModelId.value, ILSets.Positives)
-    positives.value = []
-    clearItemSet({
-        session: session,
-        modelId: activeModelId.value,
-        name: "positives"
-    })
 }
 
 function clearNegatives() {
     removeItemsFromSet(negatives.value.map((it) => it.id), activeModelId.value, ILSets.Negatives)
-    negatives.value = []
-    clearItemSet({
-        session: session,
-        modelId: activeModelId.value,
-        name: "negatives"
-    })
 }
 
 function clearHistory() {
     removeItemsFromSet(history.value.map((it) => it.id), activeModelId.value, ILSets.History)
-    history.value = []
-    clearItemSet({
-        session: session,
-        modelId: activeModelId.value,
-        name: "history"
-    })
 }
 </script>
 

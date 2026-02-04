@@ -9,8 +9,10 @@
 </template>
 
 <script lang="ts" setup>
+import router from './router';
 import { initSession } from './services/ExquisitorAPI';
 import { useAppStore } from './stores/app';
+import { createTracker } from './tracker';
 
 onMounted(async () => {
     await fetchInfo()
@@ -24,4 +26,7 @@ async function fetchInfo() {
     sessionobj.collections.forEach((val) => appStore.collections.push({name: val}))
 }
 
+createTracker({
+    getRoute: () => router.currentRoute.value.fullPath,
+})
 </script>

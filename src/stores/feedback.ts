@@ -1,0 +1,108 @@
+import { RFSession } from "@/types/feedback";
+import { defineStore } from "pinia";
+import { useItemStore } from "./item";
+import { ILSets } from "@/types/mediaitem";
+import { ExqRFRequest } from "@/types/exq";
+import { useAppStore } from "./app";
+import { useModelStore } from "./model";
+import { searchRF } from "@/services/ExquisitorAPI";
+import { useFilterStore } from "./filter";
+import { ActiveFiltersDB, AppliedFilters } from "@/types/filter";
+
+export const useFeedbackStore = defineStore('feedback', () => {
+    const itemStore = useItemStore()
+    const modelStore = useModelStore()
+    const rfSearches = reactive<Map<number,RFSession>>(new Map<number,RFSession>())
+
+    function getOrCreateRF(modelId: number): RFSession {
+        if (rfSearches.has(modelId)) {
+            return rfSearches.get(modelId)!
+        }
+        rfSearches.set(
+            modelId,
+            {
+                positives: [],
+                negatives: [],
+                filters: [],
+                resultIds: []
+            }
+        )
+        return rfSearches.get(modelId)!
+    } 
+
+    function setRFModelFilters(filters: AppliedFilters) {
+        const activeModelId = modelStore.activeModel!.id
+        const rfSearch = rfSearches.get(activeModelId!)
+        rfSearch!.filters = filters
+        rfSearches.set(activeModelId!, rfSearch!)
+    }
+
+    function getRFModelFilters(): AppliedFilters {
+        const activeModelId = modelStore.activeModel!.id
+        const rfSearch = rfSearches.get(activeModelId!)
+        return rfSearch!.filters
+    }
+
+    async function getFeedbackResults(
+        loadMore: boolean, 
+        query?: string,
+    ): Promise<number[]> {
+        const activeModelId = modelStore.activeModel!.id
+        let pos: number[] = []
+        let neg: number[] = []
+        let resIds: number[] = []
+        const rfSearch = rfSearches.get(activeModelId)!
+        let prepFilters: ActiveFiltersDB | undefined = undefined
+        if (Object.keys(rfSearch.filters!).length > 0) {
+            prepFilters = useFilterStore().prepareFilters(activeModelId, rfSearch.filters)
+        }
+        pos = itemStore.getSetItems(activeModelId, ILSets.Positives).map((e,_) => e.id)
+        neg = itemStore.getSetItems(activeModelId, ILSets.Negatives).map((e,_) => e.id)
+        if (loadMore) {
+            pos = rfSearch.positives
+            neg = rfSearch.negatives
+            resIds = rfSearch.resultIds
+        } else {
+            rfSearch.positives = pos
+            rfSearch.negatives = neg
+            rfSearch.resultIds = []
+        }
+        let hist:number[] = []
+        hist.push(...pos)
+        hist.push(...neg)
+        hist.push(...resIds)
+        let exclude : number[] = []
+        if (itemStore.modelExcluded.has(activeModelId)) {
+            exclude = Array.from(itemStore.modelExcluded.get(activeModelId)!)
+        }
+        let reqObj : ExqRFRequest = {
+            session_info: {
+                session: useAppStore().session, 
+                modelId: activeModelId,
+                collection: modelStore.getModelCollection(activeModelId)
+            },
+            n: modelStore.activeModel!.settings.itemsToShow,
+            pos: pos,
+            neg: neg,
+            seen: hist,
+            filters: prepFilters,
+            excluded: exclude,
+            query: query
+        }
+        // if (checkFilters.value) {
+        //     let filters = useFilterStore().getModelFilters(activeModel.value.id)
+        //     reqObj.filters = filters
+        // }
+        let suggs = await searchRF(reqObj)
+        resIds.push(...suggs.suggestions)
+        rfSearch.resultIds = resIds
+        return resIds
+    }
+
+    return {
+        getOrCreateRF,
+        setRFModelFilters,
+        getRFModelFilters,
+        getFeedbackResults
+    }
+})

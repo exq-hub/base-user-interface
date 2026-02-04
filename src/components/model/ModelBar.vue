@@ -9,11 +9,12 @@
         >
             <v-tab 
              v-for="m in models" 
+             :data-eid="'model_tab_' + m.id.toString()"
              :key="m.id" 
              :value="m"
             >
                 {{ m.name }}
-                <v-divider class="no-bg clr-transparent" :thickness="5" vertical /> 
+                <v-divider class="border-opacity-0" :thickness="5" vertical /> 
                 <delete-dialog
                  :id="m.id"
                  :name="m.name"
@@ -40,7 +41,6 @@ import { useAppStore } from '@/stores/app'
 import { computed, ref } from 'vue';
 import Model from '@/types/model';
 import { useItemStore } from '@/stores/item';
-import { defineEmits } from 'vue/dist/vue.js';
 
 // Stores
 const appStore = useAppStore()

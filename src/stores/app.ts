@@ -1,3 +1,4 @@
+import { getMainURI } from "@/services/ExquisitorAPI"
 import { defineStore } from "pinia"
 interface Collection {
     name: string
@@ -10,6 +11,7 @@ export const useAppStore = defineStore('app', () => {
     const success = ref(true)
     const evaluations: {id: string, name: string}[] = reactive([])
     const selectedEvaluation: {id: string, name: string} = reactive({id: '', name: ''})
+    const exqURI = getMainURI()
 
     return {
         selectedEvaluation,
@@ -17,5 +19,6 @@ export const useAppStore = defineStore('app', () => {
         collections,
         success,
         evaluations,
+        exqURI
     }
 })
