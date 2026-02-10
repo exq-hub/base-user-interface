@@ -88,7 +88,6 @@
 import { submitAnswer } from '@/services/ExquisitorAPI';
 import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
-// import ItemOverlay from './ItemOverlay.vue';
 import MediaItem, { GroupMetadata, ILSets, MediaType } from '@/types/mediaitem';
 import { useModelStore } from '@/stores/model';
 
@@ -175,9 +174,9 @@ function addToSet(itemId: number, ilset: ILSets) {
         if (item.metadata === undefined) {
             itemStore.fetchItemInfo(props.modelId, item.id).then((meta) => {
                 item.metadata = meta
-                submitAnswer({ 
+                submitAnswer({
                     session_info: {
-                        session: useAppStore().session, 
+                        session: useAppStore().session,
                         modelId: props.modelId,
                         collection: modelStore.getModelCollection(props.modelId)
                     },
@@ -190,9 +189,9 @@ function addToSet(itemId: number, ilset: ILSets) {
                 })
             })
         } else {
-            submitAnswer({ 
+            submitAnswer({
                 session_info: {
-                    session: useAppStore().session, 
+                    session: useAppStore().session,
                     modelId: props.modelId,
                     collection: modelStore.getModelCollection(props.modelId)
                 },
@@ -235,7 +234,7 @@ async function accessOverlay() {
             }
         }
     }
-    openOverlay.value = true; 
+    openOverlay.value = true;
 }
 
 onBeforeUnmount(() => {

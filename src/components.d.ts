@@ -15,13 +15,9 @@ declare module 'vue' {
     Dropdown: typeof import('./components/general/Dropdown.vue')['default']
     EditTextField: typeof import('./components/general/EditTextField.vue')['default']
     ExcludedGroups: typeof import('./components/drawers/filters/ExcludedGroups.vue')['default']
-    ImageUploadDialog: typeof import('./components/search/ImageUploadDialog.vue')['default']
     Item: typeof import('./components/items/Item.vue')['default']
-    ItemOverlay: typeof import('./components/items/ItemOverlay.vue')['default']
-    ItemSet: typeof import('./components/drawers/ItemSet.vue')['default']
     LeftPanel: typeof import('./components/model/LeftPanel.vue')['default']
     MediaViewer: typeof import('./components/viewer/MediaViewer.vue')['default']
-    Merge: typeof import('./components/drawers/Merge.vue')['default']
     ModelBar: typeof import('./components/model/ModelBar.vue')['default']
     RelatedItemsGrid: typeof import('./components/viewer/RelatedItemsGrid.vue')['default']
     ResultGrid: typeof import('./components/search/ResultGrid.vue')['default']
@@ -31,6 +27,5 @@ declare module 'vue' {
     SearchDialog: typeof import('./components/search/SearchDialog.vue')['default']
     SettingsForm: typeof import('./components/model/SettingsForm.vue')['default']
     TempSearchDialog: typeof import('./components/search/TempSearchDialog.vue')['default']
-    VideoPlayer: typeof import('./components/viewer/VideoPlayer.vue')['default']
   }
 }

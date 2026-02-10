@@ -8,7 +8,7 @@
             </span>
             <v-tooltip text="Close Viewer">
                 <template #activator="{ props }">
-                    <v-btn 
+                    <v-btn
                      data-eid="media_viewer_close_btn"
                      v-bind="props"
                      size=small
@@ -64,12 +64,12 @@
                  v-for="m in Object.keys(selectedGroup.metadata!)"
                  :key="m"
                 >
-                <v-col 
+                <v-col
                  v-if="filterStore.isGroup(m)"
                  cols="12"
                  md="12"
                 >
-                    <div 
+                    <div
                      style="font-size: 0.9rem"
                     >
                         <strong>{{ m }}:</strong>
@@ -131,12 +131,12 @@
                  v-for="m in Object.keys(selectedItem.metadata!)"
                  :key="m"
                 >
-                <v-col 
+                <v-col
                  v-if="filterStore.isMain(m)"
                  cols="12"
                  md="6"
                 >
-                    <div 
+                    <div
                      style="font-size: 0.9rem"
                     >
                         <strong>{{ m }}:</strong>
@@ -195,19 +195,19 @@
                     <template
                      v-for="m in Object.keys(selectedItem.metadata!)"
                     >
-                    <v-col 
+                    <v-col
                      v-if="!filterStore.isMain(m)"
                      cols="12"
                      md="6"
                     >
-                        <div 
+                        <div
                          style="font-size: 0.9rem"
                         >
                             <strong>{{ m }}:</strong>
                             <template v-if="Array.isArray(selectedItem.metadata![m])">
                                 <span
                                     v-for="i in selectedItem.metadata![m]"
-                                    v-if="selectedItem.metadata![m][0] !== '[]'"
+                                    v-if="Array(selectedItem.metadata![m])[0] !== '[]'"
                                     :key="i"
                                     class="ma-1"
                                     label
@@ -238,9 +238,9 @@
 
             </div>
         </v-expand-transition>
-        
+
         <v-divider class="border-opacity-0" :thickness="10" />
-        
+
         <!-- Main Viewer Content -->
         <v-card-text style="text-align: center; justify-content: center;">
             <div v-if="selectedGroup.groupMediaType === MediaType.Video">
@@ -260,7 +260,7 @@
                 >
                     Your browser does not support the video tag.
                 </video>
-            
+
                 <div>
                     <v-switch
                      data-eid="loop_video_segment_btn"
@@ -278,7 +278,7 @@
              v-else-if="selectedItem.mediaType === MediaType.Audio"
              :item="selectedItem"
             />
-            <v-btn 
+            <v-btn
              color="indigo"
              @click="submitCurrent"
              data-eid="media_viewer_submit_btn"
@@ -286,7 +286,7 @@
                 Submit ({{ Math.round(currentTime) }})
             </v-btn>
         </v-card-text>
-        
+
         <!-- <v-divider :thickness="20" class="border-opacity-0" v-if="hasRelatedItems"/> -->
         <v-card-subtitle v-if="hasRelatedItems" class="text-center pb-4">
             <span v-if="selectedItem.mediaType === MediaType.Video">
@@ -366,7 +366,7 @@ async function checkExclude() {
     const excludedItems = Array.from(itemStore.modelExcluded.get(modelId)!)
     isExcluded.value = await isGroupExcluded({
         session_info: {
-            session: useAppStore().session, 
+            session: useAppStore().session,
             collection: useModelStore().getModelCollection(modelId),
             modelId: modelId
         },
@@ -387,7 +387,7 @@ function teardownVideo() {
     vid.load()
 }
 
-watch ( 
+watch (
     () => selectedItem.value.srcPath,
     () => {
         // teardownVideo()
@@ -397,7 +397,7 @@ watch (
 watch (
     () => selectedItem.value.id,
     async () => {
-        updateSelected() 
+        updateSelected()
         await checkExclude()
         if (selectedGroup.value.groupMediaType === MediaType.Video) {
             await nextTick()
@@ -428,7 +428,7 @@ async function exclude() {
 }
 
 const emit = defineEmits<{
-    (e: 'closeMediaViewer'): void 
+    (e: 'closeMediaViewer'): void
 }>()
 
 
@@ -442,7 +442,7 @@ function updateSegment() {
     logEvents([{
         ts: Date.now(),
         action: 'Video Segment Loaded (media item: ' + selectedItem.value.id + ')',
-        session: useAppStore().session, 
+        session: useAppStore().session,
         data: JSON.stringify({
             itemId: selectedItem.value.id,
             vid: selectedGroup.value.src,
@@ -492,12 +492,12 @@ function submitCurrent() {
     // }
     // if (end > (videoPlayer.value! as HTMLMediaElement).duration) {
     //     end = (videoPlayer.value! as HTMLMediaElement).duration * 1000
-    //     start = end - 2000 
+    //     start = end - 2000
     // }
     console.log('Submitting answer for time:', start, end, currentTime.value)
-    submitAnswer({ 
+    submitAnswer({
         session_info: {
-            session: useAppStore().session, 
+            session: useAppStore().session,
             modelId: activeModelId.value,
             collection: modelStore.getModelCollection(activeModelId.value)
         },

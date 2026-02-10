@@ -29,7 +29,7 @@
         </v-list>
     </v-navigation-drawer>
 
-    <v-navigation-drawer 
+    <v-navigation-drawer
      v-if="posToggle"
      location="right"
      color="success"
@@ -42,11 +42,11 @@
             <v-btn size="small" icon="mdi-close" @click="clearPositives"></v-btn>
         </v-sheet>
         <v-list>
-            <v-list-item 
+            <v-list-item
              v-for="(it,idx) in positives"
              :key="'pos'+it.id+idx"
             >
-                <item 
+                <item
                  :item-id="it.id"
                  :item-index="idx"
                  :grid-index="-1"
@@ -63,8 +63,8 @@
             </v-list-item>
         </v-list>
     </v-navigation-drawer>
-    
-    <v-navigation-drawer 
+
+    <v-navigation-drawer
      v-if="negToggle"
      location="right"
      color="error"
@@ -80,7 +80,7 @@
              v-for="(it,idx) in negatives"
              :key="'neg'+it.id+idx"
             >
-                <item 
+                <item
                  :item-id="it.id"
                  :item-index="idx"
                  :grid-index="-1"
@@ -98,7 +98,7 @@
         </v-list>
     </v-navigation-drawer>
 
-    <v-navigation-drawer 
+    <v-navigation-drawer
      v-if="histToggle"
      location="right"
      color="grey"
@@ -114,7 +114,7 @@
              v-for="(it,idx) in history"
              :key="'hist'+it.id+idx"
             >
-                <item 
+                <item
                  :item-id="it.id"
                  :item-index="idx"
                  :grid-index="-1"
@@ -142,10 +142,7 @@ import type MediaItem from '@/types/mediaitem';
 import Item from '@/components/items/Item.vue';
 import { useModelStore } from '@/stores/model';
 import { ILSets } from '@/types/mediaitem';
-import { clearItemSet } from '@/services/ExquisitorAPI';
-import { useAppStore } from '@/stores/app';
 
-const session = useAppStore().session
 const itemStore = useItemStore()
 const activeModelId = computed(() => useModelStore().activeModel!.id)
 const { getSetItems, removeItemsFromSet } = itemStore
@@ -173,31 +170,16 @@ function getHistory() {
 function clearPositives() {
     removeItemsFromSet(positives.value.map((it) => it.id), activeModelId.value, ILSets.Positives)
     positives.value = []
-    clearItemSet({
-        session: session,
-        modelId: activeModelId.value,
-        name: "positives"
-    })
 }
 
 function clearNegatives() {
     removeItemsFromSet(negatives.value.map((it) => it.id), activeModelId.value, ILSets.Negatives)
     negatives.value = []
-    clearItemSet({
-        session: session,
-        modelId: activeModelId.value,
-        name: "negatives"
-    })
 }
 
 function clearHistory() {
     removeItemsFromSet(history.value.map((it) => it.id), activeModelId.value, ILSets.History)
     history.value = []
-    clearItemSet({
-        session: session,
-        modelId: activeModelId.value,
-        name: "history"
-    })
 }
 
 </script>
