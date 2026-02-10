@@ -5,7 +5,7 @@ User Interface for Exquisitor.
 ## Setup
 To install the application
 ```
-npm clean-install
+npm install
 ```
 
 Currently uses mock data by default, which is set in src/services/ExquisitorAPI.ts `mock=true`.
