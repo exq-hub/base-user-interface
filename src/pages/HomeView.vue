@@ -2,6 +2,11 @@
     <v-container class="text-center">
         <h1 class="text-h1">Welcome to Exquisitor</h1>
         <br/>
+
+        <v-alert v-if="!appStore.success" type="error" class="mb-4">
+            Could not connect to the Exquisitor backend. Check that the server is running and reachable.
+        </v-alert>
+
         <v-row>
             <v-col cols="12">
                 <h1 class="text-h4">Select a Collection</h1>
@@ -28,13 +33,14 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { useAppStore } from '@/stores/app';
 import { useModelStore } from '@/stores/model';
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const appStore = useAppStore()
-const collections = appStore.collections
+const { collections } = storeToRefs(appStore)
 const modelStore = useModelStore()
 
 async function onSelectCollection(collection: string) {

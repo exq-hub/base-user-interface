@@ -20,10 +20,15 @@ onMounted(async () => {
 
 const appStore = useAppStore()
 async function fetchInfo() {
-    const sessionobj = await initSession()
-    appStore.session = sessionobj.session
-    appStore.evaluations = sessionobj.evaluations
-    sessionobj.collections.forEach((val) => appStore.collections.push({name: val}))
+    try {
+        const sessionobj = await initSession()
+        appStore.session = sessionobj.session
+        appStore.evaluations = sessionobj.evaluations
+        sessionobj.collections.forEach((val) => appStore.collections.push({name: val}))
+    } catch (err) {
+        appStore.success = false
+        console.error('Failed to initialise session:', err)
+    }
 }
 
 createTracker({
