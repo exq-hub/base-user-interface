@@ -45,7 +45,7 @@
     <v-navigation-drawer
      v-if="excludeToggle"
      location="left"
-     color="orange-lighten-2"
+     color="grey-lighten-3"
     >
         <excluded-groups />
     </v-navigation-drawer>

@@ -59,7 +59,7 @@ button {
 }
 
 .dropContent:hover {
-    background: rgba(140, 211, 140, 0.856);
-    color: black;
+    background: rgba(21, 101, 192, 0.12);
+    color: #1565C0;
 }
 </style>

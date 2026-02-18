@@ -168,7 +168,7 @@ function addToSet(itemId: number, ilset: ILSets) {
             text.value = 'EvaluationId is not set!'
             return
         }
-        snackColor.value = 'indigo'
+        snackColor.value = 'primary'
 
         let item = itemStore.items.get(collection)!.get(itemId)!
         if (item.metadata === undefined) {

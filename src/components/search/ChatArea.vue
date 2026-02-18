@@ -11,9 +11,9 @@
                  @keyup.enter="search"
                 />
                 <div class="d-flex align-center ga-2">
-                    <v-btn 
+                    <v-btn
                      data-eid="chat_search_btn"
-                     color="teal"
+                     color="primary"
                      @click="search">
                      <v-icon>mdi-magnify</v-icon>
                      <v-divider class="border-opacity-0" vertical :thickness="5"/>
@@ -22,7 +22,7 @@
 
                     <v-btn
                      data-eid="chat_adv_search_btn"
-                     color="indigo"
+                     color="primary"
                      @click="openAdvancedFromBar"
                      >
                         <v-icon>mdi-filter-outline</v-icon>
@@ -31,7 +31,7 @@
                     <v-spacer />
                     <v-btn
                      data-eid="chat_image_upload_btn"
-                     color="green"
+                     color="primary"
                      @click="openImageUploadDialog"
                     >
                         <v-icon>mdi-image-plus</v-icon>
@@ -87,7 +87,7 @@
                             <v-btn
                              :data-eid="'show_results_btn_' + item.name"
                              text
-                             color="blue"
+                             color="primary"
                              size="small"
                              @click="onShowResults(item.id, item.resultIds)"
                             >
@@ -130,7 +130,7 @@
             <v-btn
              v-if="temporalSelection.length > 1"
              data-eid="temporal_dialog_btn"
-             color="orange-darken-4"
+             color="primary"
              class="ma-2"
              @click="openTemporalDialog"
             >
@@ -139,7 +139,7 @@
             <v-btn
              v-if="temporalSelection.length > 1"
              data-eid="clear_temporal_selection_btn"
-             color="red-darken-4"
+             color="error"
              class="ma-2"
              @click="temporalSelection = []"
             >
@@ -329,7 +329,7 @@ async function search(refresh=false) {
 .highlight {
     border: 4px solid;
     border-radius: 4px;
-    border-color: rgb(195, 0, 255);
+    border-color: #1565C0;
 }
 .outline {
     border: 4px solid;

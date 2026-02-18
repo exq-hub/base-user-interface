@@ -2,7 +2,7 @@
     <!-- Button Sheet -->
     <v-sheet
      class="text-center pt-3 pb-3"
-     color="orange-lighten-2"
+     color="grey-lighten-3"
     >
         <v-btn :data-eid="'exc_groups_clear_btn_model_' + activeModelId" size="small" @click="clearExcluded">
             Clear List

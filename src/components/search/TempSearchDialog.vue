@@ -4,7 +4,7 @@
             <template v-slot:loader="{ isActive }">
                 <v-progress-linear
                  :active="isActive"
-                 color="deep-purple"
+                 color="primary"
                  height="4"
                  indeterminate
                 ></v-progress-linear>
@@ -20,7 +20,7 @@
                  class="ma-2"
                  @click="addOrRemoveSelection(q)"
                 >
-                    <v-card-item class="text-center text-h6" style="border:2px solid; color:blue;">
+                    <v-card-item class="text-center text-h6" style="border:2px solid; color:#1565C0;">
                         {{ orderedSelection.indexOf(q) + 1 }}
                     </v-card-item>
                     <v-card-title>{{ q.name }}</v-card-title>
@@ -50,7 +50,7 @@
             <v-card-actions>
                 <v-btn
                  class=""
-                 color="red"
+                 color="error"
                  variant="outlined"
                  @click="clearOrderedSelection; logEvents([{
                     ts: Date.now(),

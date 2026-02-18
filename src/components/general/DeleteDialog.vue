@@ -14,7 +14,7 @@
         </template>
         <v-card class="bg-grey-lighten-4">
             <v-card-title 
-             class="text-center bg-red"
+             class="text-center bg-error"
             >
                 Delete {{ title }}
             </v-card-title>
@@ -81,9 +81,9 @@ watch(showDialog, (newVal) => {
 }
 
 .confirm:hover {
-    color: #81C784
+    color: rgb(var(--v-theme-error));
 }
 .close:hover {
-    color: #E57373
+    color: rgb(var(--v-theme-on-surface-variant));
 }
 </style>

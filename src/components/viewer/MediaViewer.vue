@@ -13,7 +13,6 @@
                      v-bind="props"
                      size=small
                      icon
-                     color=red
                      @click="teardownVideo(); emit('closeMediaViewer')"
                     >
                         <v-icon>mdi-close</v-icon>
@@ -26,7 +25,7 @@
                 <v-btn
                  data-eid="media_viewer_exclude_video_btn"
                  v-bind="props"
-                 :color="isExcluded ? 'grey' : 'yellow'"
+                 :color="isExcluded ? 'grey' : 'primary'"
                  @click="exclude"
                  class="ml-5 mr-10"
                  size="small"
@@ -279,7 +278,7 @@
              :item="selectedItem"
             />
             <v-btn
-             color="indigo"
+             color="primary"
              @click="submitCurrent"
              data-eid="media_viewer_submit_btn"
             >
@@ -483,7 +482,7 @@ function submitCurrent() {
         text.value = 'EvaluationId is not set!'
         return
     }
-    snackColor.value = 'indigo'
+    snackColor.value = 'primary'
 
     let start = (currentTime.value) * 1000
     let end = (currentTime.value) * 1000
