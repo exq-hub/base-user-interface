@@ -25,29 +25,22 @@
         </v-card-title>
         <h4 class="text-center" v-if="shownIds.length === 0">Results will appear here</h4>
         <v-card-text :key="resultKey">
-            <v-container v-if="!groupView">
-                <div class="result-items-grid">
-                    <div
-                     v-for="it,itIdx in shownIds"
-                     :key="activeModelId+it.toString()+itIdx.toString()"
-                     cols="auto"
-                     class="d-flex flex-column align-center mb-2"
-                    >
-                        <item 
-                         :item-id="it"
-                         :item-index="itIdx"
-                         :model-id="activeModelId"
-                         :btn-pos="true"
-                         :btn-neg="true"
-                         :btn-ignore="false"
-                         :btn-submit="true"
-                         :provided="false"
-                         :overlay="true"
-                         @replace-overlay="updateItem"
-                        />
-                    </div>
-                </div>
-            </v-container>
+            <div v-if="!groupView" class="result-items-grid">
+                <item
+                 v-for="it,itIdx in shownIds"
+                 :key="activeModelId+it.toString()+itIdx.toString()"
+                 :item-id="it"
+                 :item-index="itIdx"
+                 :model-id="activeModelId"
+                 :btn-pos="true"
+                 :btn-neg="true"
+                 :btn-ignore="false"
+                 :btn-submit="false"
+                 :provided="false"
+                 :overlay="true"
+                 @replace-overlay="updateItem"
+                />
+            </div>
             <v-container v-else>
                 <div v-for="k in groups.keys()" class="pb-5">
                     <v-divider class="border-opacity-75 pb-2"/>
@@ -60,18 +53,20 @@
                          v-for="it in groups.get(k)?.sort()"
                          :key="k.toString().concat('-', it.toString())"
                         >
-                            <item 
-                            :item-id="it"
-                            :item-index="0"
-                            :model-id="activeModelId"
-                            :btn-pos="true"
-                            :btn-neg="true"
-                            :btn-ignore="false"
-                            :btn-submit="true"
-                            :provided="false"
-                            :overlay="true"
-                            @replace-overlay="updateItem"
-                            />
+                            <div style="width: 180px; flex-shrink: 0;">
+                                <item
+                                :item-id="it"
+                                :item-index="0"
+                                :model-id="activeModelId"
+                                :btn-pos="true"
+                                :btn-neg="true"
+                                :btn-ignore="false"
+                                :btn-submit="false"
+                                :provided="false"
+                                :overlay="true"
+                                @replace-overlay="updateItem"
+                                />
+                            </div>
                         </v-slide-group-item>
                     </v-slide-group>
                     <v-divider class="border-opacity-75 pb-2"/>
@@ -79,11 +74,11 @@
             </v-container>
         </v-card-text>
 
-        <v-card-actions>
-            <v-btn data-eid="load_more_btn" color="primary" @click="onLoadMore">
+        <div class="load-more-row">
+            <v-btn data-eid="load_more_btn" color="primary" variant="text" @click="onLoadMore">
                 Load More
             </v-btn>
-        </v-card-actions>
+        </div>
     </v-card>
 </template>
 
@@ -188,23 +183,23 @@ function updateItem(id: number) {
 </script>
 
 <style scoped>
-.thumbnail-wrapper {
-    width: 100%;
-    position: relative;
-    cursor: pointer;
-    overflow: hidden;
-}
-
 .result-items-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 3px;
     max-height: 80vh;
     overflow-y: auto;
+    padding: 4px;
+}
+
+.load-more-row {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 4px;
 }
 
 .feedback-btn-area {
-    float: right; 
+    float: right;
     margin-left: auto;
 }
 </style>
