@@ -50,12 +50,10 @@ export const useFilterStore = defineStore('filter', () => {
                         }
                     })
                 })
-        await filtersInfo.get(modelId)!.forEach(async (f) => {
-            await getFilterValues(session, useModelStore().getModelCollection(modelId), f.tagtypeId, f.id)
-                    .then((vals: FilterValue[]) => { 
-                        f.values = vals
-                    })
-        }) 
+        await Promise.all(filtersInfo.get(modelId)!.map(async (f) => {
+            const vals = await getFilterValues(session, useModelStore().getModelCollection(modelId), f.tagtypeId, f.id)
+            f.values = vals
+        }))
         console.log(filtersInfo.get(modelId)!)
         filtersLoaded.value = true
     }

@@ -68,30 +68,26 @@ export const useItemStore = defineStore('item', () => {
    }
     
     async function fetchMediaItems(exqIds: number[], modelId: number, collection: string) : Promise<MediaItem[]> {
-        var mediaItems : MediaItem[] = []
         if (!items.has(collection)) {
             items.set(collection, new Map<number, MediaItem>())
         }
-        exqIds.forEach(async (v,_) => {
-            if (modelItems.has(modelId)) {
-                modelItems.get(modelId)!.add(v)
-            } else {
-                modelItems.set(modelId, new Set<number>())
-                modelItems.get(modelId)!.add(v)
-            }           
+        const mediaItems: MediaItem[] = await Promise.all(exqIds.map(async (v) => {
+            const modelSet = modelItems.get(modelId) ?? new Set<number>()
+            modelSet.add(v)
+            if (!modelItems.has(modelId)) {
+                modelItems.set(modelId, modelSet)
+            }
             if (items.get(collection)!.has(v)) {
-                // console.log('Getting ', items.get(collection)!.get(v))
                 if (!items.get(collection)!.get(v)!.currentSets!.has(modelId)) {
                     items.get(collection)!.get(v)!.currentSets!.set(modelId, [false,false,false,false])
                 }
-                mediaItems.push(items.get(collection)!.get(v)!)
+                return items.get(collection)!.get(v)!
             } else {
                 const item = await getItem(useAppStore().session, v, modelId, collection)
-                // console.log('Inserting ', item)
                 items.get(collection)!.set(v, item)
-                mediaItems.push(item)
-            }    
-        })
+                return item
+            }
+        }))
         return mediaItems
     }
 
