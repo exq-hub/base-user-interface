@@ -25,19 +25,16 @@ import type { ExqSearchResponse, ExqQueryRewriteResponse } from "@/types/chat"
 import { useAppStore } from "@/stores/app"
 import { FilterInfo, FilterValue } from "@/types/filter"
 
-const exqURI = 'https://localhost:5000'
+const exqURI = 'https://localhost:5001'
+const queryRewriteURI = 'http://mandla-1:5001'
 const mock = false
 
 
 function generateString(length: number) : string {
-    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    const charactersLength = characters.length;
-    for ( let i = 0; i < length; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-
-    return result;
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const randomValues = new Uint32Array(length)
+    crypto.getRandomValues(randomValues)
+    return Array.from(randomValues, v => characters[v % characters.length]).join('')
 }
 
 export const getMainURI = () => { return exqURI } 
@@ -71,7 +68,7 @@ export const initModel = (req: ExqSessionInfo): void => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    })
+    }).catch(err => console.error('initModel failed:', err))
 }
 
 export const removeModel = (req: ExqSessionInfo) : void => {
@@ -83,7 +80,7 @@ export const removeModel = (req: ExqSessionInfo) : void => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    })
+    }).catch(err => console.error('removeModel failed:', err))
 }
 
 // Get information for collections 
@@ -105,7 +102,7 @@ export const logEvents = (events: ClientEvent[]): void => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(events),
-    }).then()
+    }).catch(err => console.error('logEvents failed:', err))
 }
 
 
@@ -231,7 +228,7 @@ export const excludeGroup = async (req: ExqExcludeGroupRequest): Promise<void> =
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    }).then()
+    }).then(() => {}).catch(err => console.error('excludeGroup failed:', err))
 }
 
 export const isGroupExcluded = async (req: ExqIsExcludedRequest): Promise<boolean> => {
@@ -304,7 +301,7 @@ export const searchImage = async (req: ExqImageSearchRequest): Promise<ExqSearch
 
 export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<ExqQueryRewriteResponse> => {
     if (mock) return { userQuery: req.query, positive: req.positive, rewriteSuggestion: 'textual response' }
-    const resp: string = await fetch('http://mandla-1:5001/rewriteQuery', {
+    const resp: string = await fetch(queryRewriteURI+'/rewriteQuery', {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -312,7 +309,7 @@ export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<E
         },
         body: JSON.stringify(req)
     }).then(val => val.json())
-    // Logging on Exqusitor server
+    // Logging on Exquisitor server (fire-and-forget)
     fetch(exqURI+'/rewriteQueryLog', {
         method: 'POST',
         mode: 'cors',
@@ -320,7 +317,7 @@ export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<E
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({query: req.query, positive: req.positive, caption: resp})
-    }).then(val => val.json())
+    }).catch(err => console.error('rewriteQueryLog failed:', err))
 
     return {userQuery: req.query, positive: req.positive, rewriteSuggestion: resp}
 }
@@ -350,5 +347,5 @@ export const submitAnswer = async (req: ExqSubmissionRequest): Promise<void> => 
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    }).then(val => val.json)
+    }).then(val => val.json())
 }
