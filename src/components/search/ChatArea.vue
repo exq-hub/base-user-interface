@@ -1,7 +1,13 @@
 <!-- src/components/ChatArea.vue -->
 <template>
     <v-card data-eid="chat_area_card">
-        <!-- <v-card-title></v-card-title> -->
+        <v-card-title class="d-flex align-center justify-space-between py-2 px-3">
+            <span class="text-body-2 font-weight-medium">Search</span>
+            <v-btn icon size="x-small" variant="plain" @click="emit('collapse')">
+                <v-icon>mdi-chevron-left</v-icon>
+            </v-btn>
+        </v-card-title>
+        <v-divider/>
         <v-card-text>
             <div class="pb-5">
                 <v-text-field
@@ -64,66 +70,40 @@
              max-height="70vh"
             >
                 <template v-slot:default="{ item }">
-                    <div class="pa-1" :class="{highlight : item.id === currentQuery, outline: item.id !== currentQuery }">
-                        <div v-if="item.searchType === 'text' || item.searchType === 'temporal'" class="font-weight-bold">{{ item.name }}</div>
-                        <img v-if="item.searchType === 'image'" :src="item.name" class="w-50"></img>
-                        <div class="text-caption">Time: {{ formatTime(item.timestamp) }}</div>
-                        <div class="text-caption">Search Type: {{ item.searchType.toUpperCase() }} | {{ item.searchModel.toUpperCase() }}</div>
-                        <div class="text-caption">
-                            Filters: 
-                            <span v-if="!checkFilters(item.filters)">
-                                None
-                            </span>
-                            <template v-else>
-                                <template v-for="(value, tagsetId, index) in item.filters" :key="index">
-                                    <span v-if="value.toString() !== ''">
-                                        (<i>{{ useFilterStore().filtersInfo.get(props.modelId)!.filter((x) => x.id === Number(tagsetId))[0]?.name }}</i> &mdash; 
-                                        {{ value.map((v) => v.value).toString() + ', ' }})
-                                    </span>
-                                </template>
+                    <div
+                     class="query-entry"
+                     :class="{ 'query-entry--active': item.id === currentQuery }"
+                     :data-eid="'show_results_btn_' + item.name"
+                     @click="onShowResults(item.id, item.resultIds)"
+                    >
+                        <img v-if="item.searchType === 'image'" :src="item.name" class="query-image"/>
+                        <div v-else class="query-name text-body-2">{{ item.name }}</div>
+                        <div class="query-time">{{ formatTime(item.timestamp) }}</div>
+                        <div v-if="checkFilters(item.filters)" class="query-filters text-caption">
+                            <template v-for="(value, tagsetId, index) in item.filters" :key="index">
+                                <span v-if="value.toString() !== ''">
+                                    {{ useFilterStore().filtersInfo.get(props.modelId)!.filter((x) => x.id === Number(tagsetId))[0]?.name }}
+                                </span>
                             </template>
                         </div>
-                        <div class="d-flex align-center ga-2">
-                            <v-btn
-                             :data-eid="'show_results_btn_' + item.name"
-                             text
-                             color="primary"
-                             size="small"
-                             @click="onShowResults(item.id, item.resultIds)"
-                            >
-                                Show Results
-                            </v-btn>
-                            <!-- <v-btn
-                             :data-eid="'edit_advanced_btn_' + item.name"
-                             text
-                             :color="item.id === currentQuery ? 'indigo' : 'grey'"
-                             size="small"
-                             :readonly="item.id !== currentQuery"
-                             @click="openAdvancedFromHistory(item)"
-                            >
-                                <v-icon>mdi-pencil</v-icon>
-                            </v-btn> -->
+                        <div class="d-flex align-center" @click.stop>
                             <v-checkbox
-                                v-bind="props"
-                                :data-eid="'temporal_selection_checkbox_' + item.name"
-                                v-model="temporalSelection"
-                                :value="item"
-                                class="d-flex"
+                             :data-eid="'temporal_selection_checkbox_' + item.name"
+                             v-model="temporalSelection"
+                             :value="item"
+                             density="compact"
+                             hide-details
                             />
-                            <v-tooltip 
-                             text="Add to Temporal Search"
-                             :open-delay="1000"
-                             :close-delay="500"
-                            >
-                                <template v-slot:activator="{props}">
-                                    <v-icon v-bind="props">
+                            <v-tooltip text="Select for Temporal Search" :open-delay="800">
+                                <template v-slot:activator="{ props: ttProps }">
+                                    <v-icon v-bind="ttProps" size="small" color="grey">
                                         mdi-timeline-clock-outline
                                     </v-icon>
                                 </template>
                             </v-tooltip>
                         </div>
                     </div>
-                </template> 
+                </template>
             </v-virtual-scroll>
         </v-card-text>
         <v-card-actions>
@@ -187,6 +167,7 @@ const temporalSelection = ref<ChatQuery[]>([])
 
 const emit = defineEmits<{
     (e: 'show-search-results', resultIds: number[]): void,
+    (e: 'collapse'): void,
 }>()
 
 
@@ -325,15 +306,48 @@ async function search(refresh=false) {
 </script>
 
 <style scoped>
-/* Basic styling here */
-.highlight {
-    border: 4px solid;
-    border-radius: 4px;
-    border-color: #1565C0;
+.query-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
 }
-.outline {
-    border: 4px solid;
+
+.query-entry:hover {
+    background: rgba(21, 101, 192, 0.08);
+}
+
+.query-entry--active {
+    border-color: #1565C0;
+    background: rgba(21, 101, 192, 0.06);
+}
+
+.query-name {
+    font-weight: 500;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.query-time {
+    font-size: 0.7rem;
+    color: rgba(0, 0, 0, 0.45);
+}
+
+.query-filters {
+    color: rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.query-image {
+    max-width: 100%;
+    max-height: 80px;
     border-radius: 4px;
-    border-color: transparent;
+    object-fit: cover;
 }
 </style>

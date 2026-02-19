@@ -9,18 +9,26 @@
 
         <v-container fluid>
             <v-row>
-                <!-- 20%: Chat -->
-                <v-col cols="2" class="pa-1">
+                <!-- Search history (collapsible) -->
+                <v-col v-if="!chatCollapsed" cols="2" class="pa-1">
                     <ChatArea
                      :key="'chatarea'+activeModel!.id"
-                     :model-id="activeModel!.id" 
+                     :model-id="activeModel!.id"
                      @show-search-results="updateResultIdsChat"
+                     @collapse="chatCollapsed = true"
                     />
                 </v-col>
 
-                <!-- 50%: Results -->
-                <v-col :cols="showMedia ? 6 : 10" class="pa-1">
-                    <ResultGrid 
+                <!-- Results: expands when chat is collapsed -->
+                <v-col :cols="chatCollapsed ? (showMedia ? 8 : 12) : (showMedia ? 6 : 10)" class="pa-1">
+                    <v-btn
+                     v-if="chatCollapsed"
+                     icon size="x-small" variant="tonal" class="mb-1"
+                     @click="chatCollapsed = false"
+                    >
+                        <v-icon>mdi-chevron-right</v-icon>
+                    </v-btn>
+                    <ResultGrid
                      :model-id="activeModel!.id"
                      @selected="updateSelectedItem"
                      @load-more="loadMoreResults"
@@ -54,11 +62,12 @@ import { useItemStore } from '@/stores/item'
 import { useChatStore } from '@/stores/chat'
 import { useFeedbackStore } from '@/stores/feedback'
 
-const modelStore = useModelStore() 
+const modelStore = useModelStore()
 const itemStore = useItemStore()
 const chatStore = useChatStore()
 const activeModel = computed(() => useModelStore().activeModel)
 const showMedia = ref(false)
+const chatCollapsed = ref(false)
 const feedbackStore = useFeedbackStore()
 
 onMounted(() => {

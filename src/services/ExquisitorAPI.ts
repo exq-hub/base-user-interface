@@ -247,15 +247,19 @@ export const isGroupExcluded = async (req: ExqIsExcludedRequest): Promise<boolea
 // Get suggestions from the current model
 export const searchRF = async (req: ExqRFRequest): Promise<ExqRFResponse> => {
     if (mock) return await mockDoURF(req)
-    const resp : ExqRFResponse = await fetch(exqURI+'/exq/search/rf', {
+    const response = await fetch(exqURI+'/exq/search/rf', {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req)
-    }).then(val => val.json())
-    return resp
+    })
+    if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        throw new Error(`RF search failed (${response.status}): ${body}`)
+    }
+    return await response.json()
 }
 
 export const searchText = async (req: ExqTextSearchRequest): Promise<ExqSearchResponse> => {

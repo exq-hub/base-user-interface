@@ -107,7 +107,6 @@
 
 
 <script lang="ts" setup>
-import { useAppStore } from '@/stores/app';
 import { useItemStore } from '@/stores/item';
 import MediaItem, { GroupMetadata, ILSets, MediaType } from '@/types/mediaitem';
 import { useModelStore } from '@/stores/model';

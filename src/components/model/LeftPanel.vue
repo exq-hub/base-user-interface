@@ -17,18 +17,22 @@
 
             <v-list-item
              data-eid="left_panel_positives_btn"
-             prepend-icon="mdi-thumb-up-outline"
              @click="console.log('clicked positives'); posToggle = !posToggle;"
             >
+                <v-badge :content="positives.length" :model-value="positives.length > 0" color="success" floating>
+                    <v-icon>mdi-thumb-up-outline</v-icon>
+                </v-badge>
             </v-list-item>
 
             <v-divider :thickness="30" class="border-opacity-0"></v-divider>
 
             <v-list-item
              data-eid="left_panel_negatives_btn"
-             prepend-icon="mdi-thumb-down-outline"
              @click="console.log('clicked negatives'); negToggle = !negToggle;"
             >
+                <v-badge :content="negatives.length" :model-value="negatives.length > 0" color="error" floating>
+                    <v-icon>mdi-thumb-down-outline</v-icon>
+                </v-badge>
             </v-list-item>
 
             <v-divider :thickness="30" class="border-opacity-0"></v-divider>
@@ -191,5 +195,17 @@ function clearHistory() {
 </script>
 
 <style scoped>
-
+/* Allow badge to overflow the rail list item boundary */
+:deep(.v-navigation-drawer__content) {
+    overflow: visible;
+}
+:deep(.v-list) {
+    overflow: visible;
+}
+:deep(.v-list-item) {
+    overflow: visible;
+}
+:deep(.v-list-item__content) {
+    overflow: visible;
+}
 </style>

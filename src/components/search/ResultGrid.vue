@@ -23,6 +23,9 @@
                 </v-btn>
             </div>
         </v-card-title>
+        <v-alert v-if="rfError" type="warning" density="compact" closable class="mx-3 mt-2" @click:close="rfError = ''">
+            {{ rfError }}
+        </v-alert>
         <h4 class="text-center" v-if="shownIds.length === 0">Results will appear here</h4>
         <v-card-text :key="resultKey">
             <div v-if="!groupView" class="result-items-grid">
@@ -117,21 +120,28 @@ const emit = defineEmits<{
 
 const resultKey = ref(0)
 const shownIds = computed(() => modelStore.activeModel!.grid[0].items)
+const rfError = ref('')
 
 watch(shownIds, () => resultKey.value++)
 
 // Show positive/negative results
 async function onShowFeedbackResults() {
+    rfError.value = ''
     let suggs: number[] = []
-    if (pseudoRF.value) {
-        const qIdx = chatStore.chatSessions.get(activeModelId.value!)!.findIndex(
-            (val) => val.id === chatStore.currentQueryId 
-        )
-        suggs = await useFeedbackStore().getFeedbackResults(false, chatStore.chatSessions.get(activeModelId.value)![qIdx].text)
-    } else {
-        suggs = await useFeedbackStore().getFeedbackResults(false)
+    try {
+        if (pseudoRF.value) {
+            const qIdx = chatStore.chatSessions.get(activeModelId.value!)!.findIndex(
+                (val) => val.id === chatStore.currentQueryId
+            )
+            suggs = await useFeedbackStore().getFeedbackResults(false, chatStore.chatSessions.get(activeModelId.value)![qIdx].text)
+        } else {
+            suggs = await useFeedbackStore().getFeedbackResults(false)
+        }
+        await itemStore.fetchMediaItems(suggs, activeModelId.value, modelStore.getModelCollection(activeModelId.value))
+        emit('show-rf-results', suggs)
+    } catch (err: any) {
+        rfError.value = err?.message ?? 'Feedback search failed'
     }
-    emit('show-rf-results', suggs)
 }
 
 async function getItemGroups() {

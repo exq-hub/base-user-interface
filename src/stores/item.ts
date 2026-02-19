@@ -94,28 +94,33 @@ export const useItemStore = defineStore('item', () => {
     function addItemToSet(exqId: number, modelId: number, ilset: ILSets) : void {
         console.log('Adding Item:', exqId, 'to set', ilset, 'for model', modelId)
         const collection = modelStore.getModelCollection(modelId)
+        const currentSets = items.get(collection)!.get(exqId)!.currentSets!
+        const prev = currentSets.get(modelId) ?? [false, false, false, false]
+        const next = [...prev] as [boolean, boolean, boolean, boolean]
         switch (ilset) {
             case ILSets.Positives:
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = true
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = false
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = false
-                return
+                next[ILSets.Positives] = true
+                next[ILSets.Negatives] = false
+                next[ILSets.History] = false
+                break
             case ILSets.Negatives:
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = false
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = true
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = false
-                return
+                next[ILSets.Positives] = false
+                next[ILSets.Negatives] = true
+                next[ILSets.History] = false
+                break
             case ILSets.History:
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Positives] = false
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Negatives] = false
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.History] = true
-                return
+                next[ILSets.Positives] = false
+                next[ILSets.Negatives] = false
+                next[ILSets.History] = true
+                break
             case ILSets.Submitted:
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ILSets.Submitted] = true
-                return
+                next[ILSets.Submitted] = true
+                break
             default:
-                items.get(collection)!.get(exqId)!.currentSets!.get(modelId)![ilset] = true 
+                next[ilset] = true
         }
+        // Use Map.set() so Vue's reactive collection handler fires a tracked trigger
+        currentSets.set(modelId, next)
     }
     
     function addItemsToSet(exqIds: number[], modelId: number, ilset: ILSets) : boolean {

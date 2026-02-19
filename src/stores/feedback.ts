@@ -58,6 +58,9 @@ export const useFeedbackStore = defineStore('feedback', () => {
         }
         pos = itemStore.getSetItems(activeModelId, ILSets.Positives).map((e,_) => e.id)
         neg = itemStore.getSetItems(activeModelId, ILSets.Negatives).map((e,_) => e.id)
+        if (!loadMore && pos.length === 0 && neg.length === 0) {
+            throw new Error('No items marked as positive or negative. Hover over a result and click the thumb buttons first.')
+        }
         if (loadMore) {
             pos = rfSearch.positives
             neg = rfSearch.negatives
