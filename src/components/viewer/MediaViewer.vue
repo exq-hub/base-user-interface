@@ -207,7 +207,6 @@
                             <template v-if="Array.isArray(selectedItem.metadata![m])">
                                 <span
                                     v-for="i in selectedItem.metadata![m]"
-                                    v-if="Array(selectedItem.metadata![m])[0] !== '[]'"
                                     :key="i"
                                     class="ma-1"
                                     label

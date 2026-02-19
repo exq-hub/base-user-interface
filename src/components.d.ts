@@ -16,6 +16,7 @@ declare module 'vue' {
     EditTextField: typeof import('./components/general/EditTextField.vue')['default']
     ExcludedGroups: typeof import('./components/drawers/filters/ExcludedGroups.vue')['default']
     Item: typeof import('./components/items/Item.vue')['default']
+    ItemTile: typeof import('./components/items/ItemTile.vue')['default']
     LeftPanel: typeof import('./components/model/LeftPanel.vue')['default']
     MediaViewer: typeof import('./components/viewer/MediaViewer.vue')['default']
     ModelBar: typeof import('./components/model/ModelBar.vue')['default']
