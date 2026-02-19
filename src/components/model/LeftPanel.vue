@@ -54,15 +54,13 @@
         <excluded-groups />
     </v-navigation-drawer>
 
-    <v-navigation-drawer 
+    <v-navigation-drawer
      v-if="posToggle"
      location="right"
-     color="success"
      >
         <!-- TODO: Move this part into generic component (ItemSet) -->
         <v-sheet
-        class="text-center pt-3 pb-3"
-        color="success"
+        class="text-center pt-3 pb-3 drawer-header drawer-header--pos"
         >
             <v-btn :data-eid="'left_panel_clear_positives_btn_model_' + activeModelId" size="small" @click="clearPositives">
                 Clear List
@@ -89,14 +87,12 @@
         </v-list>
     </v-navigation-drawer>
     
-    <v-navigation-drawer 
+    <v-navigation-drawer
      v-if="negToggle"
      location="right"
-     color="error"
      >
         <v-sheet
-         class="text-center pt-3 pb-3"
-         color="error"
+         class="text-center pt-3 pb-3 drawer-header drawer-header--neg"
         >
             <v-btn :data-eid="'left_panel_clear_negatives_btn_model_' + activeModelId" size="small" @click="clearNegatives">
                 Clear List
@@ -207,5 +203,22 @@ function clearHistory() {
 }
 :deep(.v-list-item__content) {
     overflow: visible;
+}
+
+/* Drawer header strips */
+.drawer-header {
+    border-bottom: 3px solid;
+}
+
+.drawer-header--pos {
+    background: rgba(46, 125, 50, 0.08);
+    border-color: rgb(var(--v-theme-success));
+    color: rgb(var(--v-theme-success));
+}
+
+.drawer-header--neg {
+    background: rgba(198, 40, 40, 0.08);
+    border-color: rgb(var(--v-theme-error));
+    color: rgb(var(--v-theme-error));
 }
 </style>

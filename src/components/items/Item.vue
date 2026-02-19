@@ -231,6 +231,7 @@ onBeforeUnmount(() => {
     overflow: hidden;
     background: #1a1a1a; /* placeholder while image loads — eliminates CLS */
     cursor: pointer;
+    border-radius: 8px;
 }
 
 .item-thumb {
@@ -251,7 +252,7 @@ onBeforeUnmount(() => {
     justify-content: center;
     gap: 8px;
     padding-bottom: 6px;
-    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.55));
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.35));
     opacity: 0;
     transition: opacity 0.15s ease;
 }

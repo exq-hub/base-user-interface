@@ -1,6 +1,7 @@
 <template>
     <v-app-bar
-     class="bg-blue-grey-darken-3 panel"
+     color="primary"
+     theme="dark"
     >
         <v-tabs 
          class="mr-2" 

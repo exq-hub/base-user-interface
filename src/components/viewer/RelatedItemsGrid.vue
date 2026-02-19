@@ -145,8 +145,7 @@ onMounted(() => {
 }
 
 .related-item.selected {
-    border: 4px solid #ccc;
-    border-color: #1976d2;
-    box-shadow: 0 0 4px #1976d2;
+    border: 3px solid rgb(var(--v-theme-primary));
+    box-shadow: 0 0 6px rgba(var(--v-theme-primary), 0.4);
 }
 </style>
