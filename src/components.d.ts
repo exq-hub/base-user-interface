@@ -25,8 +25,11 @@ declare module 'vue' {
     RightPanel: typeof import('./components/model/RightPanel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchBar: typeof import('./components/search/SearchBar.vue')['default']
     SearchDialog: typeof import('./components/search/SearchDialog.vue')['default']
+    SearchHistoryList: typeof import('./components/search/SearchHistoryList.vue')['default']
     SettingsForm: typeof import('./components/model/SettingsForm.vue')['default']
+    TemporalSelectionBar: typeof import('./components/search/TemporalSelectionBar.vue')['default']
     TempSearchDialog: typeof import('./components/search/TempSearchDialog.vue')['default']
   }
 }

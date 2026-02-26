@@ -1,6 +1,27 @@
 <template>
   <v-card data-eid="result_grid" class="result-card">
     <v-card-title class="result-header">
+      <v-tooltip 
+       :text="props.chatVisible ? 'Hide search panel' : 'Show search panel'"
+       :open-delay="1000"
+       location="bottom"
+      >
+        <template #activator="{ props: tipProps }">
+          <v-btn
+            v-bind="tipProps"
+            data-eid="result_grid_toggle_chat"
+            icon
+            size="small"
+            variant="text"
+            @click="emit('toggle-chat')"
+          >
+            <v-icon>
+              {{ props.chatVisible ? 'mdi-chevron-left' : 'mdi-magnify' }}
+            </v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
+
       <div class="d-flex align-center ga-4 flex-wrap">
         <span class="text-h6">Search Results</span>
 
@@ -103,7 +124,6 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
 
 import ItemTile from '@/components/items/ItemTile.vue'
 
@@ -116,6 +136,11 @@ import { useAdvancedSearchStore } from '@/stores/advancedSearch'
 
 import type MediaItem from '@/types/mediaitem'
 import type { GroupMetadata, ILSets } from '@/types/mediaitem'
+
+const props = defineProps<{
+  modelId: number,
+  chatVisible?: boolean
+}>()
 
 const modelStore = useModelStore()
 const itemStore = useItemStore()
@@ -130,9 +155,8 @@ const collection = computed(() => modelStore.getModelCollection(activeModelId.va
 const groupView = ref(false)
 const pseudoRF = ref(false)
 
-const { performRFSearch } = storeToRefs(advancedStore)
-
 const emit = defineEmits<{
+  (e: 'toggle-chat'): void
   (e: 'load-more'): void
   (e: 'selected', itemId: number): void
   (e: 'show-rf-results', resultIds: number[]): void
@@ -140,7 +164,7 @@ const emit = defineEmits<{
 
 const shownIds = computed(() => modelStore.activeModel!.grid[0].items)
 
-// Tile sizing (you can swap to your responsive min/max version later)
+// Tile sizing
 const tileWidth = computed(() => modelStore.getThumbnailSize(activeModelId.value) || 220)
 const aspectRatio = 16 / 9
 
@@ -174,11 +198,6 @@ function getGroupInfoForItem(id: number): GroupMetadata | null {
   return groupStore.get(collection.value, it.groupId) // NOTE: groupStore cache is keyed by collection+groupId
 }
 
-/**
- * IMPORTANT FUTURE UPDATE (batch MediaItems):
- * When backend supports fetching MediaItems by array of ids, update this function to call ONE store/API method.
- * (See TODO below.)
- */
 async function prefetchShownItems(ids: number[]) {
   const keep = new Set(ids)
   for (const id of Array.from(itemsById.keys())) {
@@ -188,11 +207,6 @@ async function prefetchShownItems(ids: number[]) {
   const missing = ids.filter((id) => !itemsById.has(id))
   if (missing.length === 0) return
 
-  // TODO (future batch endpoint): replace Promise.all with ONE batch call
-  // Example:
-  // const batch = await itemStore.fetchMediaItemsBatch(missing, activeModelId.value, collection.value)
-  // batch.forEach(it => itemsById.set(it.id, it))
-
   const fetched = await Promise.all(missing.map((id) => itemStore.fetchMediaItem(id, activeModelId.value)))
   for (const it of fetched) itemsById.set(it.id, it)
 }
@@ -201,7 +215,7 @@ async function prefetchShownItems(ids: number[]) {
  * Prefetch GroupMetadata for all groupIds in the currently shown items.
  *
  * IMPORTANT FUTURE UPDATE (batch GroupMetadata):
- * groupStore.fetchGroupsInfo has a TODO to replace Promise.all with ONE API call when you add it.
+ * groupStore.fetchGroupsInfo has a TODO to replace Promise.all with ONE API call when added.
  */
 async function prefetchGroupsFromItems(ids: number[]) {
   const groupIds: number[] = []
@@ -271,17 +285,6 @@ function openAdvancedFromRF() {
     history: false
   })
 }
-
-watch(
-  () => performRFSearch.value,
-  async (newVal) => {
-    if (!newVal) return
-    const suggs = await feedbackStore.getFeedbackResults(false)
-    emit('show-rf-results', suggs)
-    performRFSearch.value = false
-  },
-  { immediate: true }
-)
 
 function onLoadMore() {
   emit('load-more')
