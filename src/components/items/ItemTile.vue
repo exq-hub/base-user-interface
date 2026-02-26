@@ -64,12 +64,12 @@
               class="tile-btn"
               density="compact"
               size="x-small"
+              color="success"
               icon
-              variant="flat"
               :disabled="isPos"
               @click.stop="emitAdd(ILSets.Positives)"
             >
-              <v-icon size="16">mdi-thumb-up-outline</v-icon>
+              <v-icon size="16">mdi-thumb-up</v-icon>
             </v-btn>
 
             <v-btn
@@ -78,12 +78,12 @@
               class="tile-btn"
               density="compact"
               size="x-small"
+              color="error"
               icon
-              variant="flat"
               :disabled="isNeg"
               @click.stop="emitAdd(ILSets.Negatives)"
             >
-              <v-icon size="16">mdi-thumb-down-outline</v-icon>
+              <v-icon size="16">mdi-thumb-down</v-icon>
             </v-btn>
 
             <v-btn
@@ -92,12 +92,12 @@
               class="tile-btn"
               density="compact"
               size="x-small"
+              color="blue"
               icon
-              variant="flat"
               :disabled="isSubmitted"
               @click.stop="emitAdd(ILSets.Submitted)"
             >
-              <v-icon size="16">mdi-send-outline</v-icon>
+              <v-icon size="16">mdi-send</v-icon>
             </v-btn>
           </div>
         </div>
