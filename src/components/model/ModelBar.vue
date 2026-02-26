@@ -1,6 +1,6 @@
 <template>
     <v-app-bar
-     class="bg-amber-darken-3 panel"
+     density="compact"
     >
         <v-tabs 
          class="mr-2" 
@@ -27,8 +27,9 @@
          @confirm="addModel"
          :available-collections="appStore.collections"
         /> 
-        <v-spacer></v-spacer>
-        <settings-form /> 
+        <template v-slot:append>
+            <settings-form /> 
+        </template>
     </v-app-bar>
 </template>
 

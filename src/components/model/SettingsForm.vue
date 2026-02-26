@@ -5,7 +5,7 @@
         <template v-slot:activator="{ props }">
             <v-btn
              data-eid="open_settings_form_btn"
-             color="black"
+             color="text"
              icon="mdi-cog-outline"
              v-bind="props"
              />
