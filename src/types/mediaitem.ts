@@ -3,6 +3,7 @@ export enum ILSets {
     Negatives,
     History,
     Submitted,
+    Excluded,
 }
 
 export enum MediaType {
