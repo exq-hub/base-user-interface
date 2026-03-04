@@ -17,7 +17,7 @@
 
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
-import SearchView from '@/pages/SearchView.vue'
+import SearchView from '@/pages/MainView.vue'
 import HomeView from '@/pages/HomeView.vue'
 
 const routes = [

@@ -49,7 +49,7 @@ export const useChatStore = defineStore('chat', () => {
             searchType = chatSessions.get(modelId)![qIdx].searchType
             // searchModel = chatSessions.get(modelId)![qIdx].searchModel
         }
-        let n_items = 200 //modelStore.activeModel!.settings.itemsToShow
+        let n_items = modelStore.activeModel!.settings.itemsToShow
         if (n !== undefined) {
             n_items = n
         }

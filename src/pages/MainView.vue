@@ -5,7 +5,7 @@
     <temporal-search-dialog @show-temporal-results="updateResultIdsTemporal"/>
     <model-bar @model-change="updateModel" />
     
-    <left-panel :key="activeModel!.id.toString() + Math.floor(Math.random()*9000)"/>
+    <!-- <left-panel :key="activeModel!.id.toString() + Math.floor(Math.random()*9000)"/> -->
     
     <v-container fluid>
       <v-row>
