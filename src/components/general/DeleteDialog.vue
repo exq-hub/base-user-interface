@@ -5,7 +5,7 @@
      >
         <template v-slot:activator="{ props }">
             <v-btn 
-            :data-eid="'open_delete_dialog_btn_' + id.toString()"
+             :data-eid="'open_delete_dialog_btn_' + id.toString()"
              class="v-btn--flat" 
              density="compact" 
              icon="mdi-close" 

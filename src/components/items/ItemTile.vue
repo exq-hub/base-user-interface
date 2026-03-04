@@ -99,6 +99,32 @@
             >
               <v-icon size="16">mdi-send</v-icon>
             </v-btn>
+            
+            <v-btn
+             v-if="historyEnabled"
+             :data-eid="eid('btn_history')"
+             class="tile-btn"
+             density="compact"
+             size="x-small"
+             icon
+             variant="text"
+             @click.stop="emit('add', { itemId: itemId, set: ILSets.History })"
+            >
+              <v-icon size="16">mdi-eye-off-outline</v-icon>
+            </v-btn>
+            
+            <v-btn
+             v-if="showRemove && removeSet != null"
+             :data-eid="eid('btn_remove')"
+             class="tile-btn"
+             density="compact"
+             size="x-small"
+             icon
+             variant="text"
+             @click.stop="emit('remove', { itemId: itemId, set: removeSet })"
+            >
+          <v-icon size="16">mdi-close-circle-outline</v-icon>
+        </v-btn>
           </div>
         </div>
       </template>
@@ -128,6 +154,12 @@ const props = defineProps<{
   btnPos?: boolean
   btnNeg?: boolean
   btnSubmit?: boolean
+  
+  showRemove?: boolean
+  removeSet?: ILSets | null
+
+  // move item into history (enabled through model settings)
+  historyEnabled?: boolean
 
   showBadges?: boolean
   enableHoverPreview?: boolean

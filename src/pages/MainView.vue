@@ -21,12 +21,16 @@
         <!-- 50%: Results -->
         <v-col :cols="chatVisible ? (showMedia ? 6 : 10) : (showMedia ? 8 : 12)" class="pa-1">
           <ResultGrid
-          :model-id="activeModel!.id"
-          :chat-visible="chatVisible"
-          @toggle-chat="chatVisible = !chatVisible"
-          @selected="updateSelectedItem"
-          @load-more="loadMoreResults"
-          @show-rf-results="updateResultIdsRF"
+           :model-id="activeModel!.id"
+           :chat-visible="chatVisible"
+           @toggle-chat="chatVisible = !chatVisible"
+           @selected="updateSelectedItem"
+           @load-more="loadMoreResults"
+           @show-rf-results="updateResultIdsRF"
+           @toggle-positives="posDrawerOpen = !posDrawerOpen"
+           @toggle-negatives="negDrawerOpen = !negDrawerOpen"
+           @open-positives-dialog="posDialogOpen = true"
+           @open-negatives-dialog="negDialogOpen = true"
           />
         </v-col>
         
@@ -38,6 +42,33 @@
           />
         </v-col>
       </v-row>
+      <!-- Drawers (persistent) -->
+      <SetsDrawer
+       v-model="posDrawerOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.Positives"
+       @popout="posDialogOpen = true"
+      />
+
+      <SetsDrawer
+       v-model="negDrawerOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.Negatives"
+       @popout="negDialogOpen = true"
+      />
+
+      <!-- Dialogs (deep inspect) -->
+      <SetsDialog
+       v-model="posDialogOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.Positives"
+      />
+
+      <SetsDialog
+       v-model="negDialogOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.Negatives"
+      />
     </v-container>
   </template>
 </template>
@@ -50,12 +81,15 @@ import MediaViewer from '@/components/viewer/MediaViewer.vue'
 import ModelBar from '@/components/model/ModelBar.vue'
 import SearchDialog from '@/components/search/SearchDialog.vue';
 import TemporalSearchDialog from '@/components/search/TempSearchDialog.vue';
+import SetsDrawer from '@/components/sets/SetsDrawer.vue';
+import SetsDialog from '@/components/sets/SetsDialog.vue';
 import { useModelStore } from '@/stores/model'
 import { useRouter } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { useChatStore } from '@/stores/chat'
 import { useFeedbackStore } from '@/stores/feedback'
 import { AdvancedSearchPayload } from '@/types/chat'
+import { ILSets } from '@/types/mediaitem'
 
 const modelStore = useModelStore() 
 const itemStore = useItemStore()
@@ -64,6 +98,10 @@ const activeModel = computed(() => useModelStore().activeModel)
 const showMedia = ref(false)
 const feedbackStore = useFeedbackStore()
 const chatVisible = ref(true)
+const posDrawerOpen = ref(false)
+const negDrawerOpen = ref(false)
+const posDialogOpen = ref(false)
+const negDialogOpen = ref(false)
 
 onMounted(() => {
   if (!activeModel.value) {

@@ -202,15 +202,27 @@ export const useItemStore = defineStore('item', () => {
         return items.get(collection)!.get(mediaId)!.currentSets!.get(modelId)![ILSets.Submitted]
     }
 
-    function getSetItems(modelId: number, set: ILSets) : MediaItem[] {
+    function getSetItems(modelId: number, set: ILSets): MediaItem[] {
         const collection = modelStore.getModelCollection(modelId)
-        let setItems : MediaItem[] = []
-        // Get all items for the current model
-        let mItems = modelItems.get(modelId)
-        mItems?.forEach((value, _) => {
-            if (items.get(collection)!.get(value)!.currentSets!.get(modelId)![set])
-                setItems.push(items.get(collection)!.get(value)!)
-        })
+
+        const colMap = items.get(collection)
+        const mItems = modelItems.get(modelId)
+
+        if (!colMap || !mItems) return []
+
+        const setItems: MediaItem[] = []
+
+        mItems.forEach((id) => {
+            const it = colMap.get(id)
+            if (!it) return
+
+            const sets = it.currentSets?.get(modelId)
+            if (!sets) return
+
+            if (sets[set]) setItems.push(it)
+          }
+        )
+
         return setItems
     }
     

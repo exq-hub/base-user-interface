@@ -35,6 +35,40 @@
       </div>
 
       <div class="feedback-btn-area d-flex align-center ga-2">
+        <v-tooltip text="Inspect positives" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="posCount" :model-value="posCount > 0" color="success">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_positives"
+               icon
+               size="small"
+               variant="text"
+               @click="onPosClick"
+              >
+                <v-icon>mdi-thumb-up-outline</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Inspect negatives" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="negCount" :model-value="negCount > 0" color="error">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_negatives"
+               icon
+               size="small"
+               variant="text"
+               @click="onNegClick"
+              >
+                <v-icon>mdi-thumb-down-outline</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+        
         <v-btn data-eid="show_feedback_results_btn" color="primary" @click="onShowFeedbackResults">
           Show Feedback Results
         </v-btn>
@@ -124,18 +158,16 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-
 import ItemTile from '@/components/items/ItemTile.vue'
-
 import { useModelStore } from '@/stores/model'
 import { useItemStore } from '@/stores/item'
 import { useGroupStore } from '@/stores/group'
 import { useFeedbackStore } from '@/stores/feedback'
 import { useChatStore } from '@/stores/chat'
 import { useAdvancedSearchStore } from '@/stores/advancedSearch'
-
+import { ILSets } from '@/types/mediaitem'
 import type MediaItem from '@/types/mediaitem'
-import type { GroupMetadata, ILSets } from '@/types/mediaitem'
+import type { GroupMetadata } from '@/types/mediaitem'
 
 const props = defineProps<{
   modelId: number,
@@ -160,6 +192,10 @@ const emit = defineEmits<{
   (e: 'load-more'): void
   (e: 'selected', itemId: number): void
   (e: 'show-rf-results', resultIds: number[]): void
+  (e: 'toggle-positives'): void
+  (e: 'toggle-negatives'): void
+  (e: 'open-positives-dialog'): void
+  (e: 'open-negatives-dialog'): void
 }>()
 
 const shownIds = computed(() => modelStore.activeModel!.grid[0].items)
@@ -175,6 +211,24 @@ const gridStyle = computed(() => ({
 const slideTileStyle = computed(() => ({
   width: `${tileWidth.value}px`
 }))
+
+// Counts for feedback results
+const posCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.Positives).length
+)
+const negCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.Negatives).length
+)
+
+function onPosClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-positives-dialog')
+  else emit('toggle-positives')
+}
+
+function onNegClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-negatives-dialog')
+  else emit('toggle-negatives')
+}
 
 // Prefetched items (id -> MediaItem)
 const itemsById: Map<number, MediaItem> = reactive(new Map())
