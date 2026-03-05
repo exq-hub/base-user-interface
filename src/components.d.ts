@@ -18,6 +18,8 @@ declare module 'vue' {
     Item: typeof import('./components/items/Item.vue')['default']
     ItemTile: typeof import('./components/items/ItemTile.vue')['default']
     LeftPanel: typeof import('./components/model/LeftPanel.vue')['default']
+    MediaMetadata: typeof import('./components/viewer/MediaMetadata.vue')['default']
+    MediaMetadataPopover: typeof import('./components/viewer/MediaMetadataPopover.vue')['default']
     MediaViewer: typeof import('./components/viewer/MediaViewer.vue')['default']
     ModelBar: typeof import('./components/model/ModelBar.vue')['default']
     RelatedItemsGrid: typeof import('./components/viewer/RelatedItemsGrid.vue')['default']
