@@ -70,3 +70,9 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+/* Make button labels stronger */
+.v-btn .v-btn__content, .v-chip .v-chip__content {
+  font-weight: 600;
+  letter-spacing: 0.2px; /* optional, subtle */
+}

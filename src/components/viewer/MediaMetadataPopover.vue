@@ -310,8 +310,15 @@ watch(open, (isOpen) => {
   opacity: 0.9;
 }
 
-.meta-val {
-  min-width: 0;
+.meta-val :deep(.v-chip) {
+  height: auto !important;
+  width: fit-content;
+}
+
+.meta-val :deep(.v-chip__content) {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .empty {

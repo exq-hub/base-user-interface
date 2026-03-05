@@ -1,127 +1,128 @@
 <template>
-  <v-virtual-scroll
-    :data-eid="eid('scroll')"
-    :items="items"
-    max-height="70vh"
-  >
-    <template #default="{ item }" >
-      <div
-        :data-eid="eid(`item_${item.id}`)"
-        class="history-item pa-2"
-        :class="{ 'history-item--active': item.id === currentQueryId }"
-        @click="$emit('show-results', item.id, item.resultIds)"
-      >
-        <div class="row-wrap" :class="{ 'row-wrap--active': item.id === currentQueryId }">
-          <!-- top line -->
-          <div class="row-top" @click="$emit('show-results', item.id, item.resultIds)">
-            <div class="row-title min-w-0" :data-eid="eid(`title_${item.id}`)">
-              <template v-if="item.searchType === 'text' || item.searchType === 'temporal'">
-                {{ item.name }}
-              </template>
-              <template v-else>
-                Image query
-              </template>
-            </div>
-
-            <div class="row-time text-caption opacity-70" :data-eid="eid(`time_${item.id}`)">
-              {{ formatTime(item.timestamp) }}
-            </div>
-          </div>
-
-          <!-- optional image preview -->
-          <div v-if="item.searchType === 'image'" class="row-image" :data-eid="eid(`img_${item.id}`)">
-            <img :src="item.name" class="row-image__img" />
-          </div>
-
-          <!-- bottom line -->
-          <div class="row-bottom">
-            <div class="row-chips">
-              <v-chip size="x-small" label variant="tonal" :data-eid="eid(`chip_type_${item.id}`)">
-                {{ item.searchType.toUpperCase() }}
-              </v-chip>
-
-              <v-chip size="x-small" label variant="tonal" :data-eid="eid(`chip_model_${item.id}`)">
-                {{ item.searchModel.toUpperCase() }}
-              </v-chip>
-
-              <!-- your existing filter block can stay, just make it chip-like -->
-              <div class="text-caption opacity-70 d-flex align-center ga-2" :data-eid="eid(`filters_${item.id}`)">
-                <span>Filters ·</span>
-
-                <template v-if="filterCount(item.filters) === 0">
-                  <span>None</span>
+  <div ref="rootEl" :data-eid="eid('root')">
+    <v-virtual-scroll
+     :data-eid="eid('scroll')"
+     :items="items"
+     max-height="70vh"
+    >
+      <template #default="{ item }" >
+        <div
+         :data-eid="eid(`item_${item.id}`)"
+         class="history-item pa-2"
+         :class="{ 'history-item--active': item.id === currentQueryId }"
+         @click="$emit('show-results', item.id, item.resultIds)"
+        >
+          <div class="row-wrap" :class="{ 'row-wrap--active': item.id === currentQueryId }">
+            <!-- top line -->
+            <div class="row-top" @click="$emit('show-results', item.id, item.resultIds)">
+              <div class="row-title min-w-0" :data-eid="eid(`title_${item.id}`)">
+                <template v-if="item.searchType === 'text' || item.searchType === 'temporal'">
+                  {{ item.name }}
                 </template>
-
                 <template v-else>
-                  <v-tooltip location="top" :open-delay="350" :close-delay="150">
-                    <template #activator="{ props: tipProps }">
-                      <v-chip
-                        v-bind="tipProps"
-                        :data-eid="eid(`filters_chip_${item.id}`)"
-                        size="x-small"
-                        label
-                        variant="tonal"
-                      >
-                        {{ filterCount(item.filters) }}
-                      </v-chip>
-                    </template>
-
-                    <div class="filter-tooltip">
-                      {{ filterTooltipText(item.filters) }}
-                    </div>
-                  </v-tooltip>
+                  Image query
                 </template>
+              </div>
+
+              <div class="row-time text-caption opacity-70" :data-eid="eid(`time_${item.id}`)">
+                {{ formatTime(item.timestamp) }}
               </div>
             </div>
 
-            <div class="row-actions"> 
-              <template v-if="props.temporalMode">
-                <v-tooltip
-                  :text="isSelected(item) ? 'Remove from Temporal Search' : 'Add to Temporal Search'"
-                  :open-delay="500"
-                  :close-delay="150"
-                  location="top"
-                >
+            <!-- optional image preview -->
+            <div v-if="item.searchType === 'image'" class="row-image" :data-eid="eid(`img_${item.id}`)">
+              <img :src="item.name" class="row-image__img" />
+            </div>
+
+            <!-- bottom line -->
+            <div class="row-bottom">
+              <div class="row-chips">
+                <v-chip :size="chipSize" label variant="tonal" :data-eid="eid(`chip_type_${item.id}`)">
+                  {{ item.searchType.toUpperCase() }}
+                </v-chip>
+
+                <v-chip :size="chipSize" label variant="tonal" :data-eid="eid(`chip_model_${item.id}`)">
+                  {{ item.searchModel.toUpperCase() }}
+                </v-chip>
+
+                <div :class="[metaTextClass, 'd-flex align-center ga-2']" :data-eid="eid(`filters_${item.id}`)">
+                  <span>Filters ·</span>
+
+                  <template v-if="filterCount(item.filters) === 0">
+                    <span>None</span>
+                  </template>
+
+                  <template v-else>
+                    <v-tooltip location="top" :open-delay="350" :close-delay="150">
+                      <template #activator="{ props: tipProps }">
+                        <v-chip
+                         v-bind="tipProps"
+                         :data-eid="eid(`filters_chip_${item.id}`)"
+                         size="small"
+                         label
+                         variant="tonal"
+                        >
+                          {{ filterCount(item.filters) }}
+                        </v-chip>
+                      </template>
+
+                      <div class="filter-tooltip">
+                        {{ filterTooltipText(item.filters) }}
+                      </div>
+                    </v-tooltip>
+                  </template>
+                </div>
+              </div>
+
+              <div class="row-actions"> 
+                <template v-if="props.temporalMode">
+                  <v-tooltip
+                    :text="isSelected(item) ? 'Remove from Temporal Search' : 'Add to Temporal Search'"
+                    :open-delay="500"
+                    :close-delay="150"
+                    location="top"
+                  >
+                    <template #activator="{ props: tipProps }">
+                      <v-btn
+                        v-bind="tipProps"
+                        :data-eid="eid(`tgl_temporal_${item.id}`)"
+                        icon
+                        size="small"
+                        density="compact"
+                        variant="text"
+                        :color="isSelected(item) ? 'orange-darken-4' : undefined"
+                        @click.stop="toggleSelection(item)"
+                      >
+                        <v-icon>
+                          {{ isSelected(item) ? 'mdi-check-circle' : 'mdi-plus-circle-outline' }}
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+                </template>
+                <v-tooltip text="Open in Advanced Search" :open-delay="450" :close-delay="150" location="top">
                   <template #activator="{ props: tipProps }">
                     <v-btn
-                      v-bind="tipProps"
-                      :data-eid="eid(`tgl_temporal_${item.id}`)"
-                      icon
-                      size="small"
-                      density="compact"
-                      variant="text"
-                      :color="isSelected(item) ? 'orange-darken-4' : undefined"
-                      @click.stop="toggleSelection(item)"
+                     v-bind="tipProps"
+                     :data-eid="eid(`btn_open_advanced_${item.id}`)"
+                     icon
+                     size="small"
+                     density="compact"
+                     variant="text"
+                     @click.stop="$emit('open-advanced', item)"
                     >
-                      <v-icon>
-                        {{ isSelected(item) ? 'mdi-check-circle' : 'mdi-plus-circle-outline' }}
-                      </v-icon>
+                      <v-icon>mdi-tune</v-icon>
                     </v-btn>
                   </template>
                 </v-tooltip>
-              </template>
-              <v-tooltip text="Open in Advanced Search" :open-delay="450" :close-delay="150" location="top">
-                <template #activator="{ props: tipProps }">
-                  <v-btn
-                   v-bind="tipProps"
-                   :data-eid="eid(`btn_open_advanced_${item.id}`)"
-                   icon
-                   size="small"
-                   density="compact"
-                   variant="text"
-                   @click.stop="$emit('open-advanced', item)"
-                  >
-                    <v-icon>mdi-tune</v-icon>
-                  </v-btn>
-                </template>
-              </v-tooltip>
- 
+   
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </template>
-  </v-virtual-scroll>
+      </template>
+    </v-virtual-scroll>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -157,6 +158,34 @@ const tagsetNameById = computed(() => {
   for (const f of list) m.set(f.id, f.name)
   return m
 })
+
+const rootEl = ref<HTMLElement | null>(null)
+const containerW = ref(9999)
+
+let ro: ResizeObserver | null = null
+
+onMounted(() => {
+  if (!rootEl.value) return
+
+  const update = () => {
+    containerW.value = rootEl.value?.getBoundingClientRect().width ?? 9999
+  }
+
+  update()
+  ro = new ResizeObserver(update)
+  ro.observe(rootEl.value)
+})
+
+onBeforeUnmount(() => {
+  ro?.disconnect()
+  ro = null
+})
+
+const isNarrow = computed(() => containerW.value < 340)
+
+// Use these to choose chip size + text classes
+const chipSize = computed(() => (isNarrow.value ? 'x-small' : 'small'))
+const metaTextClass = computed(() => (isNarrow.value ? 'text-caption' : 'text-body-2'))
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleString('sv-SE')
@@ -240,6 +269,7 @@ function toggleSelection(q: ChatQuery) {
   word-break: break-word;
   line-height: 1.25;
 }
+
 .history-item .v-selection-control {
   margin: 0;
 }
@@ -270,6 +300,7 @@ function toggleSelection(q: ChatQuery) {
 
 .row-time {
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .row-image__img {

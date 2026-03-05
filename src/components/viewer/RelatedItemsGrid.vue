@@ -397,10 +397,8 @@ watch(
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  align-items: start;
-  padding: 2px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 @media (max-height: 700px) {
@@ -409,7 +407,8 @@ watch(
   }
 }
 
-.preview-cell--selected {
+/* Put border around the tile itself (the first child inside the cell) */
+.preview-cell--selected :deep(> *) {
   outline: 2px solid rgba(76, 201, 240, 0.85);
   border-radius: 12px;
 }
