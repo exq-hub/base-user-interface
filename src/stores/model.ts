@@ -16,7 +16,6 @@ export const useModelStore = defineStore('model', () => {
     return { 
       itemsToShow: 50,
       resources: ResourceValues.Low,
-      maxThumbSize: 300
     }
   }
   
@@ -144,11 +143,6 @@ export const useModelStore = defineStore('model', () => {
     }
   }
   
-  function getThumbnailSize(modelId: number) {
-    let indx = models.findIndex(e => e.id === modelId)
-    return models[indx].settings.maxThumbSize
-  }
-  
   function updateModelSettings(modelId: number, partial: Partial<Settings>) {
     const indx = models.findIndex(e => e.id === modelId)
     if (indx < 0) return
@@ -176,7 +170,6 @@ export const useModelStore = defineStore('model', () => {
     getModelCollection,
     getModelGrid,
     getSuggestions,
-    getThumbnailSize,
     updateModelSettings,
   }    
 })

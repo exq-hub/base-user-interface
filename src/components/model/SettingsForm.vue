@@ -215,7 +215,6 @@ const resourceOptions = [
 watch(activeModel, (m) => {
   if (!m) return
   itemsToShow.value = m.settings.itemsToShow
-  maxThumbSize.value = m.settings.maxThumbSize
   resources.value = m.settings.resources
 }, { immediate: true })
 
@@ -228,7 +227,6 @@ function applyModelSettings() {
   if (!activeModel.value) return
   modelStore.updateModelSettings(activeModel.value.id, {
     itemsToShow: Number(itemsToShow.value),
-    maxThumbSize: Number(maxThumbSize.value),
     resources: resources.value,
   })
 }

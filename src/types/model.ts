@@ -19,7 +19,6 @@ export enum ResourceValues {
 export interface Settings {
   itemsToShow: number,
   resources: ResourceValues,
-  maxThumbSize: number
 }
 
 export default interface Model {
