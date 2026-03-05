@@ -34,5 +34,6 @@ declare module 'vue' {
     SettingsForm: typeof import('./components/model/SettingsForm.vue')['default']
     TemporalSelectionBar: typeof import('./components/search/TemporalSelectionBar.vue')['default']
     TempSearchDialog: typeof import('./components/search/TempSearchDialog.vue')['default']
+    ThemeButton: typeof import('./components/model/ThemeButton.vue')['default']
   }
 }

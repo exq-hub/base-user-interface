@@ -30,7 +30,8 @@
     /> 
 
     <template v-slot:append>
-      <settings-form /> 
+      <ThemeButton :model-id="activeModel!.id" />
+      <settings-form />
     </template>
   </v-app-bar>
 </template>

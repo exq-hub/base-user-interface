@@ -54,12 +54,12 @@
         <v-tooltip text="Close Viewer">
           <template #activator="{ props: tipProps }">
             <v-btn
-              v-bind="tipProps"
-              :data-eid="eid('close_btn')"
-              size="small"
-              icon
-              color="red"
-              @click="closeViewer"
+             v-bind="tipProps"
+             :data-eid="eid('close_btn')"
+             size="small"
+             icon
+             color="red"
+             @click="closeViewer"
             >
               <v-icon>mdi-close</v-icon>
             </v-btn>
@@ -102,21 +102,22 @@
       <div v-if="selectedItem" class="viewer-controls" :data-eid="eid('controls')">
         <div class="d-flex align-center ga-2">
           <v-btn
-            color="teal"
-            size="small"
-            variant="flat"
-            :data-eid="eid('submit_btn')"
-            @click="submitCurrent"
+          v-if="appStore.selectedEvaluation.id !== ''"
+           color="teal"
+           size="small"
+           variant="flat"
+           :data-eid="eid('submit_btn')"
+           @click="submitCurrent"
           >
             Submit
             <span class="ml-2 opacity-80">({{ Math.round(currentTime) }})</span>
           </v-btn>
 
           <v-chip
-            v-if="segment.hasSegment"
-            size="small"
-            variant="outlined"
-            :data-eid="eid('segment_chip')"
+           v-if="segment.hasSegment"
+           size="small"
+           variant="outlined"
+           :data-eid="eid('segment_chip')"
           >
             {{ Math.round(segment.startMs/1000) }}–{{ Math.round(segment.endMs/1000) }}s
           </v-chip>
@@ -143,20 +144,20 @@
       <!-- Related summary -->
       <div v-if="selectedItem && selectedGroup" class="related-block" :data-eid="eid('related_block')">
         <RelatedItemsGrid
-          :data-eid="eid('related_grid')"
-          :model-id="activeModelId"
-          :media-item="selectedItem"
-          :related-items="selectedGroup.items"
-          @select-item="updateSelected"
+         :data-eid="eid('related_grid')"
+         :model-id="activeModelId"
+         :media-item="selectedItem"
+         :related-items="selectedGroup.items"
+         @select-item="updateSelected"
         />
       </div> 
     </v-card-text>
 
     <v-snackbar
-      v-model="snackbar"
-      :timeout="snackTimeout"
-      location="bottom left"
-      :color="snackColor"
+     v-model="snackbar"
+     :timeout="snackTimeout"
+     location="bottom left"
+     :color="snackColor"
     >
       {{ text }}
       <template #actions>
@@ -178,6 +179,7 @@ import { useAppStore } from '@/stores/app'
 import { isGroupExcluded, logEvents, submitAnswer } from '@/services/ExquisitorAPI'
 import { useFilterStore } from '@/stores/filter'
 
+const appStore = useAppStore()
 const modelStore = useModelStore()
 const itemStore = useItemStore()
 const filterStore = useFilterStore()

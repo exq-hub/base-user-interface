@@ -44,8 +44,6 @@ const props = defineProps<Props>()
     field = props.text
   }
   
-  const tColor = (props.textColor == null) ? { color: 'white' } : { color: props.textColor }
-  
 </script>
 
 
@@ -56,7 +54,6 @@ const props = defineProps<Props>()
 }
 .v-text-field :deep(input) {
   text-align: center;
-  color: v-bind('tColor.color');
 }
 
 </style>

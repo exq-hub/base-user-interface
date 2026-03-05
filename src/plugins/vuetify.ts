@@ -20,7 +20,7 @@ export default createVuetify({
     VFileUpload
   },
   theme: {
-    defaultTheme: 'softDark',
+    defaultTheme: 'graphiteDark',
     themes: {
       softDark: {
         dark: true,

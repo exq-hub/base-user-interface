@@ -11,11 +11,11 @@
 
       <div class="d-flex align-center ga-2">
         <v-btn
-          :data-eid="eid('btn_open_dialog')"
-          variant="outlined"
-          size="small"
-          @click="dialogOpen = true"
-          :disabled="allItems.length === 0"
+         :data-eid="eid('btn_open_dialog')"
+         variant="outlined"
+         size="small"
+         @click="dialogOpen = true"
+         :disabled="allItems.length === 0"
         >
           Open
         </v-btn>
@@ -26,15 +26,15 @@
     <div class="related-controls" :data-eid="eid('controls')">
       <div class="text-caption opacity-70">Summary</div>
       <v-slider
-        v-model="summaryCount"
-        :data-eid="eid('slider_summary')"
-        :min="20"
-        :max="summaryMax"
-        :step="5"
-        hide-details
-        thumb-label
-        density="compact"
-        color="indigo"
+       v-model="summaryCount"
+       :data-eid="eid('slider_summary')"
+       :min="20"
+       :max="summaryMax"
+       :step="5"
+       hide-details
+       thumb-label
+       density="compact"
+       color="indigo"
       />
     </div>
 
@@ -46,30 +46,30 @@
     >
       <div class="preview-grid" :data-eid="eid('preview_grid')">
         <div
-          v-for="it in summaryItems"
-          :key="it.id"
-          class="preview-cell"
-          :class="{ 'preview-cell--selected': it.id === selectedId }"
-          :data-eid="eid(`preview_cell_${it.id}`)"
+         v-for="it in summaryItems"
+         :key="it.id"
+         class="preview-cell"
+         :class="{ 'preview-cell--selected': it.id === selectedId }"
+         :data-eid="eid(`preview_cell_${it.id}`)"
         >
           <ItemTile
-            :data-eid="eid(`itemtile_${it.id}`)"
-            :item-id="it.id"
-            :model-id="modelId"
-            :item="it"
-            :group-info="null"
-            :tile-width="tileWidth"
-            :aspect-ratio="aspectRatio"
-            :btn-pos="true"
-            :btn-neg="true"
-            :btn-submit="false"
-            :show-remove="true"
-            :remove-set="itemStore.isItemInPos(it.id, props.modelId) ? ILSets.Positives : itemStore.isItemInNeg(it.id, props.modelId) ? ILSets.Negatives : null"
-            :history-enabled="false"
-            :enable-hover-preview="false"
-            @open="onSelect(it.id)"
-            @add="onAdd"
-            @remove="onRemove"
+           :data-eid="eid(`itemtile_${it.id}`)"
+           :item-id="it.id"
+           :model-id="modelId"
+           :item="it"
+           :group-info="null"
+           :tile-width="tileWidth"
+           :aspect-ratio="aspectRatio"
+           :btn-pos="true"
+           :btn-neg="true"
+           :btn-submit="false"
+           :show-remove="true"
+           :remove-set="itemStore.isItemInPos(it.id, props.modelId) ? ILSets.Positives : itemStore.isItemInNeg(it.id, props.modelId) ? ILSets.Negatives : null"
+           :history-enabled="false"
+           :enable-hover-preview="false"
+           @open="onSelect(it.id)"
+           @add="onAdd"
+           @remove="onRemove"
           />
         </div>
       </div>
@@ -92,10 +92,10 @@
 
           <div class="d-flex align-center ga-2">
             <v-btn
-              :data-eid="eid('dialog_btn_close')"
-              icon
-              variant="text"
-              @click="dialogOpen = false"
+             :data-eid="eid('dialog_btn_close')"
+             icon
+             variant="text"
+             @click="dialogOpen = false"
             >
               <v-icon>mdi-close</v-icon>
             </v-btn>
@@ -110,24 +110,24 @@
 
             <div class="d-flex align-center ga-3">
               <v-slider
-                v-model="dialogCount"
-                :data-eid="eid('dialog_slider')"
-                :min="Math.min(100, allItems.length || 100)"
-                :max="Math.max(100, allItems.length || 100)"
-                :step="10"
-                hide-details
-                thumb-label="always"
-                density="compact"
-                :disabled="allItems.length <= 100"
+               v-model="dialogCount"
+               :data-eid="eid('dialog_slider')"
+               :min="Math.min(100, allItems.length || 100)"
+               :max="Math.max(100, allItems.length || 100)"
+               :step="10"
+               hide-details
+               thumb-label="always"
+               density="compact"
+               :disabled="allItems.length <= 100"
               />
 
               <v-checkbox
-                v-model="dialogAll"
-                :data-eid="eid('dialog_all_toggle')"
-                hide-details
-                density="compact"
-                label="All"
-                :disabled="allItems.length <= 100"
+               v-model="dialogAll"
+               :data-eid="eid('dialog_all_toggle')"
+               hide-details
+               density="compact"
+               label="All"
+               :disabled="allItems.length <= 100"
               />
             </div>
 
@@ -147,30 +147,30 @@
               <div class="dialog-row" :data-eid="eid(`dialog_row_${index}`)">
                 <div class="dialog-row-grid">
                   <div
-                    v-for="it in row"
-                    :key="it.id"
-                    class="dialog-cell"
-                    :class="{ 'dialog-cell--selected': it.id === selectedId }"
-                    :data-eid="eid(`dialog_cell_${it.id}`)"
+                   v-for="it in row"
+                   :key="it.id"
+                   class="dialog-cell"
+                   :class="{ 'dialog-cell--selected': it.id === selectedId }"
+                   :data-eid="eid(`dialog_cell_${it.id}`)"
                   >
                     <ItemTile
-                      :data-eid="eid(`dialog_itemtile_${it.id}`)"
-                      :item-id="it.id"
-                      :model-id="modelId"
-                      :item="it"
-                      :group-info="null"
-                      :tile-width="dialogTileWidth"
-                      :aspect-ratio="aspectRatio"
-                      :btn-pos="true"
-                      :btn-neg="true"
-                      :btn-submit="false"
-                      :show-remove="true"
-                      :remove-set="itemStore.isItemInPos(it.id, props.modelId) ? ILSets.Positives : itemStore.isItemInNeg(it.id, props.modelId) ? ILSets.Negatives : null"
-                      :history-enabled="false"
-                      :enable-hover-preview="false"
-                      @open="onSelect(it.id)"
-                      @add="onAdd"
-                      @remove="onRemove"
+                     :data-eid="eid(`dialog_itemtile_${it.id}`)"
+                     :item-id="it.id"
+                     :model-id="modelId"
+                     :item="it"
+                     :group-info="null"
+                     :tile-width="dialogTileWidth"
+                     :aspect-ratio="aspectRatio"
+                     :btn-pos="true"
+                     :btn-neg="true"
+                     :btn-submit="false"
+                     :show-remove="true"
+                     :remove-set="itemStore.isItemInPos(it.id, props.modelId) ? ILSets.Positives : itemStore.isItemInNeg(it.id, props.modelId) ? ILSets.Negatives : null"
+                     :history-enabled="false"
+                     :enable-hover-preview="false"
+                     @open="onSelect(it.id)"
+                     @add="onAdd"
+                     @remove="onRemove"
                     />
                   </div>
                 </div>

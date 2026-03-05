@@ -172,6 +172,7 @@ import { useAdvancedSearchStore } from '@/stores/advancedSearch'
 import { ILSets } from '@/types/mediaitem'
 import type MediaItem from '@/types/mediaitem'
 import type { GroupMetadata } from '@/types/mediaitem'
+import { useAppStore } from '@/stores/app'
 
 const props = defineProps<{
   modelId: number,
@@ -205,7 +206,7 @@ const emit = defineEmits<{
 const shownIds = computed(() => modelStore.activeModel!.grid[0].items)
 
 // Tile sizing
-const tileWidth = computed(() => modelStore.getThumbnailSize(activeModelId.value) || 220)
+const tileWidth = computed(() => useAppStore().globalThumbSize)
 const aspectRatio = 16 / 9
 
 const gridStyle = computed(() => ({

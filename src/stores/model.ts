@@ -149,6 +149,17 @@ export const useModelStore = defineStore('model', () => {
     return models[indx].settings.maxThumbSize
   }
   
+  function updateModelSettings(modelId: number, partial: Partial<Settings>) {
+    const indx = models.findIndex(e => e.id === modelId)
+    if (indx < 0) return
+    models[indx].settings = { ...models[indx].settings, ...partial }
+
+    // Keep grid group size in sync
+    if (partial.itemsToShow !== undefined && models[indx].grid?.length) {
+      models[indx].grid[0].itemsToShow = models[indx].settings.itemsToShow
+    }
+  }
+  
   return { 
     models, 
     activeModel,
@@ -166,5 +177,6 @@ export const useModelStore = defineStore('model', () => {
     getModelGrid,
     getSuggestions,
     getThumbnailSize,
+    updateModelSettings,
   }    
 })
