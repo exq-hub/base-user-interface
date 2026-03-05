@@ -15,7 +15,6 @@ declare module 'vue' {
     Dropdown: typeof import('./components/general/Dropdown.vue')['default']
     EditTextField: typeof import('./components/general/EditTextField.vue')['default']
     ExcludedGroups: typeof import('./components/items/ExcludedGroups.vue')['default']
-    Item: typeof import('./components/items/Item.vue')['default']
     ItemTile: typeof import('./components/items/ItemTile.vue')['default']
     LeftPanel: typeof import('./components/model/LeftPanel.vue')['default']
     MediaMetadata: typeof import('./components/viewer/MediaMetadata.vue')['default']
