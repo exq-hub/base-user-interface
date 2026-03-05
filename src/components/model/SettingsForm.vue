@@ -190,7 +190,6 @@ watch(
 
 // Model settings local fields
 const itemsToShow = ref<number>(50)
-const maxThumbSize = ref<number>(300)
 const resources = ref<ResourceValues>(ResourceValues.Low)
 
 const resourceOptions = [
