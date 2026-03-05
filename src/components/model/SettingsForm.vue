@@ -92,19 +92,6 @@
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-text-field
-                 :data-eid="'max_thumb_size_' + activeModel!.id"
-                 v-model.number="maxThumbSize"
-                 type="number"
-                 label="Max thumbnail size"
-                 variant="outlined"
-                 density="comfortable"
-                 hide-details
-                 @blur="applyModelSettings"
-                />
-              </v-col>
-
-              <v-col cols="12" md="6">
                 <v-select
                  :data-eid="'resources_' + activeModel!.id"
                  v-model="resources"
