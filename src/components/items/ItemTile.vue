@@ -108,6 +108,7 @@
              size="x-small"
              icon
              variant="text"
+             :disabled="isHistory"
              @click.stop="emit('add', { itemId: itemId, set: ILSets.History })"
             >
               <v-icon size="16">mdi-eye-off-outline</v-icon>
@@ -191,10 +192,12 @@ const showBadges = computed(() => props.showBadges ?? true)
 const isPos = computed(() => itemStore.isItemInPos(props.itemId, props.modelId))
 const isNeg = computed(() => itemStore.isItemInNeg(props.itemId, props.modelId))
 const isSubmitted = computed(() => itemStore.isItemInSubmitted(props.itemId, props.modelId))
+const isHistory = computed(() => itemStore.isItemInHistory(props.itemId, props.modelId))
 
 const borderClass = computed(() => {
   if (isPos.value) return 'tile-border--pos'
   if (isNeg.value) return 'tile-border--neg'
+  if (isHistory.value) return 'tile-border--history'
   return 'tile-border--none'
 })
 
@@ -510,5 +513,9 @@ const rootStyle = computed(() => ({
 }
 .tile-border--neg {
   border: 3px solid rgba(244, 67, 54, 0.9) !important;
+}
+.tile-border--history {
+  border: 3px solid rgb(255, 255, 255) !important;
+  opacity: 0.6;
 }
 </style>
