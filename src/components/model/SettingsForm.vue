@@ -91,7 +91,20 @@
                 />
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col class="pl-8" cols="12" md="6">
+                <v-switch
+                 :data-eid="'history_enabled_' + activeModel!.id"
+                 v-model="historyEnabled"
+                 label="Enable History"
+                 variant="outlined"
+                 density="comfortable"
+                 hide-details
+                 color="indigo"
+                 @update:model-value="applyModelSettings"
+                />
+              </v-col>
+
+              <!-- <v-col cols="12" md="6">
                 <v-select
                  :data-eid="'resources_' + activeModel!.id"
                  v-model="resources"
@@ -102,7 +115,7 @@
                  hide-details
                  @update:model-value="applyModelSettings"
                 />
-              </v-col>
+              </v-col> -->
             </v-row>
           </v-window-item>
 
@@ -191,12 +204,13 @@ watch(
 // Model settings local fields
 const itemsToShow = ref<number>(50)
 const resources = ref<ResourceValues>(ResourceValues.Low)
+const historyEnabled = ref<boolean>(false)
 
-const resourceOptions = [
-  { title: 'Low', value: ResourceValues.Low },
-  { title: 'Medium', value: ResourceValues.Medium },
-  { title: 'High', value: ResourceValues.High },
-]
+// const resourceOptions = [
+//   { title: 'Low', value: ResourceValues.Low },
+//   { title: 'Medium', value: ResourceValues.Medium },
+//   { title: 'High', value: ResourceValues.High },
+// ]
 
 watch(activeModel, (m) => {
   if (!m) return
@@ -214,6 +228,7 @@ function applyModelSettings() {
   modelStore.updateModelSettings(activeModel.value.id, {
     itemsToShow: Number(itemsToShow.value),
     resources: resources.value,
+    historyEnabled: historyEnabled.value,
   })
 }
 
