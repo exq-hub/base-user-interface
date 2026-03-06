@@ -11,7 +11,7 @@
       </v-icon>
       <template v-else>
         <v-icon color="success" @click="textChanged" icon="mdi-check-circle-outline"/>
-        <v-divider class="clr-transparent" :thickness="5" vertical></v-divider>
+        <v-divider class="opacity-0" :thickness="5" vertical></v-divider>
         <v-icon color="error" @click="resetText" icon="mdi-close-circle-outline"/>
       </template>
     </template>
