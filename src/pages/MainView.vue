@@ -31,6 +31,10 @@
            @toggle-negatives="negDrawerOpen = !negDrawerOpen"
            @open-positives-dialog="posDialogOpen = true"
            @open-negatives-dialog="negDialogOpen = true"
+           @toggle-history="histDialogOpen = !histDrawerOpen"
+           @open-history-dialog="histDialogOpen = true"
+           @toggle-excluded="excDrawerOpen = !excDrawerOpen"
+           @open-excluded-dialog="excDialogOpen = true"
           />
         </v-col>
         
@@ -57,6 +61,20 @@
        @popout="negDialogOpen = true"
       />
 
+      <SetsDrawer
+       v-model="histDrawerOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.History"
+       @popout="histDialogOpen = true"
+      />
+
+      <SetsDrawer
+       v-model="excDrawerOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.Excluded"
+       @popout="excDialogOpen = true"
+      />
+
       <!-- Dialogs (deep inspect) -->
       <SetsDialog
        v-model="posDialogOpen"
@@ -68,6 +86,18 @@
        v-model="negDialogOpen"
        :model-id="activeModel!.id"
        :set="ILSets.Negatives"
+      />
+      
+      <SetsDialog
+       v-model="histDialogOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.History"
+      />
+
+      <SetsDialog
+       v-model="excDialogOpen"
+       :model-id="activeModel!.id"
+       :set="ILSets.Excluded"
       />
     </v-container>
   </template>
@@ -102,6 +132,10 @@ const posDrawerOpen = ref(false)
 const negDrawerOpen = ref(false)
 const posDialogOpen = ref(false)
 const negDialogOpen = ref(false)
+const histDrawerOpen = ref(false)
+const histDialogOpen = ref(false)
+const excDrawerOpen = ref(false)
+const excDialogOpen = ref(false)
 
 onMounted(() => {
   if (!activeModel.value) {

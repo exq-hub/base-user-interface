@@ -40,13 +40,14 @@
             <v-btn
              v-bind="tipProps"
              :data-eid="eid('exclude_video_btn')"
-             :color="isExcluded ? 'grey' : 'yellow'"
+             :color="isExcluded ? 'grey' : 'warning'"
              :disabled="!selectedItem"
              @click="exclude"
              size="small"
              variant="outlined"
             >
-              Exclude
+              <span class="pr-1">Exclude</span>
+              <v-icon>mdi-cancel</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -172,11 +173,11 @@ import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import AlbumViewer from './AlbumViewer.vue'
 import AudioPlayer from './AudioPlayer.vue'
 import RelatedItemsGrid from './RelatedItemsGrid.vue'
-import { MediaType } from '@/types/mediaitem'
+import { ILSets, MediaType } from '@/types/mediaitem'
 import { useItemStore } from '@/stores/item'
 import { useModelStore } from '@/stores/model'
 import { useAppStore } from '@/stores/app'
-import { isGroupExcluded, logEvents, submitAnswer } from '@/services/ExquisitorAPI'
+import { logEvents, submitAnswer } from '@/services/ExquisitorAPI'
 import { useFilterStore } from '@/stores/filter'
 
 const appStore = useAppStore()
@@ -217,40 +218,23 @@ const snackTimeout = ref(4000)
 const snackColor = ref('white')
 const text = ref('')
 
-// exclude
-const isExcluded = ref(false)
+const isExcluded = computed(() => {
+  const modelId = modelStore.activeModel!.id
 
-async function checkExclude() {
-  const modelId = modelStore.activeModel?.id
-  if (!modelId || !selectedItem.value) return
-
-  if (!itemStore.modelExcluded.has(modelId)) {
-    isExcluded.value = false
-    return
+  if (isGroupVideo.value && selectedItem.value) {
+    return itemStore.getSetItems(modelId, ILSets.Excluded).some(item => item.groupId === selectedItem.value?.groupId)
   }
-
-  const excludedItems = Array.from(itemStore.modelExcluded.get(modelId)!)
-  isExcluded.value = await isGroupExcluded({
-    session_info: {
-      session: useAppStore().session,
-      collection: modelStore.getModelCollection(modelId),
-      modelId: modelId
-    },
-    itemId: selectedItem.value.id,
-    excluded_ids: excludedItems
-  })
-}
+  return itemStore.getSetItems(modelId, ILSets.Excluded).some(item => item.id === selectedItem.value?.id)
+})
 
 async function exclude() {
-  const modelId = modelStore.activeModel?.id
-  if (!modelId || !selectedItem.value) return
+  const modelId = modelStore.activeModel!.id
 
   if (!isExcluded.value) {
-    itemStore.excludeItemGroup(selectedItem.value.id, modelId)
-    isExcluded.value = true
+    itemStore.addItemToSet(selectedItem.value.id, modelId!, ILSets.Excluded)
   } else {
-    itemStore.removeItemFromExclude(selectedItem.value.id)
-    isExcluded.value = false
+    const id = itemStore.getSetItems(modelId, ILSets.Excluded).find(item => item.groupId === selectedItem.value?.groupId)!.id
+    itemStore.removeItemFromSet(id, modelId!, ILSets.Excluded)
   }
 }
 
@@ -330,10 +314,7 @@ function updateSelected(itemId?: number) {
 
 watch(
   () => [selectedGroup.value?.src, selectedItem.value?.id] as const,
-  async ([src]) => {
-    await checkExclude()
-
-    // If no video, just bail
+  async ([src, id]) => {
     if (!src || !isGroupVideo.value) return
 
     const vid = videoPlayer.value

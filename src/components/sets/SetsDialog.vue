@@ -48,7 +48,7 @@
             :btn-pos="showOppositePos"
             :btn-neg="showOppositeNeg"
             :btn-submit="false"
-            :history-enabled="false"
+            :history-enabled="historyEnabled"
             :show-remove="true"
             :remove-set="props.set"
             :enable-hover-preview="true"
@@ -76,6 +76,7 @@ import { computed } from 'vue'
 import ItemTile from '@/components/items/ItemTile.vue'
 import { useItemStore } from '@/stores/item'
 import { ILSets } from '@/types/mediaitem'
+import { useModelStore } from '@/stores/model';
 
 const props = defineProps<{
   modelId: number
@@ -92,6 +93,9 @@ const emit = defineEmits<{
 }>()
 
 const itemStore = useItemStore()
+const modelStore = useModelStore()
+
+const historyEnabled = computed(() => modelStore.activeModel!.settings.historyEnabled)
 
 const tileWidth = computed(() => props.tileWidth ?? 260)
 const aspectRatio = computed(() => props.aspectRatio ?? 16 / 9)
@@ -115,10 +119,13 @@ const title = computed(() => {
     case ILSets.Negatives: return 'Negatives'
     case ILSets.History: return 'History'
     case ILSets.Submitted: return 'Submitted'
+    case ILSets.Excluded: return 'Excluded'
     default: return 'Set'
   }
 })
+
 const items = computed(() => itemStore.getSetItems(props.modelId, props.set))
+
 
 function onAdd(payload: { itemId: number; set: ILSets }) {
   itemStore.addItemToSet(payload.itemId, props.modelId, payload.set)

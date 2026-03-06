@@ -7,6 +7,7 @@ import { useModelStore } from './model'
 import { useItemStore } from './item'
 import { useFilterStore } from './filter'
 import { ActiveFiltersDB, AppliedFilters } from '@/types/filter'
+import { ILSets } from '@/types/mediaitem'
 
 export const useChatStore = defineStore('chat', () => {
   const chatSessions = reactive<Map<number,ChatQuery[]>>(new Map<number,ChatQuery[]>())
@@ -53,10 +54,7 @@ export const useChatStore = defineStore('chat', () => {
     if (n !== undefined) {
       n_items = n
     }
-    let exclude : number[] = []
-    if (itemStore.modelExcluded.has(modelStore.activeModel!.id)) {
-      exclude = Array.from(itemStore.modelExcluded.get(modelStore.activeModel!.id)!)
-    }
+    let exclude : number[] = itemStore.getSetItems(modelStore.activeModel!.id, ILSets.Excluded).map(item => item.id)
     let prepFilters: ActiveFiltersDB | undefined = useFilterStore().prepareFilters(
       modelStore.activeModel!.id, 
       activeFilters

@@ -24,7 +24,7 @@ export interface GroupMetadata {
 export default interface MediaItem {
   id : number,
   name : string,
-  mediaId : number, // Id in its database
+  itemId : number, // Id in its database
   mediaType : MediaType,
   thumbPath : string, // For Items in Grid and Overlays
   srcPath : string // Enlarged version for Summary View, if downloading and rendering is not a performance hit use this path in thumbPath

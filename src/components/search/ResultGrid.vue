@@ -35,6 +35,40 @@
       </div>
 
       <div class="feedback-btn-area d-flex align-center ga-2">
+        <v-tooltip v-if="historyEnabled" text="Inspect history" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="histCount" :model-value="histCount > 0" :color="'white'">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_history"
+               icon
+               size="small"
+               variant="text"
+               @click="onHistClick"
+               :color="(histCount > 0) ? 'white' : 'grey'"
+              >
+                <v-icon>mdi-eye-off-outline</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+        <v-tooltip text="Inspect excluded" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="excCount" :model-value="excCount > 0" :color="'warning'">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_excluded"
+               icon
+               size="small"
+               variant="text"
+               @click="onExcClick"
+               :color="(excCount > 0) ? 'warning' : 'grey'"
+              >
+                <v-icon>mdi-cancel</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
         <v-tooltip text="Inspect positives" location="bottom">
           <template #activator="{ props: tipProps }">
             <v-badge :content="posCount" :model-value="posCount > 0" color="success">
@@ -45,6 +79,7 @@
                size="small"
                variant="text"
                @click="onPosClick"
+               :color="(posCount > 0) ? 'success' : 'grey'"
               >
                 <v-icon>mdi-thumb-up-outline</v-icon>
               </v-btn>
@@ -62,6 +97,7 @@
                size="small"
                variant="text"
                @click="onNegClick"
+               :color="(negCount > 0) ? 'error' : 'grey'"
               >
                 <v-icon>mdi-thumb-down-outline</v-icon>
               </v-btn>
@@ -101,8 +137,9 @@
           :btn-neg="true"
           :btn-ignore="false"
           :btn-submit="false"
+          :history-enabled="historyEnabled"
           :show-remove="true"
-          :remove-set="itemStore.isItemInPos(id, props.modelId) ? ILSets.Positives : itemStore.isItemInNeg(id, props.modelId) ? ILSets.Negatives : null"
+          :remove-set="removeSet(id)"
           :enable-hover-preview="true"
           @open="onOpen"
           @add="onAdd"
@@ -136,8 +173,9 @@
                   :btn-neg="true"
                   :btn-ignore="false"
                   :btn-submit="false"
+                  :history-enabled="historyEnabled"
                   :show-remove="true"
-                  :remove-set="itemStore.isItemInPos(id, props.modelId) ? ILSets.Positives : itemStore.isItemInNeg(id, props.modelId) ? ILSets.Negatives : null"
+                  :remove-set="removeSet(id)"
                   :enable-hover-preview="true"
                   @open="onOpen"
                   @add="onAdd"
@@ -192,6 +230,15 @@ const collection = computed(() => modelStore.getModelCollection(activeModelId.va
 const groupView = ref(false)
 const pseudoRF = ref(false)
 
+const historyEnabled = computed(() => modelStore.activeModel!.settings.historyEnabled)
+
+function removeSet(id: number) {
+  if (itemStore.isItemInPos(id, props.modelId)) return ILSets.Positives
+  if (itemStore.isItemInNeg(id, props.modelId)) return ILSets.Negatives
+  if (itemStore.isItemInHistory(id, props.modelId)) return ILSets.History
+  return null
+}
+
 const emit = defineEmits<{
   (e: 'toggle-chat'): void
   (e: 'load-more'): void
@@ -199,8 +246,12 @@ const emit = defineEmits<{
   (e: 'show-rf-results', resultIds: number[]): void
   (e: 'toggle-positives'): void
   (e: 'toggle-negatives'): void
+  (e: 'toggle-history'): void
+  (e: 'toggle-excluded'): void
   (e: 'open-positives-dialog'): void
   (e: 'open-negatives-dialog'): void
+  (e: 'open-history-dialog'): void
+  (e: 'open-excluded-dialog'): void
 }>()
 
 const shownIds = computed(() => modelStore.activeModel!.grid[0].items)
@@ -224,6 +275,12 @@ const posCount = computed(() =>
 const negCount = computed(() =>
   itemStore.getSetItems(activeModelId.value, ILSets.Negatives).length
 )
+const histCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.History).length
+)
+const excCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.Excluded).length
+)
 
 function onPosClick(e: MouseEvent) {
   if (e.shiftKey) emit('open-positives-dialog')
@@ -233,6 +290,16 @@ function onPosClick(e: MouseEvent) {
 function onNegClick(e: MouseEvent) {
   if (e.shiftKey) emit('open-negatives-dialog')
   else emit('toggle-negatives')
+}
+
+function onHistClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-history-dialog')
+  else emit('toggle-history')
+}
+
+function onExcClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-excluded-dialog')
+  else emit('toggle-excluded')
 }
 
 // Prefetched items (id -> MediaItem)

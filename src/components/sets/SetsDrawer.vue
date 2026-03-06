@@ -59,25 +59,25 @@
 
       <div v-else class="grid" :data-eid="eid('grid')">
         <ItemTile
-          v-for="it in items"
-          :key="it.id"
-          :data-eid="eid(`itemtile_${it.id}`)"
-          :item-id="it.id"
-          :model-id="modelId"
-          :item="it"
-          :group-info="null"
-          :tile-width="tileWidth"
-          :aspect-ratio="aspectRatio"
-          :btn-pos="showOppositePos"
-          :btn-neg="showOppositeNeg"
-          :btn-submit="false"
-          :history-enabled="false"
-          :show-remove="true"
-          :remove-set="props.set"
-          :enable-hover-preview="true"
-          @open="$emit('open-item', it.id)"
-          @add="onAdd"
-          @remove="onRemove"
+         v-for="it in items"
+         :key="it.id"
+         :data-eid="eid(`itemtile_${it.id}`)"
+         :item-id="it.id"
+         :model-id="modelId"
+         :item="it"
+         :group-info="null"
+         :tile-width="tileWidth"
+         :aspect-ratio="aspectRatio"
+         :btn-pos="showOppositePos"
+         :btn-neg="showOppositeNeg"
+         :btn-submit="false"
+         :history-enabled="historyEnabled && props.set !== ILSets.History"
+         :show-remove="true"
+         :remove-set="props.set"
+         :enable-hover-preview="true"
+         @open="$emit('open-item', it.id)"
+         @add="onAdd"
+         @remove="onRemove"
         />
       </div>
     </div>
@@ -89,6 +89,7 @@ import { computed } from 'vue'
 import ItemTile from '@/components/items/ItemTile.vue'
 import { useItemStore } from '@/stores/item'
 import { ILSets } from '@/types/mediaitem'
+import { useModelStore } from '@/stores/model';
 
 
 const props = defineProps<{
@@ -109,6 +110,9 @@ const emit = defineEmits<{
 }>()
 
 const itemStore = useItemStore()
+const modelStore = useModelStore()
+
+const historyEnabled = computed(() => modelStore.activeModel!.settings.historyEnabled)
 
 const location = computed(() => props.location ?? 'right')
 const width = computed(() => props.width ?? 360)
@@ -126,8 +130,8 @@ const openProxy = computed({
 })
 
 // Opposite button shown via ItemTile's built-in add buttons
-const showOppositeNeg = computed(() => props.set === ILSets.Positives) // move to Neg
-const showOppositePos = computed(() => props.set === ILSets.Negatives) // move to Pos
+const showOppositeNeg = computed(() => props.set === ILSets.Positives || props.set === ILSets.Excluded || props.set === ILSets.History) // move to Neg
+const showOppositePos = computed(() => props.set === ILSets.Negatives || props.set === ILSets.Excluded || props.set === ILSets.History) // move to Pos
 
 const title = computed(() => {
   switch (props.set) {
@@ -135,6 +139,7 @@ const title = computed(() => {
     case ILSets.Negatives: return 'Negatives'
     case ILSets.History: return 'History'
     case ILSets.Submitted: return 'Submitted'
+    case ILSets.Excluded: return 'Excluded'
     default: return 'Set'
   }
 })

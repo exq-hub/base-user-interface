@@ -19,6 +19,7 @@ export enum ResourceValues {
 export interface Settings {
   itemsToShow: number,
   resources: ResourceValues,
+  historyEnabled: boolean,
 }
 
 export default interface Model {

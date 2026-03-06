@@ -5,6 +5,8 @@ import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'
 import { ExqRFRequest } from '@/types/exq'
 import { searchRF, initModel, removeModel } from '@/services/ExquisitorAPI'
 import { useFeedbackStore } from './feedback'
+import { useItemStore } from './item'
+import { ILSets } from '@/types/mediaitem'
 
 export const useModelStore = defineStore('model', () => {
   const nModels = ref(0)
@@ -16,6 +18,7 @@ export const useModelStore = defineStore('model', () => {
     return { 
       itemsToShow: 50,
       resources: ResourceValues.Low,
+      historyEnabled: false,
     }
   }
   
@@ -151,6 +154,11 @@ export const useModelStore = defineStore('model', () => {
     // Keep grid group size in sync
     if (partial.itemsToShow !== undefined && models[indx].grid?.length) {
       models[indx].grid[0].itemsToShow = models[indx].settings.itemsToShow
+    }
+
+    if (partial.historyEnabled !== undefined && !partial.historyEnabled) {
+      const itemStore = useItemStore()
+      itemStore.removeItemsFromSet(itemStore.getSetItems(modelId, ILSets.History).map(item => item.id), modelId, ILSets.History)
     }
   }
   
