@@ -35,3 +35,21 @@ a,
 ::-webkit-scrollbar {
     display: none;
 }
+
+/* Vuetify tooltip styling (global) */
+.v-tooltip > .v-overlay__content {
+  background: rgba(38, 43, 53, 0.98) !important; /* match your surface */
+  color: #E6EAF2 !important;                      /* on-surface */
+  border: 1px solid rgba(255, 255, 255, 0.12) !important; /* outline */
+  border-radius: 10px !important;
+  padding: 8px 10px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35) !important;
+}
+
+/* If you use multiline tooltip blocks */
+.filter-tooltip {
+  max-width: 360px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.25;
+}

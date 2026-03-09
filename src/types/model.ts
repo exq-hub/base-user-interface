@@ -1,35 +1,37 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 export interface GridGroup {
-    itemsToShow: number,
-    items: number[],
-    name? : string,
+  itemsToShow: number,
+  items: number[],
+  name? : string,
 }
 
 export interface GridGroupInfo {
-    id: number,
-    itemsToShow: number,
-    name?: string
+  id: number,
+  itemsToShow: number,
+  name?: string
 }
 
 export enum ResourceValues {
-    Low=0,
-    Medium,
-    High
+  Low=0,
+  Medium,
+  High
 }
 
 export interface Settings {
-    itemsToShow: number,
-    resources: ResourceValues,
-    maxThumbSize: number
+  itemsToShow: number,
+  resources: ResourceValues,
+  historyEnabled: boolean,
 }
 
 export default interface Model {
-    session: string,
-    id : number,
-    collection: string,
-    name : string,
-    settings : Settings, //Settings type, number of suggestions, modalities, etc.
-    grid : GridGroup[],
-    activeFilters? : Map<number,number[][]>
-    activeSearch? : string[], //TODO: Consider using a Search type with keyword and search form
+  session: string,
+  id : number,
+  collection: string,
+  name : string,
+  settings : Settings, //Settings type, number of suggestions, modalities, etc.
+  grid : GridGroup[],
+  activeFilters? : Map<number,number[][]>
+  activeSearch? : string[], //TODO: Consider using a Search type with keyword and search form
 }
 

@@ -1,210 +1,487 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
-    <v-card data-eid="result_grid">
-        <v-card-title style="display: flex; align-items: center;">
-            Search Results
-            <v-switch 
-             data-eid="toggle_group_view_btn"
-             style="display: flex;" class="pl-4" v-model="groupView" label="Toggle Grouping"
-            />
-            <div class="feedback-btn-area d-flex">
-                <div style="display: flex; align-items: center;" class="pl-3 pr-2">
-                    <v-btn data-eid="show_feedback_results_btn" color="primary" @click="onShowFeedbackResults">
-                        Show Feedback Results
-                    </v-btn>
-                    <!-- <v-checkbox label="PRF" v-model="pseudoRF" style="display: flex;"/> -->
-                </div>
-                <v-btn
-                 data-eid="open_advanced_from_rf_btn"
-                 color="primary"
-                 @click="openAdvancedFromRF"
-                 >
-                    <v-icon>mdi-filter-outline</v-icon>
-                    <v-divider class="border-opacity-0" vertical :thickness="5"/>
-                </v-btn>
-            </div>
-        </v-card-title>
-        <h4 class="text-center" v-if="shownIds.length === 0">Results will appear here</h4>
-        <v-card-text :key="resultKey">
-            <v-container v-if="!groupView">
-                <div class="result-items-grid">
-                    <div
-                     v-for="it,itIdx in shownIds"
-                     :key="activeModelId+it.toString()+itIdx.toString()"
-                     cols="auto"
-                     class="d-flex flex-column align-center mb-2"
-                    >
-                        <item 
-                         :item-id="it"
-                         :item-index="itIdx"
-                         :model-id="activeModelId"
-                         :btn-pos="true"
-                         :btn-neg="true"
-                         :btn-ignore="false"
-                         :btn-submit="true"
-                         :provided="false"
-                         :overlay="true"
-                         @replace-overlay="updateItem"
-                        />
-                    </div>
-                </div>
-            </v-container>
-            <v-container v-else>
-                <div v-for="k in groups.keys()" class="pb-5">
-                    <v-divider class="border-opacity-75 pb-2"/>
-                    <h3 class="pb-2">Group/Video {{ k }}</h3>
-                    <v-slide-group
-                     show-arrows
-                     :data-eid="'slide_group_' + k.toString()"
-                    >
-                        <v-slide-group-item
-                         v-for="it in groups.get(k)?.sort()"
-                         :key="k.toString().concat('-', it.toString())"
-                        >
-                            <item 
-                            :item-id="it"
-                            :item-index="0"
-                            :model-id="activeModelId"
-                            :btn-pos="true"
-                            :btn-neg="true"
-                            :btn-ignore="false"
-                            :btn-submit="true"
-                            :provided="false"
-                            :overlay="true"
-                            @replace-overlay="updateItem"
-                            />
-                        </v-slide-group-item>
-                    </v-slide-group>
-                    <v-divider class="border-opacity-75 pb-2"/>
-                </div>
-            </v-container>
-        </v-card-text>
+  <v-card data-eid="result_grid" class="result-card">
+    <v-card-title class="result-header">
+      <v-tooltip 
+       :text="props.chatVisible ? 'Hide search panel' : 'Show search panel'"
+       :open-delay="1000"
+       location="bottom"
+      >
+        <template #activator="{ props: tipProps }">
+          <v-btn
+            v-bind="tipProps"
+            data-eid="result_grid_toggle_chat"
+            icon
+            size="small"
+            variant="text"
+            @click="emit('toggle-chat')"
+          >
+            <v-icon>
+              {{ props.chatVisible ? 'mdi-chevron-left' : 'mdi-magnify' }}
+            </v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
 
-        <v-card-actions>
-            <v-btn data-eid="load_more_btn" color="primary" @click="onLoadMore">
-                Load More
-            </v-btn>
-        </v-card-actions>
-    </v-card>
+      <div class="d-flex align-center ga-4 flex-wrap">
+        <span class="text-h6">Search Results</span>
+
+        <v-switch
+          data-eid="toggle_group_view_btn"
+          v-model="groupView"
+          label="Group by Video"
+          hide-details
+          density="compact"
+        />
+      </div>
+
+      <div class="feedback-btn-area d-flex align-center ga-2">
+        <v-tooltip v-if="historyEnabled" text="Inspect history" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="histCount" :model-value="histCount > 0" :color="'white'">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_history"
+               icon
+               size="small"
+               variant="text"
+               @click="onHistClick"
+               :color="(histCount > 0) ? 'white' : 'grey'"
+              >
+                <v-icon>mdi-eye-off-outline</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+        <v-tooltip text="Inspect excluded" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="excCount" :model-value="excCount > 0" :color="'warning'">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_excluded"
+               icon
+               size="small"
+               variant="text"
+               @click="onExcClick"
+               :color="(excCount > 0) ? 'warning' : 'grey'"
+              >
+                <v-icon>mdi-cancel</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+        <v-tooltip text="Inspect positives" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="posCount" :model-value="posCount > 0" color="success">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_positives"
+               icon
+               size="small"
+               variant="text"
+               @click="onPosClick"
+               :color="(posCount > 0) ? 'success' : 'grey'"
+              >
+                <v-icon>mdi-thumb-up-outline</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Inspect negatives" location="bottom">
+          <template #activator="{ props: tipProps }">
+            <v-badge :content="negCount" :model-value="negCount > 0" color="error">
+              <v-btn
+               v-bind="tipProps"
+               data-eid="result_grid_btn_negatives"
+               icon
+               size="small"
+               variant="text"
+               @click="onNegClick"
+               :color="(negCount > 0) ? 'error' : 'grey'"
+              >
+                <v-icon>mdi-thumb-down-outline</v-icon>
+              </v-btn>
+            </v-badge>
+          </template>
+        </v-tooltip>
+        
+        <v-btn data-eid="show_feedback_results_btn" color="primary" @click="onShowFeedbackResults">
+          Show Feedback Results
+        </v-btn>
+
+        <v-btn data-eid="open_advanced_from_rf_btn" color="primary" @click="openAdvancedFromRF" icon>
+          <v-icon>mdi-filter-outline</v-icon>
+        </v-btn>
+      </div>
+    </v-card-title>
+
+    <v-divider />
+
+    <v-card-text class="result-body">
+      <div v-if="shownIds.length === 0" class="empty-state">
+        Results will appear here
+      </div>
+
+      <!-- Normal grid view -->
+      <div v-else-if="!groupView" class="result-grid" :style="gridStyle">
+        <ItemTile
+          v-for="id in shownIds"
+          :key="`${activeModelId}-${id}`"
+          :item-id="id"
+          :model-id="activeModelId"
+          :item="itemsById.get(id) ?? null"
+          :group-info="getGroupInfoForItem(id)"
+          :tile-width="tileWidth"
+          :aspect-ratio="aspectRatio"
+          :btn-pos="true"
+          :btn-neg="true"
+          :btn-ignore="false"
+          :btn-submit="false"
+          :history-enabled="historyEnabled"
+          :show-remove="true"
+          :remove-set="removeSet(id)"
+          :enable-hover-preview="true"
+          @open="onOpen"
+          @add="onAdd"
+          @remove="onRemove"
+        />
+      </div>
+
+      <!-- Group-by-video view -->
+      <div v-else class="group-view">
+        <div v-for="groupId in groupOrder" :key="groupId" class="group-block">
+          <div class="d-flex align-center ga-2 mb-2">
+            <v-divider class="flex-grow-1" />
+            <div class="text-subtitle-1 font-weight-medium">Video {{ groupId }}</div>
+            <v-divider class="flex-grow-1" />
+          </div>
+
+          <v-slide-group show-arrows :data-eid="`slide_group_${groupId}`">
+            <v-slide-group-item
+              v-for="id in (groups.get(groupId) ?? [])"
+              :key="`${activeModelId}-${groupId}-${id}`"
+            >
+              <div class="slide-tile" :style="slideTileStyle">
+                <ItemTile
+                  :item-id="id"
+                  :model-id="activeModelId"
+                  :item="itemsById.get(id) ?? null"
+                  :group-info="getGroupInfoForItem(id)"
+                  :tile-width="tileWidth"
+                  :aspect-ratio="aspectRatio"
+                  :btn-pos="true"
+                  :btn-neg="true"
+                  :btn-ignore="false"
+                  :btn-submit="false"
+                  :history-enabled="historyEnabled"
+                  :show-remove="true"
+                  :remove-set="removeSet(id)"
+                  :enable-hover-preview="true"
+                  @open="onOpen"
+                  @add="onAdd"
+                  @remove="onRemove"
+                />
+              </div>
+            </v-slide-group-item>
+          </v-slide-group>
+        </div>
+      </div>
+    </v-card-text>
+
+    <v-divider />
+
+    <v-card-actions class="result-actions">
+      <v-btn data-eid="load_more_btn" color="primary" @click="onLoadMore">
+        Load More
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useModelStore } from '@/stores/model';
-import Item from '@/components/items/Item.vue';
-import { useItemStore } from '@/stores/item';
-import { useFeedbackStore } from '@/stores/feedback';
-import { useChatStore } from '@/stores/chat';
-import { useAdvancedSearchStore } from '@/stores/advancedSearch';
-import { storeToRefs } from 'pinia';
+import { computed, reactive, ref, watch } from 'vue'
+import ItemTile from '@/components/items/ItemTile.vue'
+import { useModelStore } from '@/stores/model'
+import { useItemStore } from '@/stores/item'
+import { useGroupStore } from '@/stores/group'
+import { useFeedbackStore } from '@/stores/feedback'
+import { useChatStore } from '@/stores/chat'
+import { useAdvancedSearchStore } from '@/stores/advancedSearch'
+import { ILSets } from '@/types/mediaitem'
+import type MediaItem from '@/types/mediaitem'
+import type { GroupMetadata } from '@/types/mediaitem'
+import { useAppStore } from '@/stores/app'
+
+const props = defineProps<{
+  modelId: number,
+  chatVisible?: boolean
+}>()
 
 const modelStore = useModelStore()
 const itemStore = useItemStore()
+const groupStore = useGroupStore()
+const feedbackStore = useFeedbackStore()
 const chatStore = useChatStore()
 const advancedStore = useAdvancedSearchStore()
 
-const activeModelId = reactive(computed(() => modelStore.activeModel!.id))
+const activeModelId = computed(() => modelStore.activeModel!.id)
+const collection = computed(() => modelStore.getModelCollection(activeModelId.value))
 
-// For controlling the amount shown initially
-const itemsPerPage = ref(modelStore.activeModel!.settings.itemsToShow)
-
-const groups: Map<number,number[]> = reactive(new Map<number, number[]>())
 const groupView = ref(false)
-
 const pseudoRF = ref(false)
 
-const { performRFSearch } = storeToRefs(advancedStore)
+const historyEnabled = computed(() => modelStore.activeModel!.settings.historyEnabled)
+
+function removeSet(id: number) {
+  if (itemStore.isItemInPos(id, props.modelId)) return ILSets.Positives
+  if (itemStore.isItemInNeg(id, props.modelId)) return ILSets.Negatives
+  if (itemStore.isItemInHistory(id, props.modelId)) return ILSets.History
+  return null
+}
 
 const emit = defineEmits<{
-    (e: 'load-more'): void,
-    (e: 'selected', itemId: number): void
-    (e: 'show-rf-results', resultIds: number[]): void
+  (e: 'toggle-chat'): void
+  (e: 'load-more'): void
+  (e: 'selected', itemId: number): void
+  (e: 'show-rf-results', resultIds: number[]): void
+  (e: 'toggle-positives'): void
+  (e: 'toggle-negatives'): void
+  (e: 'toggle-history'): void
+  (e: 'toggle-excluded'): void
+  (e: 'open-positives-dialog'): void
+  (e: 'open-negatives-dialog'): void
+  (e: 'open-history-dialog'): void
+  (e: 'open-excluded-dialog'): void
 }>()
 
-const resultKey = ref(0)
 const shownIds = computed(() => modelStore.activeModel!.grid[0].items)
 
-watch(shownIds, () => resultKey.value++)
+// Tile sizing
+const tileWidth = computed(() => useAppStore().globalThumbSize)
+const aspectRatio = 16 / 9
+
+const gridStyle = computed(() => ({
+  '--tile-w': `${tileWidth.value}px`
+}))
+
+const slideTileStyle = computed(() => ({
+  width: `${tileWidth.value}px`
+}))
+
+// Counts for feedback results
+const posCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.Positives).length
+)
+const negCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.Negatives).length
+)
+const histCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.History).length
+)
+const excCount = computed(() =>
+  itemStore.getSetItems(activeModelId.value, ILSets.Excluded).length
+)
+
+function onPosClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-positives-dialog')
+  else emit('toggle-positives')
+}
+
+function onNegClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-negatives-dialog')
+  else emit('toggle-negatives')
+}
+
+function onHistClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-history-dialog')
+  else emit('toggle-history')
+}
+
+function onExcClick(e: MouseEvent) {
+  if (e.shiftKey) emit('open-excluded-dialog')
+  else emit('toggle-excluded')
+}
+
+// Prefetched items (id -> MediaItem)
+const itemsById: Map<number, MediaItem> = reactive(new Map())
+
+// Grouping (groupId -> ids)
+const groups: Map<number, number[]> = reactive(new Map())
+
+const groupOrder = computed(() => {
+  const keys = Array.from(groups.keys())
+  keys.sort((a, b) => {
+    if (a === -1 && b !== -1) return 1
+    if (b === -1 && a !== -1) return -1
+    return a - b
+  })
+  return keys
+})
+
+function getGroupInfoForItem(id: number): GroupMetadata | null {
+  const it = itemsById.get(id)
+  if (!it || it.groupId == null) return null
+  return groupStore.get(collection.value, it.groupId) // NOTE: groupStore cache is keyed by collection+groupId
+}
+
+async function prefetchShownItems(ids: number[]) {
+  const keep = new Set(ids)
+  for (const id of Array.from(itemsById.keys())) {
+    if (!keep.has(id)) itemsById.delete(id)
+  }
+
+  const missing = ids.filter((id) => !itemsById.has(id))
+  if (missing.length === 0) return
+
+  const fetched = await Promise.all(missing.map((id) => itemStore.fetchMediaItem(id, activeModelId.value)))
+  for (const it of fetched) itemsById.set(it.id, it)
+}
+
+/**
+ * Prefetch GroupMetadata for all groupIds in the currently shown items.
+ *
+ * IMPORTANT FUTURE UPDATE (batch GroupMetadata):
+ * groupStore.fetchGroupsInfo has a TODO to replace Promise.all with ONE API call when added.
+ */
+async function prefetchGroupsFromItems(ids: number[]) {
+  const groupIds: number[] = []
+  for (const id of ids) {
+    const it = itemsById.get(id)
+    if (it?.groupId != null) groupIds.push(it.groupId)
+  }
+  await groupStore.fetchGroupsInfo(collection.value, groupIds, activeModelId.value)
+}
+
+function rebuildGroups(ids: number[]) {
+  groups.clear()
+  for (const id of ids) {
+    const it = itemsById.get(id)
+    const g = it?.groupId ?? -1
+    const bucket = groups.get(g) ?? []
+    bucket.push(id)
+    groups.set(g, bucket)
+  }
+}
+
+/**
+ * Ensure correctness when shownIds changes rapidly:
+ * - Use a monotonically increasing sequence number.
+ * - Only apply results if the sequence matches the latest.
+ */
+let seq = 0
+watch(
+  shownIds,
+  async (ids) => {
+    const mySeq = ++seq
+
+    // Prefetch items (await)
+    await prefetchShownItems(ids)
+    if (mySeq !== seq) return
+
+    // Prefetch groups (await)
+    await prefetchGroupsFromItems(ids)
+    if (mySeq !== seq) return
+
+    // Build grouping map
+    rebuildGroups(ids)
+  },
+  { immediate: true }
+)
 
 // Show positive/negative results
 async function onShowFeedbackResults() {
-    let suggs: number[] = []
-    if (pseudoRF.value) {
-        const qIdx = chatStore.chatSessions.get(activeModelId.value!)!.findIndex(
-            (val) => val.id === chatStore.currentQueryId 
-        )
-        suggs = await useFeedbackStore().getFeedbackResults(false, chatStore.chatSessions.get(activeModelId.value)![qIdx].text)
-    } else {
-        suggs = await useFeedbackStore().getFeedbackResults(false)
-    }
-    emit('show-rf-results', suggs)
-}
-
-async function getItemGroups() {
-    groups.clear()
-    await Promise.all(
-        shownIds.value.map(async id => {
-            const itm = await itemStore.fetchMediaItem(id, activeModelId.value)
-            const g = itm.groupId!
-            const bucket = groups.get(g) ?? []
-            bucket.push(id)
-            groups.set(g, bucket)
-        })
-    )
+  let suggs: number[] = []
+  if (pseudoRF.value) {
+    const session = chatStore.chatSessions.get(activeModelId.value!)!
+    const qIdx = session.findIndex((val) => val.id === chatStore.currentQueryId)
+    suggs = await feedbackStore.getFeedbackResults(false, session[qIdx]?.text ?? '')
+  } else {
+    suggs = await feedbackStore.getFeedbackResults(false)
+  }
+  emit('show-rf-results', suggs)
 }
 
 function openAdvancedFromRF() {
-    advancedStore.open({
-        queryName: 'Feedback',
-        queryText: '',
-        searchType: 'feedback',
-        searchModel: 'clip',
-        filters: useFeedbackStore().getRFModelFilters(),
-        history: false
-    })
+  advancedStore.open({
+    queryName: 'Feedback',
+    queryText: '',
+    searchType: 'feedback',
+    searchModel: 'clip',
+    filters: feedbackStore.getRFModelFilters(),
+    history: false
+  })
 }
 
-watch(shownIds, () => {
-    getItemGroups()
-}, 
-{ immediate: true })
-
-watch(() => performRFSearch.value, async (newVal) => {
-    if (newVal) {
-        const suggs = await useFeedbackStore().getFeedbackResults(false)
-        emit('show-rf-results', suggs)
-        performRFSearch.value = false
-    }
-},
-{ immediate: true })
-
-async function onLoadMore() {
-    emit('load-more')
-    itemsPerPage.value += 50 // Or some other logic
+function onLoadMore() {
+  emit('load-more')
 }
 
-function updateItem(id: number) {
-    emit('selected', id)
+function onOpen(itemId: number) {
+  emit('selected', itemId)
+}
+
+function onAdd(payload: { itemId: number; set: ILSets }) {
+  itemStore.addItemToSet(payload.itemId, activeModelId.value, payload.set)
+}
+
+function onRemove(payload: { itemId: number; set: ILSets }) {
+  itemStore.removeItemFromSet(payload.itemId, activeModelId.value, payload.set)
 }
 </script>
 
 <style scoped>
-.thumbnail-wrapper {
-    width: 100%;
-    position: relative;
-    cursor: pointer;
-    overflow: hidden;
+.result-card {
+  height: 100%;
 }
 
-.result-items-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    max-height: 80vh;
-    overflow-y: auto;
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .feedback-btn-area {
-    float: right; 
-    margin-left: auto;
+  margin-left: auto;
+}
+
+.result-body {
+  padding: 8px;
+}
+
+.empty-state {
+  padding: 24px 8px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* grid */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-w), 1fr));
+  gap: 8px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+/* group view */
+.group-view {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.group-block {
+  padding-bottom: 16px;
+}
+
+.slide-tile {
+  margin-right: 8px;
+}
+
+.result-actions {
+  justify-content: flex-start;
 }
 </style>

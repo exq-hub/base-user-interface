@@ -1,6 +1,8 @@
-import type { 
-    ExqRFRequest, 
-    ExqInitResponse, 
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGP-3.0-or-later
+import type {
+    ExqRFRequest,
+    ExqInitResponse,
     ExqInitModelResponse,
     ExqApplyFiltersRequest,
     ExqRFResponse,
@@ -9,7 +11,7 @@ import type {
 } from "@/types/exq"
 import { FilterInfo } from "@/types/filter"
 import type MediaItem from "@/types/mediaitem"
-import { Info, MediaType } from "@/types/mediaitem"
+import { MediaType } from "@/types/mediaitem"
 import type { GridGroup } from "@/types/model"
 
 const mockItems : number[] = [...Array(200).keys()]
@@ -25,7 +27,7 @@ function getTestImagePaths() : string[] {
 const imgPaths : string[] = getTestImagePaths()
 
 // Initialize Exquisitor
-export const initSession = (): ExqInitResponse => { 
+export const initSession = (): ExqInitResponse => {
     const evaluations: {id: string, name: string}[] = [
         {
             id: "1247184-fae-14o41",
@@ -36,7 +38,7 @@ export const initSession = (): ExqInitResponse => {
             name: "mock evaluation 2"
         }]
     return { session: 'testSession', collections: ["Test Collection 1", "Test Collection 2"], evaluations: evaluations}
-} 
+}
 
 export const initModel = (req: ExqSessionInfo): ExqInitModelResponse => {
     var groups: GridGroup[] = []
@@ -53,7 +55,7 @@ export const initModel = (req: ExqSessionInfo): ExqInitModelResponse => {
 
 export const removeModel = (req: ExqSessionInfo) : void => {}
 
-// Get information for collections 
+// Get information for collections
 // export const getCollections = async (): Promise<string[]> =>
 //     await fetch('CALL_TO_API_HERE').then((val) => val.json())
 
@@ -81,36 +83,25 @@ export const getItem = async (exqId: number, modelId: number): Promise<MediaItem
     const ilsets = new Map<number,boolean[]>()
     ilsets.set(modelId, [false,false,false,false])
     return {
-        id: exqId, 
+        id: exqId,
         name: 'name-' + exqId,
-        mediaId: exqId, 
-        currentSets: ilsets, 
-        relatedGroupId: '0',
-        mediaType: MediaType.Image, 
-        thumbPath: imgPaths[exqId], 
+        itemId: exqId,
+        currentSets: ilsets,
+        groupId: 0,
+        mediaType: MediaType.Image,
+        thumbPath: imgPaths[exqId],
         srcPath: imgPaths[exqId],
     }
 }
 
-export const getItemInfoMock = async (itemId: number): Promise<Record<string, Info>> => {
-    var info: Record<string, Info> = {}
-    info['Start (ms)'] = {
-        values: 15000,
-        isMain: false,
-        isGroup: false
-    }
-    info['End (ms)'] = {
-        values: 30000,
-        isMain: false,
-        isGroup: false
-    }
-    info['Group ID'] = {
-        values: 12,
-        isMain: true,
-        isGroup: true
-    }
+export const getItemInfoMock = async (itemId: number):
+  Promise<Record<string, number | string | (number|string)[]>> => {
+    var info: Record<string, number | string | (number|string)[]> = {}
+    info['Start (ms)'] = 15000
+    info['End (ms)'] = 30000
+    info['Group ID'] = 12
     return info
-} 
+}
 
 
 const mockFilters : FilterInfo[] = [
