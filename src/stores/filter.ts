@@ -15,10 +15,10 @@ export const useFilterStore = defineStore('filter', () => {
     "Caption Index ID", "Transcript Index ID"
   ]
   
-  const mainItemTagsets = ["Objects", "Time (hh:mm:ss)", "Video ID"]
+  const mainItemTagsets = ["Objects", "Time (hh:mm:ss)", "Video ID", "Hour", "Day", "Month", "Year"]
   const otherItemTagsets = ["Start (ms)", "End (ms)", "Keyframe (ms)"]
   const mainGroupTagsets = ["Title", "Categories", "User Tags"]
-  const otherGroupTagsets = ["fps", "Resolution", "Duration (hh:mm:ss)"]
+  const otherGroupTagsets = ["Resolution", "Duration (hh:mm:ss)"]
   
   function isMain(key: string) : boolean {
     return mainItemTagsets.includes(key) || mainGroupTagsets.includes(key)

@@ -362,7 +362,7 @@ const local = reactive({
   // typed inputs for range filters
   typed: {} as Record<number, TypedState>,
 
-  // built leaves for range filters (so we don’t rebuild everything on submit)
+  // built leaves for range filters (so we don't rebuild everything on submit)
   rangeLeaves: {} as Record<number, FilterExpr>,
 })
 
@@ -681,10 +681,9 @@ async function search() {
     queryText: local.queryText,
     searchType: local.searchType,
     searchModel: local.searchModel,
-    // NOTE: This emits ActiveFiltersDB | undefined. We’ll update types after.
-    filters: (filtersDB ?? {}) as any,
+    filters: filtersDB ?? undefined,
     history: payload.value.history ?? false,
-  } as any)
+  })
 
   advStore.close()
 }

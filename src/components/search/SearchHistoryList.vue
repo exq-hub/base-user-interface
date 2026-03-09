@@ -131,7 +131,7 @@
 import { computed } from 'vue'
 import { useFilterStore } from '@/stores/filter'
 import type { ChatQuery } from '@/types/chat'
-import type { AppliedFilters } from '@/types/filter'
+import type { ActiveFiltersDB, FilterExpr } from '@/types/filter'
 
 const props = defineProps<{
   modelId: number
@@ -193,31 +193,39 @@ function formatTime(ts: number) {
   return new Date(ts).toLocaleString('sv-SE')
 }
 
-function filterCount(filters: AppliedFilters): number {
-  if (!filters) return 0
-  let c = 0
-  for (const arr of Object.values(filters)) {
-    if (Array.isArray(arr)) c += arr.length
-  }
-  return c
+function countLeaves(node: FilterExpr): number {
+  if (node.kind === 'leaf') return 1
+  return node.children.reduce((sum, child) => sum + countLeaves(child), 0)
 }
 
-function filterTooltipText(filters: AppliedFilters): string {
-  if (!filters || filterCount(filters) === 0) return 'No filters'
+function filterCount(filters: ActiveFiltersDB | undefined): number {
+  if (!filters?.root) return 0
+  return countLeaves(filters.root)
+}
 
-  const blocks: string[] = []
-
-  for (const [tagsetId, arr] of Object.entries(filters)) {
-    if (!arr?.length) continue
-
-    const name = tagsetNameById.value.get(Number(tagsetId)) ?? `#${tagsetId}`
-    const values = arr.map((v: any) => v.value).join(', ')
-
-    // Tagset name on its own line + values below
-    blocks.push(`• ${name.toUpperCase()}\n${values}`)
+function collectLeafBlocks(node: FilterExpr, blocks: string[]): void {
+  if (node.kind === 'leaf') {
+    const { id, constraint } = node.filter
+    const name = tagsetNameById.value.get(id) ?? `#${id}`
+    let detail: string
+    if ('value_ids' in constraint) {
+      detail = constraint.value_ids.join(', ')
+    } else {
+      const parts: string[] = []
+      if (constraint.lower_bound != null) parts.push(`≥ ${constraint.lower_bound}`)
+      if (constraint.upper_bound != null) parts.push(`≤ ${constraint.upper_bound}`)
+      detail = parts.join(', ') || '—'
+    }
+    blocks.push(`• ${name.toUpperCase()}\n${detail}`)
+  } else {
+    for (const child of node.children) collectLeafBlocks(child, blocks)
   }
+}
 
-  // blank line between tagsets
+function filterTooltipText(filters: ActiveFiltersDB | undefined): string {
+  if (!filters?.root || filterCount(filters) === 0) return 'No filters'
+  const blocks: string[] = []
+  collectLeafBlocks(filters.root, blocks)
   return blocks.length ? blocks.join('\n\n') : 'No filters'
 }
 

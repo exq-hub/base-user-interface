@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { AppliedFilters } from "./filter"
+import { ActiveFiltersDB } from "./filter"
 
 export interface ExqSearchResponse {
   suggestions: number[],
@@ -19,14 +19,14 @@ export interface ChatQuery {
   searchType: string
   searchModel: string
   timestamp: number
-  resultIds: number[] 
-  filters: AppliedFilters
+  resultIds: number[]
+  filters: ActiveFiltersDB | undefined
 }
 
 export interface AdvancedSearchPayload {
   queryName: string,
   queryText: string,
-  filters: AppliedFilters,
+  filters: ActiveFiltersDB | undefined,
   searchType: string,
   searchModel: string
   history?: boolean

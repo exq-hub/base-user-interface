@@ -9,8 +9,7 @@ import { ExqRFRequest } from "@/types/exq";
 import { useAppStore } from "./app";
 import { useModelStore } from "./model";
 import { searchRF } from "@/services/ExquisitorAPI";
-import { useFilterStore } from "./filter";
-import { ActiveFiltersDB, AppliedFilters } from "@/types/filter";
+import { ActiveFiltersDB } from "@/types/filter";
 
 export const useFeedbackStore = defineStore('feedback', () => {
   const itemStore = useItemStore()
@@ -26,21 +25,21 @@ export const useFeedbackStore = defineStore('feedback', () => {
       {
         positives: [],
         negatives: [],
-        filters: [],
+        filters: undefined,
         resultIds: []
       }
     )
     return rfSearches.get(modelId)!
   } 
   
-  function setRFModelFilters(filters: AppliedFilters) {
+  function setRFModelFilters(filters: ActiveFiltersDB | undefined) {
     const activeModelId = modelStore.activeModel!.id
     const rfSearch = rfSearches.get(activeModelId!)
     rfSearch!.filters = filters
     rfSearches.set(activeModelId!, rfSearch!)
   }
-  
-  function getRFModelFilters(): AppliedFilters {
+
+  function getRFModelFilters(): ActiveFiltersDB | undefined {
     const activeModelId = modelStore.activeModel!.id
     const rfSearch = rfSearches.get(activeModelId!)
     return rfSearch!.filters
@@ -55,10 +54,6 @@ export const useFeedbackStore = defineStore('feedback', () => {
     let neg: number[] = []
     let resIds: number[] = []
     const rfSearch = rfSearches.get(activeModelId)!
-    let prepFilters: ActiveFiltersDB | undefined = undefined
-    if (Object.keys(rfSearch.filters!).length > 0) {
-      prepFilters = useFilterStore().prepareFilters(activeModelId, rfSearch.filters)
-    }
     pos = itemStore.getSetItems(activeModelId, ILSets.Positives).map((e,_) => e.id)
     neg = itemStore.getSetItems(activeModelId, ILSets.Negatives).map((e,_) => e.id)
     if (loadMore) {
@@ -88,7 +83,7 @@ export const useFeedbackStore = defineStore('feedback', () => {
       pos: pos,
       neg: neg,
       seen: hist,
-      filters: prepFilters,
+      ...(rfSearch.filters !== undefined && { filters: rfSearch.filters }),
       excluded: exclude,
       query: query
     }

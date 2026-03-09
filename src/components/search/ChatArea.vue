@@ -89,7 +89,6 @@ import { useAdvancedSearchStore } from '@/stores/advancedSearch'
 import { useTemporalSearchStore } from '@/stores/temporalSearchStore'
 
 import type { ChatQuery } from '@/types/chat'
-import type { AppliedFilters } from '@/types/filter'
 
 const props = defineProps<{ modelId: number }>()
 
@@ -130,7 +129,7 @@ function openAdvancedFromBar() {
     queryText: inputText.value,
     searchType: searchType.value,
     searchModel: searchModel.value,
-    filters: {} as AppliedFilters,
+    filters: undefined,
   })
 }
 
@@ -150,7 +149,7 @@ function openImageUploadDialog() {
     queryText: inputText.value,
     searchType: 'image',
     searchModel: 'clip',
-    filters: {} as AppliedFilters,
+    filters: undefined,
   })
 }
 
@@ -181,7 +180,7 @@ async function search(refresh = false) {
     false,
     searchType.value,
     searchModel.value,
-    {},
+    undefined,
     refresh
   )
 

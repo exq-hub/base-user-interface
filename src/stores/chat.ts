@@ -7,8 +7,7 @@ import { defineStore } from 'pinia'
 import { useAppStore } from './app'
 import { useModelStore } from './model'
 import { useItemStore } from './item'
-import { useFilterStore } from './filter'
-import { ActiveFiltersDB, AppliedFilters } from '@/types/filter'
+import { ActiveFiltersDB } from '@/types/filter'
 import { ILSets } from '@/types/mediaitem'
 
 export const useChatStore = defineStore('chat', () => {
@@ -36,7 +35,7 @@ export const useChatStore = defineStore('chat', () => {
     current: boolean,
     searchType: string,
     searchModel: string,
-    activeFilters: AppliedFilters = {},
+    activeFilters: ActiveFiltersDB | undefined = undefined,
     refresh: boolean,
     n?: number
   ): Promise<number[]> {
@@ -45,7 +44,7 @@ export const useChatStore = defineStore('chat', () => {
     let qIdx = -1
     if (current) {
       qIdx = chatSessions.get(modelId)!.findIndex(
-        (val) => val.id === currentQueryId.value 
+        (val) => val.id === currentQueryId.value
       )
       seen = chatSessions.get(modelId)![qIdx].resultIds
       query = chatSessions.get(modelId)![qIdx].text
@@ -57,18 +56,6 @@ export const useChatStore = defineStore('chat', () => {
       n_items = n
     }
     let exclude : number[] = itemStore.getSetItems(modelStore.activeModel!.id, ILSets.Excluded).map(item => item.id)
-    let prepFilters: ActiveFiltersDB | undefined = undefined
-    if (!activeFilters) {
-      prepFilters = useFilterStore().prepareFilters(
-        modelStore.activeModel!.id, 
-        activeFilters
-      )
-    }
-    
-    if (Object.keys(activeFilters).length !== 0) {
-      console.log(activeFilters)
-      // prepFilters = useFilterStore().prepareFilters(modelStore.activeModel!.id, activeFilters)
-    }
     let resultIds : ExqSearchResponse = { suggestions: [] }
     if (searchType === 'text') {
       let reqObj : ExqTextSearchRequest = {
@@ -80,7 +67,7 @@ export const useChatStore = defineStore('chat', () => {
         n: n_items,
         text: query,
         seen: seen,
-        filters: prepFilters,
+        ...(activeFilters !== undefined && { filters: activeFilters }),
         excluded: exclude,
         search_model: searchModel
       }
@@ -97,7 +84,7 @@ export const useChatStore = defineStore('chat', () => {
         n: n_items,
         image_b64: query,
         seen: seen,
-        filters: prepFilters,
+        ...(activeFilters !== undefined && { filters: activeFilters }),
         excluded: exclude,
         search_model: searchModel
       }
