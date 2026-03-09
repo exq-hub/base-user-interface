@@ -111,6 +111,10 @@
      multi-line
     >
       {{ errorStore.message }}
+      <details v-if="errorStore.detail" class="mt-2">
+        <summary style="cursor:pointer;opacity:0.8;font-size:0.8rem">Request details</summary>
+        <pre style="font-size:0.72rem;white-space:pre-wrap;word-break:break-all;margin-top:4px">{{ errorStore.detail }}</pre>
+      </details>
       <template #actions>
         <v-btn variant="text" @click="errorStore.dismiss()">Dismiss</v-btn>
       </template>

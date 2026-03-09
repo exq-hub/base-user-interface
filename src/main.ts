@@ -20,6 +20,7 @@ import App from '@/App.vue'
 // Composables
 import { createApp } from 'vue'
 import { useErrorStore } from '@/stores/error'
+import { HttpError } from '@/services/http'
 
 const app = createApp(App)
 
@@ -32,7 +33,15 @@ registerPlugins(app)
 
 app.config.errorHandler = (err) => {
   console.error(err)
-  useErrorStore().show(err)
+  if (err instanceof HttpError) {
+    const detail = JSON.stringify(
+      { method: err.method, url: err.url, ...(err.body !== undefined && { body: err.body }) },
+      null, 2
+    )
+    useErrorStore().show(err, detail)
+  } else {
+    useErrorStore().show(err)
+  }
 }
 
 app.mount('#app')

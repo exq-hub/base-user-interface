@@ -6,14 +6,24 @@ export const mock = false
 
 export const getMainURI = () => exqURI
 
-async function checkResponse(resp: Response): Promise<void> {
+export class HttpError extends Error {
+    constructor(
+        message: string,
+        public readonly method: string,
+        public readonly url: string,
+        public readonly body?: unknown,
+    ) {
+        super(message)
+        this.name = 'HttpError'
+    }
+}
+
+async function checkResponse(resp: Response, method: string, body?: unknown): Promise<void> {
     if (!resp.ok) {
-        let detail = ''
-        try {
-            const text = await resp.text()
-            detail = text ? `: ${text}` : ''
-        } catch { /* ignore */ }
-        throw new Error(`HTTP ${resp.status} ${resp.statusText}${detail} — ${resp.url}`)
+        let responseText = ''
+        try { responseText = await resp.text() } catch { /* ignore */ }
+        const msg = `HTTP ${resp.status} ${resp.statusText}${responseText ? `: ${responseText}` : ''}`
+        throw new HttpError(msg, method, resp.url, body)
     }
 }
 
@@ -25,7 +35,7 @@ export async function post<T>(path: string, body: unknown, signal?: AbortSignal)
         body: JSON.stringify(body),
         signal,
     })
-    await checkResponse(resp)
+    await checkResponse(resp, 'POST', body)
     return resp.json()
 }
 
@@ -35,6 +45,6 @@ export async function get<T>(path: string): Promise<T> {
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
     })
-    await checkResponse(resp)
+    await checkResponse(resp, 'GET')
     return resp.json()
 }
