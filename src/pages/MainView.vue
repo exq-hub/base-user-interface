@@ -102,6 +102,19 @@
        :set="ILSets.Excluded"
       />
     </v-container>
+
+    <v-snackbar
+     v-model="errorStore.visible"
+     color="error"
+     :timeout="-1"
+     location="bottom"
+     multi-line
+    >
+      {{ errorStore.message }}
+      <template #actions>
+        <v-btn variant="text" @click="errorStore.dismiss()">Dismiss</v-btn>
+      </template>
+    </v-snackbar>
   </template>
 </template>
 
@@ -120,6 +133,7 @@ import { useRouter } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { useChatStore } from '@/stores/chat'
 import { useFeedbackStore } from '@/stores/feedback'
+import { useErrorStore } from '@/stores/error'
 import { AdvancedSearchPayload } from '@/types/chat'
 import { ILSets } from '@/types/mediaitem'
 
@@ -129,6 +143,7 @@ const chatStore = useChatStore()
 const activeModel = computed(() => useModelStore().activeModel)
 const showMedia = ref(false)
 const feedbackStore = useFeedbackStore()
+const errorStore = useErrorStore()
 const chatVisible = ref(true)
 const posDrawerOpen = ref(false)
 const negDrawerOpen = ref(false)
@@ -171,7 +186,6 @@ function updateResultIdsTemporal(resultIds: number[]) {
 async function updateSelectedItem (itemId: number) {
   await itemStore.setSelectedItem(itemId)
   const group = itemStore.getSelectedItem().groupId!
-  // console.log(itemStore.getSelectedGroup())
   if (selectedMediaGroupIndex.value !== group) {
     selectedMediaGroupIndex.value = group
     showMedia.value = false
@@ -196,18 +210,15 @@ async function loadMoreResults() {
   if (rf.value) {
     modelStore.activeModel!.grid[0].items = [ ...await feedbackStore.getFeedbackResults(true) ]
   } else {
-    let qIdx = chatStore.chatSessions.get(activeModel.value!.id)!.findIndex(
-    (val) => val.id === chatStore.currentQueryId 
+    const qIdx = chatStore.chatSessions.get(activeModel.value!.id)!.findIndex(
+      (val) => val.id === chatStore.currentQueryId
     )
     modelStore.activeModel!.grid[0].items = await chatStore.search(
-    activeModel.value!.id, 
-    '', 
-    '',
-    true, 
-    '',
-    '',
-    chatStore.chatSessions.get(activeModel.value!.id)![qIdx].filters,
-    false
+      activeModel.value!.id,
+      '', '',
+      true, '', '',
+      chatStore.chatSessions.get(activeModel.value!.id)![qIdx].filters,
+      false
     )
   }
 }

@@ -6,6 +6,17 @@ export const mock = false
 
 export const getMainURI = () => exqURI
 
+async function checkResponse(resp: Response): Promise<void> {
+    if (!resp.ok) {
+        let detail = ''
+        try {
+            const text = await resp.text()
+            detail = text ? `: ${text}` : ''
+        } catch { /* ignore */ }
+        throw new Error(`HTTP ${resp.status} ${resp.statusText}${detail} — ${resp.url}`)
+    }
+}
+
 export async function post<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
     const resp = await fetch(exqURI + path, {
         method: 'POST',
@@ -14,6 +25,7 @@ export async function post<T>(path: string, body: unknown, signal?: AbortSignal)
         body: JSON.stringify(body),
         signal,
     })
+    await checkResponse(resp)
     return resp.json()
 }
 
@@ -23,5 +35,6 @@ export async function get<T>(path: string): Promise<T> {
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
     })
+    await checkResponse(resp)
     return resp.json()
 }

@@ -19,6 +19,7 @@ import App from '@/App.vue'
 
 // Composables
 import { createApp } from 'vue'
+import { useErrorStore } from '@/stores/error'
 
 const app = createApp(App)
 
@@ -28,5 +29,10 @@ app.config.warnHandler = (msg, instance, trace) => {
 }
 
 registerPlugins(app)
+
+app.config.errorHandler = (err) => {
+  console.error(err)
+  useErrorStore().show(err)
+}
 
 app.mount('#app')
