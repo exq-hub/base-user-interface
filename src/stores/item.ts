@@ -29,6 +29,7 @@ export const useItemStore = defineStore('item', () => {
   const pendingControllers = new Map<string, AbortController>()
   
   const filterStore = useFilterStore()
+  const appStore = useAppStore()
   
   async function fetchMediaItem(itemId: number, modelId: number) : Promise<MediaItem> {
     const collection = modelStore.getModelCollection(modelId)
@@ -55,7 +56,7 @@ export const useItemStore = defineStore('item', () => {
       // console.log('Fetching media item ' + itemId + ' from API')
       try {
         const item = await getItem(
-          useAppStore().session, 
+          appStore.session, 
           itemId, modelId, 
           modelStore.getModelCollection(modelId),
           { signal: ctrl.signal }
@@ -81,11 +82,11 @@ export const useItemStore = defineStore('item', () => {
     if (missing.length > 0) {
       // TODO (future batch endpoint):
       // Replace Promise.all below with a single API call that accepts an array of ids:
-      // const batch = await getItems(useAppStore().session, missing, modelId, collection)
+      // const batch = await getItems(appStore.session, missing, modelId, collection)
       // for (const it of batch) colMap.set(it.id, it)
       
       const fetched = await Promise.all(
-        missing.map(id => getItem(useAppStore().session, id, modelId, collection))
+        missing.map(id => getItem(appStore.session, id, modelId, collection))
       )
       for (const it of fetched) colMap.set(it.id, it)
       }
@@ -269,7 +270,7 @@ export const useItemStore = defineStore('item', () => {
     // console.log('item_filter_ids:', item_filter_ids)
     
     // Fetch metadata
-    let metadata = await getItemInfo(modelId, itemId, collection, item_filter_ids)
+    let metadata = await getItemInfo(appStore.session, modelId, itemId, collection, item_filter_ids)
     items.get(collection)!.get(itemId)!.metadata = {}
     
     // Populate main and other item/group metadata
@@ -321,7 +322,7 @@ export const useItemStore = defineStore('item', () => {
     }
     
     // Fetch metadata
-    let metadata = await getItemInfo(modelId, groupId, collection, group_filter_ids)
+    let metadata = await getItemInfo(appStore.session, modelId, groupId, collection, group_filter_ids)
     if (Object.keys(metadata).length === 0) {
       // No metadata found
       return groupMetadata.get(groupId)!
@@ -347,7 +348,7 @@ export const useItemStore = defineStore('item', () => {
     if (groupMetadata.has(groupId) && groupMetadata.get(groupId)!.items.length > 0) {
       return groupMetadata.get(groupId)!.items
     }
-    let relatedItems = await getRelatedItems(modelId, groupId, collection)
+    let relatedItems = await getRelatedItems(appStore.session, modelId, groupId, collection)
     groupMetadata.get(groupId)!.items = relatedItems
     return relatedItems
   }

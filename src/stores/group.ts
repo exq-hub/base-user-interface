@@ -3,6 +3,7 @@
 import { defineStore } from 'pinia'
 import { useFilterStore } from '@/stores/filter'
 import { useItemStore } from '@/stores/item'
+import { useAppStore } from '@/stores/app'
 import { getItemInfo } from "@/services/ExquisitorAPI";
 import type { GroupMetadata } from '@/types/mediaitem'
 
@@ -14,6 +15,7 @@ function key(collection: string, groupId: number) {
 export const useGroupStore = defineStore('group', () => {
   const filterStore = useFilterStore()
   const itemStore = useItemStore()
+  const appStore = useAppStore()
 
   // Cache: collection+groupId -> GroupMetadata
   const groupMetadata = shallowReactive(new Map<string, GroupMetadata>())
@@ -87,7 +89,7 @@ export const useGroupStore = defineStore('group', () => {
     const group_filter_ids = getGroupFilterIds(collection)
 
     // TODO (future batch endpoint): replace this per-group call with a batched getItemInfo for many groupIds.
-    const metadata = await getItemInfo(modelIdForSessionContext, groupId, collection, group_filter_ids)
+    const metadata = await getItemInfo(appStore.session, modelIdForSessionContext, groupId, collection, group_filter_ids)
     if (!metadata || Object.keys(metadata).length === 0) {
       return base
     }

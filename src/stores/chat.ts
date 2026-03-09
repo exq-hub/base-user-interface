@@ -57,10 +57,13 @@ export const useChatStore = defineStore('chat', () => {
       n_items = n
     }
     let exclude : number[] = itemStore.getSetItems(modelStore.activeModel!.id, ILSets.Excluded).map(item => item.id)
-    let prepFilters: ActiveFiltersDB | undefined = useFilterStore().prepareFilters(
-      modelStore.activeModel!.id, 
-      activeFilters
-    )
+    let prepFilters: ActiveFiltersDB | undefined = undefined
+    if (!activeFilters) {
+      prepFilters = useFilterStore().prepareFilters(
+        modelStore.activeModel!.id, 
+        activeFilters
+      )
+    }
     
     if (Object.keys(activeFilters).length !== 0) {
       console.log(activeFilters)

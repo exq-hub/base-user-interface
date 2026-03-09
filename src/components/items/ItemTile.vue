@@ -211,17 +211,14 @@ watchEffect(async () => {
   // only fetch when we have an item and it lacks metadata we need
   if (!props.item) return
 
-  // if already present on the item, use it
-  const md = props.item.metadata ?? {}
-  const hasStartEnd = md['Start (ms)'] != null && md['End (ms)'] != null
-  const hasKeyframe = md['Keyframe (ms)'] != null
-
-  if (hasStartEnd || hasKeyframe) {
+  // if metadata has already been fetched (even if the dataset has no time fields),
+  // use whatever was returned and stop — prevents infinite re-fetch on image-only datasets
+  const md = props.item.metadata
+  if (md != null) {
     mdRef.value = md
     return
   }
 
-  // avoid re-fetch loops
   if (mdLoading.value) return
   mdLoading.value = true
   try {
