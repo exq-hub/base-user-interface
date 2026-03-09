@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { ActiveFiltersDB, AppliedFilters, DBRangeConstraint, FilterExpr, FilterGroup, FilterInfo, FilterLeaf, FilterValue, LogicalOp } from "@/types/filter"
 import { defineStore } from "pinia"
 import { getFiltersInfo, getFilterValues } from "@/services/ExquisitorAPI"

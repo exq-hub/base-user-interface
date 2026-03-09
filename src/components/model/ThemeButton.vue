@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
   <div class="theme-btn-wrap">
     <v-tooltip text="Theme (click toggles, Shift-click opens menu)" location="bottom" :open-delay="350" :close-delay="150">

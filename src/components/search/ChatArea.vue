@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
   <v-card :data-eid="eid('root')" class="chat-card">
     <div class="chat-header" :data-eid="eid('header')">

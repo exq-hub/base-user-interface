@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
   <v-dialog v-model="dialog" width="760">
     <template #activator="{ props }">

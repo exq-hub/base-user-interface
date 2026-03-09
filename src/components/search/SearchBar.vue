@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
   <div ref="rootEl" :data-eid="eid('root')" class="searchbar">
     <v-text-field

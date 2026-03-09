@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
   <v-container class="d-flex flex-column align-center justify-center" style="min-height: 75vh">
     <v-icon size="72" color="primary" class="mb-3">mdi-database-search</v-icon>

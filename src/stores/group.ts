@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { defineStore } from 'pinia'
 import { useFilterStore } from '@/stores/filter'
 import { useItemStore } from '@/stores/item'

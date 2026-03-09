@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
+import { reactive } from "vue"
 import { RFSession } from "@/types/feedback";
 import { defineStore } from "pinia";
 import { useItemStore } from "./item";
@@ -72,8 +75,8 @@ export const useFeedbackStore = defineStore('feedback', () => {
     hist.push(...neg)
     hist.push(...resIds)
     let exclude : number[] = []
-    if (itemStore.modelExcluded.has(activeModelId)) {
-      exclude = Array.from(itemStore.modelExcluded.get(activeModelId)!)
+    if (itemStore.getSetItems(activeModelId, ILSets.Excluded).length > 0) {
+      exclude = itemStore.getSetItems(activeModelId, ILSets.Excluded).map(item => item.id)
     }
     let reqObj : ExqRFRequest = {
       session_info: {

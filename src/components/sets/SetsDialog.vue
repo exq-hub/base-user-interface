@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
+<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
   <v-dialog v-model="openProxy" :data-eid="eid('dialog')" max-width="1200" scrollable>
     <v-card :data-eid="eid('card')" rounded="lg">

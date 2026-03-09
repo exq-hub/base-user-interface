@@ -1,5 +1,9 @@
-// Return types for ExquisitorAPI calls
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
+/**
+ * Return types for ExquisitorAPI calls
+ */
 import type { ActiveFiltersDB, FilterInfo } from "./filter"
 import type { MediaType } from "./mediaitem"
 import type { GridGroup } from "./model"
@@ -87,7 +91,7 @@ export interface ExqTemporalSearchRequest {
 export interface ExqGetItemResponse {
   id: number
   name: string
-  mediaId: number
+  itemId: number
   mediaType: MediaType
   thumbPath: string
   srcPath: string

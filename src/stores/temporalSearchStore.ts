@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { searchTemporal } from "@/services/ExquisitorAPI"
 import { ChatQuery } from "@/types/chat"
 import { ExqTemporalSearchRequest } from "@/types/exq"

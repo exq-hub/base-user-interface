@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
+import { ref } from "vue"
 import { AdvancedSearchPayload } from "@/types/chat"
 import { defineStore } from "pinia"
 import { AppliedFilters } from "@/types/filter"

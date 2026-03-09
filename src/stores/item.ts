@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { GroupMetadata, ILSets, } from "@/types/mediaitem";
 import type MediaItem from "@/types/mediaitem";
 import { defineStore } from "pinia";

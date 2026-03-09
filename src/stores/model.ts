@@ -1,4 +1,5 @@
-// Utilities
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import Model, { Settings, ResourceValues, GridGroup } from '@/types/model'

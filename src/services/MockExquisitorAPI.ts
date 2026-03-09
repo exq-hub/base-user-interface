@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
+// SPDX-License-Identifier: AGP-3.0-or-later
 import type {
     ExqRFRequest,
     ExqInitResponse,
@@ -83,7 +85,7 @@ export const getItem = async (exqId: number, modelId: number): Promise<MediaItem
     return {
         id: exqId,
         name: 'name-' + exqId,
-        mediaId: exqId,
+        itemId: exqId,
         currentSets: ilsets,
         groupId: 0,
         mediaType: MediaType.Image,
