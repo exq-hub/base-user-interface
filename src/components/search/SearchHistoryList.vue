@@ -203,13 +203,21 @@ function filterCount(filters: ActiveFiltersDB | undefined): number {
   return countLeaves(filters.root)
 }
 
+function filterValueName(id: number, valueId: number): string {
+  const filterInfo = filterStore.filtersInfo.get(props.modelId)?.find(f => f.id === id)
+  if (!filterInfo) return ''
+  const valueInfo = filterInfo.values.find(v => v.id === valueId)
+  if (!valueInfo) return ''
+  return valueInfo.value
+}
+
 function collectLeafBlocks(node: FilterExpr, blocks: string[]): void {
   if (node.kind === 'leaf') {
     const { id, constraint } = node.filter
     const name = tagsetNameById.value.get(id) ?? `#${id}`
     let detail: string
     if ('value_ids' in constraint) {
-      detail = constraint.value_ids.join(', ')
+      detail = constraint.value_ids.map(vid => filterValueName(id, vid)).join(', ')
     } else {
       const parts: string[] = []
       if (constraint.lower_bound != null) parts.push(`≥ ${constraint.lower_bound}`)
