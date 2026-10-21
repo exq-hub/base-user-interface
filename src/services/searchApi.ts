@@ -6,6 +6,7 @@ import type {
     ExqTextSearchRequest,
     ExqImageSearchRequest,
     ExqTemporalSearchRequest,
+    ExqTemporalSearchResponse,
     ExqQueryRewriteRequest,
 } from '@/types/exq'
 import type { ExqSearchResponse, ExqQueryRewriteResponse } from '@/types/chat'
@@ -39,8 +40,16 @@ export const searchImage = async (req: ExqImageSearchRequest): Promise<ExqSearch
     return post('/exq/search/image', body)
 }
 
-export const searchTemporal = async (req: ExqTemporalSearchRequest): Promise<ExqSearchResponse> => {
-    if (mock) return { suggestions: Array(100).fill(0).map((_, idx) => idx + 1) }
+export const searchTemporal = async (req: ExqTemporalSearchRequest): Promise<ExqTemporalSearchResponse> => {
+    if (mock) return {
+        // The first two chains share a video so it shows up twice
+        suggestions: [
+            { group: 1, items: [1, 2, 3], length: 3, score: 0.9, start_ms: 4000, end_ms: 19000 },
+            { group: 1, items: [7, 8, 9], length: 3, score: 0.8, start_ms: 61000, end_ms: 75000 },
+            { group: 2, items: [21, 22], length: 2, score: 0.6, start_ms: 0, end_ms: 9000 },
+            { group: 3, items: [40, 42, 45], length: 3, score: 0.5, start_ms: 120000, end_ms: 138000 },
+        ]
+    }
     return post('/exq/search/temporal', req)
 }
 

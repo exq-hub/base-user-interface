@@ -44,7 +44,7 @@
                 </v-chip>
 
                 <v-chip :size="chipSize" label variant="tonal" :data-eid="eid(`chip_model_${item.id}`)">
-                  {{ item.searchModel.toUpperCase() }}
+                  {{ modelChipText(item) }}
                 </v-chip>
 
                 <div :class="[metaTextClass, 'd-flex align-center ga-2']" :data-eid="eid(`filters_${item.id}`)">
@@ -77,7 +77,8 @@
               </div>
 
               <div class="row-actions"> 
-                <template v-if="props.temporalMode">
+                <!-- Image and RF items will become selectable for temporal search later -->
+                <template v-if="props.temporalMode && item.searchType !== 'image'">
                   <v-tooltip
                     :text="isSelected(item) ? 'Remove from Temporal Search' : 'Add to Temporal Search'"
                     :open-delay="500"
@@ -130,6 +131,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useFilterStore } from '@/stores/filter'
+import { useModelStore } from '@/stores/model'
+import { useSearchIndexStore } from '@/stores/searchIndex'
 import type { ChatQuery } from '@/types/chat'
 import type { ActiveFiltersDB, FilterExpr } from '@/types/filter'
 
@@ -148,6 +151,20 @@ const emit = defineEmits<{
 }>()
 
 const filterStore = useFilterStore()
+const modelStore = useModelStore()
+const indexStore = useSearchIndexStore()
+
+const collection = computed(() => modelStore.getModelCollection(props.modelId))
+onMounted(() => indexStore.load(collection.value))
+
+// Text searches show their index, image and temporal entries keep the search model
+function modelChipText(q: ChatQuery): string {
+  if (q.searchType === 'text') {
+    const label = indexStore.indexLabel(collection.value, q.indexName) ?? q.indexName
+    if (label) return label
+  }
+  return q.searchModel.toUpperCase()
+}
 
 const eidBase = computed(() => `history_model_${props.modelId}`)
 function eid(part: string) {

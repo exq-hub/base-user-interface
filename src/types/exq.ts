@@ -77,14 +77,44 @@ export interface ExqQueryRewriteRequest {
   positive: number
 }
 
+// /exq/info/indexes
+export interface ExqIndexInfo {
+  name: string
+  index_type: string
+  embedding_type: string
+  source_type: string
+  default: boolean
+}
+
+// One ranked chain of segments within a video
+export interface ExqTemporalChain {
+  group: number
+  items: number[]
+  length: number
+  score: number
+  start_ms: number
+  end_ms: number
+}
+
+export interface ExqTemporalSearchResponse {
+  suggestions: ExqTemporalChain[]
+}
+
+export type ExqTemporalHop =
+  | { kind: 'query'; text: string; index_name?: string; weight?: number; filters?: ActiveFiltersDB }
+  | { kind: 'rf'; pos: number[]; neg: number[]; query?: string; index_name?: string; weight?: number; filters?: ActiveFiltersDB }
+
 export interface ExqTemporalSearchRequest {
   session_info: ExqSessionInfo
   n: number
-  queries: string[]
+  hops: ExqTemporalHop[]
   seen?: number[]
-  filters?: (ActiveFiltersDB | undefined)[]
-  excluded: number[]
-  search_model?: string[]
+  excluded?: number[]
+  filters?: ActiveFiltersDB
+  top_r?: number
+  rrf_k?: number
+  chains_per_video?: number
+  iou_threshold?: number
 }
 
 

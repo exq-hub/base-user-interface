@@ -149,19 +149,19 @@
         />
       </div>
 
-      <!-- Group-by-video view -->
+      <!-- Group-by-video view, one block per chain on temporal results -->
       <div v-else class="group-view">
-        <div v-for="groupId in groupOrder" :key="groupId" class="group-block">
+        <div v-for="block in groupBlocks" :key="block.key" class="group-block">
           <div class="d-flex align-center ga-2 mb-2">
             <v-divider class="flex-grow-1" />
-            <div class="text-subtitle-1 font-weight-medium">Video {{ groupLabel(groupId) }}</div>
+            <div class="text-subtitle-1 font-weight-medium text-no-wrap flex-shrink-0">{{ block.label }}</div>
             <v-divider class="flex-grow-1" />
           </div>
 
-          <v-slide-group show-arrows :data-eid="`slide_group_${groupId}`">
+          <v-slide-group show-arrows :data-eid="`slide_group_${block.key}`">
             <v-slide-group-item
-              v-for="id in (groups.get(groupId) ?? [])"
-              :key="`${activeModelId}-${groupId}-${id}`"
+              v-for="id in block.ids"
+              :key="`${activeModelId}-${block.key}-${id}`"
             >
               <div class="slide-tile" :style="slideTileStyle">
                 <ItemTile
@@ -193,7 +193,12 @@
     <v-divider />
 
     <v-card-actions class="result-actions">
-      <v-btn data-eid="load_more_btn" color="primary" @click="onLoadMore">
+      <v-btn
+       data-eid="load_more_btn"
+       color="primary"
+       :disabled="currentQuery?.searchType === 'temporal'"
+       @click="onLoadMore"
+      >
         Load More
       </v-btn>
     </v-card-actions>
@@ -331,6 +336,50 @@ function groupLabel(groupId: number): string | number {
   const first = groups.get(groupId)?.[0]
   return (first != null && itemsById.get(first)?.groupKey) || groupId
 }
+
+const currentQuery = computed(() =>
+  chatStore.chatSessions.get(activeModelId.value)?.find((q) => q.id === chatStore.currentQueryId)
+)
+
+// Temporal results open in the chain view and the earlier setting comes back for other searches
+let groupViewBefore: boolean | null = null
+watch(
+  () => currentQuery.value?.id,
+  () => {
+    if (currentQuery.value?.searchType === 'temporal') {
+      if (groupViewBefore === null) groupViewBefore = groupView.value
+      groupView.value = true
+    } else if (groupViewBefore !== null) {
+      groupView.value = groupViewBefore
+      groupViewBefore = null
+    }
+  }
+)
+
+function formatMs(ms: number): string {
+  const s = Math.floor(ms / 1000)
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+}
+
+// Temporal results get a block per chain so a video can show up more than once
+const groupBlocks = computed(() => {
+  const chains = currentQuery.value?.chains
+  if (chains) {
+    return chains.map((c, i) => {
+      const video = itemsById.get(c.items[0])?.groupKey || c.group
+      return {
+        key: `chain_${i}`,
+        label: `Video ${video} · ${formatMs(c.start_ms)}–${formatMs(c.end_ms)}`,
+        ids: c.items,
+      }
+    })
+  }
+  return groupOrder.value.map((groupId) => ({
+    key: String(groupId),
+    label: `Video ${groupLabel(groupId)}`,
+    ids: groups.get(groupId) ?? [],
+  }))
+})
 
 async function prefetchShownItems(ids: number[]) {
   const keep = new Set(ids)

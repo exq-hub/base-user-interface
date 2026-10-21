@@ -8,9 +8,11 @@
   >
     <v-btn
       :data-eid="eid('btn_open')"
-      color="orange-darken-4"
-      density="compact"
-      class="ma-2"
+      color="orange-darken-2"
+      variant="tonal"
+      size="small"
+      prepend-icon="mdi-timeline-outline"
+      class="temporal-btn temporal-btn--open"
       @click="$emit('open')"
     >
       Temporal Search ({{ count }})
@@ -18,9 +20,11 @@
 
     <v-btn
       :data-eid="eid('btn_clear')"
-      color="red-darken-4"
-      density="compact"
-      class="ma-2"
+      color="red-lighten-1"
+      variant="tonal"
+      size="small"
+      prepend-icon="mdi-close"
+      class="temporal-btn"
       @click="$emit('clear')"
     >
       Clear
@@ -48,7 +52,20 @@ function eid(part: string) {
 </script>
 
 <style scoped>
+/* Buttons share the row and Clear wraps to its own line when the panel is narrow */
 .temporal-actions {
-  border-top: 1px solid rgba(0,0,0,0.08);
+  border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.temporal-actions .temporal-btn {
+  flex: 1 1 auto;
+  margin-inline-start: 0;
+}
+
+.temporal-btn--open {
+  flex-grow: 2;
 }
 </style>

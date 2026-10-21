@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { ActiveFiltersDB } from "./filter"
+import type { ExqTemporalChain } from "./exq"
 
 export interface ExqSearchResponse {
   suggestions: number[],
@@ -21,6 +22,10 @@ export interface ChatQuery {
   timestamp: number
   resultIds: number[]
   filters: ActiveFiltersDB | undefined
+  // Set by the index dropdown once it exists, the server default is used otherwise
+  indexName?: string
+  // Only on temporal entries
+  chains?: ExqTemporalChain[]
 }
 
 export interface AdvancedSearchPayload {

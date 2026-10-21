@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { searchTemporal } from "@/services/ExquisitorAPI"
 import { ChatQuery } from "@/types/chat"
-import { ExqTemporalSearchRequest } from "@/types/exq"
+import { ExqTemporalHop, ExqTemporalSearchRequest } from "@/types/exq"
 import { defineStore } from "pinia"
 import { useAppStore } from "./app"
 import { useModelStore } from "./model"
@@ -49,18 +49,19 @@ export const useTemporalSearchStore = defineStore('temporalSearch', () => {
         collection: modelStore.getModelCollection(modelStore.activeModel!.id)
       },
       n: 100,
-      queries: orderedSelection.map(q => q.text),
-      filters: orderedSelection.map(f => f.filters),
+      hops: orderedSelection.map(toHop),
       excluded: [],
       seen: [],
     }
 
-    let resultIds = await searchTemporal(reqObj).then((response) => {
+    const chains = await searchTemporal(reqObj).then((response) => {
       console.log("Temporal search results:", response.suggestions)
       loadingResults.value = false
-      return response
+      return response.suggestions
     })
-    
+    // The grid works on item ids so the chains are flattened in rank order
+    const resultIds = [...new Set(chains.flatMap(c => c.items))]
+
     let text = orderedSelection[0].name + "," + orderedSelection[1].name
     if (orderedSelection.length > 2) {
       text += ", ..."
@@ -70,17 +71,18 @@ export const useTemporalSearchStore = defineStore('temporalSearch', () => {
       name: "Temporal Search (" + text + ")",
       text: orderedSelection.map(q => q.text).join(" || "),
       timestamp: Date.now(),
-      resultIds: resultIds.suggestions,
+      resultIds: resultIds,
       searchType: 'temporal',
       searchModel: 'clip',
-      filters: orderedSelection[0].filters
+      filters: orderedSelection[0].filters,
+      chains: chains
     })
     chatStore.currentQueryId = chat![chat!.length-1].id
     // await new Promise(resolve => setTimeout(resolve, 5000)).then(() => {
     //     loadingResults.value = false
     // })
     
-    return resultIds.suggestions
+    return resultIds
   }
     
   return {
@@ -93,6 +95,16 @@ export const useTemporalSearchStore = defineStore('temporalSearch', () => {
   }
 })
   
+// Image searches will map to kind 'query' and RF history entries to kind 'rf' here once they can be selected
+function toHop(q: ChatQuery): ExqTemporalHop {
+  return {
+    kind: 'query',
+    text: q.text,
+    ...(q.indexName !== undefined && { index_name: q.indexName }),
+    ...(q.filters !== undefined && { filters: q.filters }),
+  }
+}
+
 function generateUniqueId() {
   return crypto.randomUUID()
 }

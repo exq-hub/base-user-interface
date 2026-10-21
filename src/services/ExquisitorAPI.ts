@@ -6,6 +6,7 @@ export { initSession, initModel, removeModel, getCollections } from './sessionAp
 export { searchRF, searchText, searchImage, searchTemporal, searchQueryRewrite } from './searchApi'
 export { getItem, getRelatedItems } from './itemApi'
 export { getFiltersInfo, getFilterValues } from './filterApi'
+export { getIndexes } from './indexApi'
 export { excludeGroup, isGroupExcluded } from './excludeApi'
 export { logEvents } from './logApi'
 export { submitAnswer } from './dresApi'
