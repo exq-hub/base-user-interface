@@ -406,6 +406,7 @@ watch(
 <style scoped>
 .related-root {
   width: 100%;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -424,10 +425,10 @@ watch(
   gap: 10px;
 }
 
-/* Vertical preview grid: show ~4 rows comfortably, scroll for more */
+/* Vertical preview grid fills the height left in the viewer and scrolls for more */
 .preview-wrap {
-  /* tune to get ~4 rows visible; 170px tiles + gaps ends up around this */
-  max-height: 35vh;
+  flex: 1 1 0;
+  min-height: 200px;
   overflow-y: auto;
   padding-right: 4px; /* avoid scrollbar overlay */
 }
@@ -436,12 +437,6 @@ watch(
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-}
-
-@media (max-height: 700px) {
-  .preview-wrap {
-    max-height: 280px;
-  }
 }
 
 /* Put border around the tile itself (the first child inside the cell) */

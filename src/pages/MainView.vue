@@ -9,10 +9,10 @@
     
     <!-- <left-panel :key="activeModel!.id.toString() + Math.floor(Math.random()*9000)"/> -->
     
-    <v-container fluid>
-      <v-row>
+    <v-container fluid class="main-layout">
+      <v-row class="h-100">
         <!-- 20%: Chat -->
-        <v-col v-if="chatVisible" :cols="2" class="pa-1">
+        <v-col v-if="chatVisible" :cols="2" class="pa-1 h-100">
           <ChatArea
           :key="'chatarea'+activeModel!.id"
           :model-id="activeModel!.id"
@@ -21,7 +21,7 @@
         </v-col>
         
         <!-- 50%: Results -->
-        <v-col :cols="chatVisible ? (showMedia ? 6 : 10) : (showMedia ? 8 : 12)" class="pa-1">
+        <v-col :cols="chatVisible ? (showMedia ? 6 : 10) : (showMedia ? 8 : 12)" class="pa-1 h-100">
           <ResultGrid
            :model-id="activeModel!.id"
            :chat-visible="chatVisible"
@@ -41,7 +41,7 @@
         </v-col>
         
         <!-- 30%: Viewer -->
-        <v-col cols="4" class="pa-1" v-if="showMedia">
+        <v-col cols="4" class="pa-1 h-100" v-if="showMedia">
           <MediaViewer 
           :key="'viewer'+modelStore.activeModel!.id+Math.floor(Math.random()*9000)"
           @close-media-viewer="showMedia = !showMedia"
@@ -278,4 +278,8 @@ async function onAdvancedSubmit(p: AdvancedSearchPayload) {
 </script>
 
 <style scoped>
+/* The panels fill the screen below the app bar and scroll inside instead of the page */
+.main-layout {
+  height: calc(100dvh - var(--v-layout-top, 0px));
+}
 </style>

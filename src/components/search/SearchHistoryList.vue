@@ -1,11 +1,11 @@
 <!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
 <!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
-  <div ref="rootEl" :data-eid="eid('root')">
+  <div ref="rootEl" :data-eid="eid('root')" class="history-root">
     <v-virtual-scroll
      :data-eid="eid('scroll')"
      :items="items"
-     max-height="70vh"
+     class="history-scroll"
     >
       <template #default="{ item }" >
         <div
@@ -251,6 +251,19 @@ function toggleSelection(q: ChatQuery) {
 </script>
 
 <style scoped>
+/* Fills the rest of the search panel, the minimum keeps it usable on short screens */
+.history-root {
+  flex: 1 1 0;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 /* .history-item {
   border: 1px solid transparent;
   border-radius: 8px;

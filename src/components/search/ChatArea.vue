@@ -14,22 +14,6 @@
           </template>
         </v-tooltip>
 
-        <v-tooltip text="Number of selected temporal searches" location="top">
-          <template #activator="{ props: tipProps }">
-            <v-chip
-              v-bind="tipProps"
-              v-if="temporalSelection.length > 0"
-              :data-eid="eid('chip_temporal')"
-              size="small"
-              variant="tonal"
-              label
-              color="orange"
-            >
-              T {{ temporalSelection.length }}
-            </v-chip>
-          </template>
-        </v-tooltip>
-
         <v-chip
          :data-eid="eid('chip_temporal_mode')"
          size="small"
@@ -214,8 +198,12 @@ watch(temporalMode, (on) => {
   border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 
+/* The history list takes the space left, on very short screens the whole body scrolls */
 .chat-body {
-  flex: 1;
-  overflow: hidden;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 </style>

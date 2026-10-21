@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
 <!-- SPDX-License-Identifier: AGP-3.0-or-later -->
 <template>
-  <v-card class="pa-2" :data-eid="eid('root')">
+  <v-card class="pa-2 viewer-card" :data-eid="eid('root')">
     <!-- Header -->
     <v-card-title class="viewer-header" :data-eid="eid('header')">
       <v-tooltip
@@ -533,15 +533,28 @@ async function submitCurrent() {
   flex-shrink: 0;
 }
 
+.viewer-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Related items take the height left under the media, on very short screens the body scrolls */
 .viewer-body {
   padding-top: 8px;
   padding-bottom: 8px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .viewer-video {
   max-width: 100%;
   height: auto;
   border-radius: 10px;
+  flex-shrink: 0;
 }
 
 /* Controls directly under media */
@@ -572,6 +585,9 @@ async function submitCurrent() {
 .related-block {
   padding-top: 4px;
   padding-bottom: 6px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .related-title-row {
