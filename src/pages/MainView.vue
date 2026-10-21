@@ -43,7 +43,7 @@
         <!-- 30%: Viewer -->
         <v-col cols="4" class="pa-1 h-100" v-if="showMedia">
           <MediaViewer 
-          :key="'viewer'+modelStore.activeModel!.id+Math.floor(Math.random()*9000)"
+          :key="'viewer'+modelStore.activeModel!.id"
           @close-media-viewer="showMedia = !showMedia"
           />
         </v-col>

@@ -68,5 +68,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    // Listen on IPv4 and IPv6, Caddy resolves localhost to [::1]
+    host: '::',
   },
 })

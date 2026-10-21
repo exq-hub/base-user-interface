@@ -8,7 +8,6 @@ import {
   FilterGroup,
   FilterInfo,
   FilterLeaf,
-  FilterValue,
   LogicalOp
 } from "@/types/filter"
 import { defineStore } from "pinia"
@@ -70,12 +69,10 @@ export const useFilterStore = defineStore('filter', () => {
         }
       })
     })
-    await filtersInfo.get(modelId)!.forEach(async (f) => {
-      await getFilterValues(session, useModelStore().getModelCollection(modelId), f.tagtypeId, f.id)
-      .then((vals: FilterValue[]) => {
-        f.values = vals
-      })
-    })
+    // forEach would not wait for the values, so filtersLoaded was set before they arrived
+    await Promise.all(filtersInfo.get(modelId)!.map(async (f) => {
+      f.values = await getFilterValues(session, collection, f.tagtypeId, f.id)
+    }))
     console.log(filtersInfo.get(modelId)!)
     filtersLoaded.value = true
   }
