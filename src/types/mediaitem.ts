@@ -29,7 +29,7 @@ export default interface MediaItem {
   name : string,
   itemId : number, // Id in its database
   mediaType : MediaType,
-  thumbPath : string, // For Items in Grid and Overlays
+  thumbPath : string | null, // For Items in Grid and Overlays, null when the media has no thumbnail
   srcPath : string // Enlarged version for Summary View, if downloading and rendering is not a performance hit use this path in thumbPath
   groupId? : number, // groupId
   groupKey? : string, // value of the item store's groupKey tagset (Video ID by default), labels the group

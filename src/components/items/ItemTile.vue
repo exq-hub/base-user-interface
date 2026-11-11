@@ -38,7 +38,7 @@
           :data-eid="eid('thumb')"
           class="tile-img"
           :class="{ 'tile-img--zoom': hovering && !canHoverPlay }"
-          :src="item.thumbPath"
+          :src="item.thumbPath ?? undefined"
           cover
           :aspect-ratio="aspectRatio"
         >

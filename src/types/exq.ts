@@ -124,7 +124,7 @@ export interface ExqGetItemResponse {
   name: string
   mediaId: number
   mediaType: MediaType
-  thumbPath: string
+  thumbPath: string | null // null when the media has no thumbnail, e.g. a whole video
   srcPath: string
   groupId?: number
   // Only present when filterIds were sent, keyed by tagset name
