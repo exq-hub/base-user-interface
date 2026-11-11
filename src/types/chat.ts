@@ -7,12 +7,6 @@ export interface ExqSearchResponse {
   suggestions: number[],
 }
 
-export interface ExqQueryRewriteResponse {
-  userQuery: string,
-  positive: number,
-  rewriteSuggestion: string
-}
-
 export interface ChatQuery {
   id: string
   name: string

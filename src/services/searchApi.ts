@@ -7,14 +7,10 @@ import type {
     ExqImageSearchRequest,
     ExqTemporalSearchRequest,
     ExqTemporalSearchResponse,
-    ExqQueryRewriteRequest,
 } from '@/types/exq'
-import type { ExqSearchResponse, ExqQueryRewriteResponse } from '@/types/chat'
+import type { ExqSearchResponse } from '@/types/chat'
 import { mock, post } from './http'
 import { doURF as mockDoURF } from './MockExquisitorAPI'
-
-// Separate service — different host from the main Exquisitor server
-const queryRewriteURI = 'http://mandla-1:5001'
 
 export const searchRF = async (req: ExqRFRequest): Promise<ExqRFResponse> => {
     if (mock) return mockDoURF(req)
@@ -51,17 +47,4 @@ export const searchTemporal = async (req: ExqTemporalSearchRequest): Promise<Exq
         ]
     }
     return post('/exq/search/temporal', req)
-}
-
-export const searchQueryRewrite = async (req: ExqQueryRewriteRequest): Promise<ExqQueryRewriteResponse> => {
-    if (mock) return { userQuery: req.query, positive: req.positive, rewriteSuggestion: 'textual response' }
-    const resp: string = await fetch(queryRewriteURI + '/rewriteQuery', {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req),
-    }).then(val => val.json())
-    // Fire-and-forget log to Exquisitor server
-    post('/rewriteQueryLog', { query: req.query, positive: req.positive, caption: resp })
-    return { userQuery: req.query, positive: req.positive, rewriteSuggestion: resp }
 }

@@ -72,11 +72,6 @@ export interface ExqChatFeedbackRequest {
   excluded: number[]
 }
 
-export interface ExqQueryRewriteRequest {
-  query: string
-  positive: number
-}
-
 // /exq/info/indexes
 export interface ExqIndexInfo {
   name: string
