@@ -75,7 +75,7 @@
          ref="videoPlayer"
          :data-eid="eid('video_player')"
          :data-looping="loopSegment ? '1' : '0'"
-         :poster="selectedItem.thumbPath"
+         :poster="selectedItem.thumbPath ?? undefined"
          controls
          autoplay
          muted
@@ -90,7 +90,7 @@
 
       <!-- Show the keyframe while the selected item's video is loading -->
       <div v-else-if="selectedItem && !selectedGroup" class="viewer-loading" :data-eid="eid('loading')">
-        <v-img :src="selectedItem.thumbPath" :aspect-ratio="16 / 9" />
+        <v-img :src="selectedItem.thumbPath ?? undefined" :aspect-ratio="16 / 9" />
         <div v-if="itemStore.selectionFailed" class="text-caption text-error mt-1" :data-eid="eid('load_failed')">
           Couldn't load this video.
         </div>
