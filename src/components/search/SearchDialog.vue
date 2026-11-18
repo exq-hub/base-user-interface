@@ -294,7 +294,7 @@
          color="primary"
          variant="flat"
          @click="search"
-         :disabled="(['clip','caption','aggregate'].includes(local.searchType) && local.queryText === '')
+         :disabled="(local.searchType === 'text' && local.queryText.trim() === '')
           || (local.searchType === 'image' && !file)"
         >
           <span v-if="local.searchType === 'feedback'">Show Feedback Results</span>

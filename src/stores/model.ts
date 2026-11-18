@@ -12,8 +12,7 @@ import { ILSets } from '@/types/mediaitem'
 
 export const useModelStore = defineStore('model', () => {
   const nModels = ref(0)
-  const models = reactive<Model[]>([]) 
-  const totalItems = ref(0)
+  const models = reactive<Model[]>([])
   const activeModel = ref<Model | undefined>()
   
   function defaultSettings() : Settings {
@@ -24,20 +23,7 @@ export const useModelStore = defineStore('model', () => {
     }
   }
   
-  
-  function initializeModelItems(modelId: number) {
-    let grp : GridGroup = { 
-      itemsToShow: models[modelId].settings.itemsToShow,
-      items: [] 
-    }
-    let rngItems = new Set<number>()
-    while (rngItems.size != grp.itemsToShow) {
-      rngItems.add(Math.floor(Math.random()*totalItems.value)+1)
-    }
-    grp.items = Array.from(rngItems)
-    models[modelId].grid.push(grp)
-  }
-  
+
   function updateActiveModel(modelId: number) {
     console.log('Changing active model to ', modelId)
     let indx = models.findIndex(e => e.id === modelId)
@@ -96,15 +82,6 @@ export const useModelStore = defineStore('model', () => {
     nModels.value++
     model.id = nModels.value
     models.push(model)
-  }
-  
-  function resetModel(model: Model) {
-    const idx : number = models.findIndex(e => e.id === model.id)
-    models[idx].grid = []
-    models[idx].activeFilters?.clear()
-    models[idx].activeSearch = []
-    initModel({ modelId: model.id, session: model.session, collection: model.collection })
-    initializeModelItems(model.id)
   }
   
   function getModel (id: number) : Model {
@@ -172,14 +149,11 @@ export const useModelStore = defineStore('model', () => {
   return { 
     models, 
     activeModel,
-    totalItems,
-    initializeModelItems,
     updateActiveModel,
     addModel, 
     deleteModel, 
     initLoadModels, 
-    loadModel, 
-    resetModel,
+    loadModel,
     updateName, 
     getModel, 
     getModelCollection,
