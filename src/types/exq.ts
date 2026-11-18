@@ -142,11 +142,6 @@ export interface ExqApplyFiltersRequest {
   values: (number | string)[]
 }
 
-export interface ExqExcludeGroupRequest {
-  session_info: ExqSessionInfo
-  itemId: number
-}
-
 export interface ExqIsExcludedRequest {
   session_info: ExqSessionInfo
   itemId: number

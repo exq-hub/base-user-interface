@@ -24,11 +24,8 @@ export const searchText = async (req: ExqTextSearchRequest): Promise<ExqSearchRe
     }
     // Destructure so search_model is not sent to the server
     const { search_model, ...body } = req
-    let path = '/exq/search/clip'
-    if (search_model === 'caption') path = '/exq/search/caption'
-    else if (search_model === 'aggregate') path = '/exq/search/aggregate'
     console.log('Search object', body)
-    return post(path, body)
+    return post('/exq/search/clip', body)
 }
 
 export const searchImage = async (req: ExqImageSearchRequest): Promise<ExqSearchResponse> => {
