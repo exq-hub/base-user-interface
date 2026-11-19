@@ -52,7 +52,6 @@ function toMediaItem(resp: ExqGetItemResponse, modelId: number): MediaItem {
     sets.set(modelId, [false, false, false, false])
     return {
         id: resp.id,
-        name: resp.name,
         itemId: resp.mediaId,
         currentSets: sets,
         groupId: resp.groupId,

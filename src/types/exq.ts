@@ -116,7 +116,6 @@ export interface ExqTemporalSearchRequest {
 // /exq/item/info
 export interface ExqGetItemResponse {
   id: number
-  name: string
   mediaId: number
   mediaType: MediaType
   thumbPath: string | null // null when the media has no thumbnail, e.g. a whole video

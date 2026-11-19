@@ -6,7 +6,7 @@
       <div>
         <img
         :src="item.srcPath"
-        :alt="`Album Image ${item.name}`"
+        :alt="`Album Image ${item.itemId}`"
         style="max-width: 100%; height: auto;"
         />
       </div>

@@ -26,7 +26,6 @@ export interface GroupMetadata {
 
 export default interface MediaItem {
   id : number,
-  name : string,
   itemId : number, // Id in its database
   mediaType : MediaType,
   thumbPath : string | null, // For Items in Grid and Overlays, null when the media has no thumbnail

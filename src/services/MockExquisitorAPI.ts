@@ -84,7 +84,6 @@ export const getItem = async (exqId: number, modelId: number): Promise<MediaItem
     ilsets.set(modelId, [false,false,false,false])
     return {
         id: exqId,
-        name: 'name-' + exqId,
         itemId: exqId,
         currentSets: ilsets,
         groupId: 0,
