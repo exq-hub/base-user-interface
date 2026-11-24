@@ -15,15 +15,28 @@ function generateString(length: number): string {
     return result
 }
 
+/**
+ * Evaluations from DRES, a separate evaluation service that is often not running.
+ * Anything but a list from it (no DRES, an error, a web page) means no evaluations.
+ */
+async function fetchEvaluations(): Promise<{ id: string; name: string }[]> {
+    try {
+        const resp = await fetch(exqURI + '/dres/evaluation_list/')
+        if (!resp.ok) return []
+        const evals: unknown = await resp.json()
+        return Array.isArray(evals) ? evals : []
+    } catch {
+        return []
+    }
+}
+
 export const initSession = async (): Promise<ExqInitResponse> => {
     if (mock) return mockInitExq()
     const session = generateString(10)
     const resp = await get<{ session: string; collections: string[] }>(
         '/exq/init/' + session
     )
-    // DRES is a separate evaluation service — fetched separately on init
-    const evals: { id: string; name: string }[] = await fetch(exqURI + '/dres/evaluation_list/')
-        .then(val => val.status !== 404 ? val.json() : [])
+    const evals = await fetchEvaluations()
     return {
         session: resp.session,
         collections: resp.collections,
