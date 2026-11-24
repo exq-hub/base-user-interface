@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: 2026 Ujjwal Sharma and Omar Shahbaz Khan -->
-<!-- SPDX-License-Identifier: AGP-3.0-or-later -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <template>
   <v-dialog v-model="show" persistent max-width="500px">
     <template v-slot:activator="{ props }">
